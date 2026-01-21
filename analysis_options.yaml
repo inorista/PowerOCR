@@ -1,1 +1,17 @@
 include: package:flutter_lints/flutter.yaml
+linter:
+  rules:
+    non_constant_identifier_names: false
+    use_named_constants: true
+    avoid_print: false
+    prefer_single_quotes: true
+    
+rules:
+    prefer_const_constructors: true
+    prefer_const_literals_to_create_immutables: true
+
+analyzer:
+  exclude:
+    - /**/**.g.dart
+    - /**/**.freezed.dart
+    - /**/generated/**
