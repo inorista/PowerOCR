@@ -14,6 +14,10 @@ import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 import 'package:powerocr/core/di/locator.dart' as _i537;
 import 'package:powerocr/core/network/rest_client.dart' as _i150;
+import 'package:powerocr/core/services/implements/network_service.dart'
+    as _i169;
+import 'package:powerocr/core/services/interfaces/inetwork_service.dart'
+    as _i47;
 
 extension GetItInjectableX on _i174.GetIt {
   // initializes the registration of main-scope dependencies inside of GetIt
@@ -23,6 +27,7 @@ extension GetItInjectableX on _i174.GetIt {
   }) {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final registerModule = _$RegisterModule();
+    gh.lazySingleton<_i47.INetworkService>(() => _i169.NetworkService());
     gh.lazySingleton<_i361.Dio>(
       () => registerModule.provideVisionDio(),
       instanceName: 'VisionDio',

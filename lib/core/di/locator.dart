@@ -16,7 +16,10 @@ abstract class RegisterModule {
   @Named('VisionDio')
   Dio provideVisionDio() {
     final dio = Dio();
-    dio.options = BaseOptions(baseUrl: ApiConstants.visionBaseUrl);
+    dio.options = BaseOptions(
+      baseUrl: ApiConstants.visionBaseUrl,
+      headers: {'X-Ios-Bundle-Identifier': 'com.dev.powerocr'},
+    );
     return dio;
   }
 
