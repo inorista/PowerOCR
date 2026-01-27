@@ -9,6 +9,7 @@
 // coverage:ignore-file
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:connectivity_plus/connectivity_plus.dart' as _i895;
 import 'package:dio/dio.dart' as _i361;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
@@ -18,25 +19,49 @@ import 'package:powerocr/core/services/implements/network_service.dart'
     as _i169;
 import 'package:powerocr/core/services/interfaces/inetwork_service.dart'
     as _i47;
+import 'package:powerocr/features/scanning/data/datasources/scanning_local_data_source.dart'
+    as _i217;
+import 'package:powerocr/features/scanning/data/datasources/scanning_remote_data_source.dart'
+    as _i543;
+import 'package:powerocr/features/scanning/data/repositories/scanning_repository_impl.dart'
+    as _i581;
+import 'package:powerocr/features/scanning/domain/repositories/scanning_repository.dart'
+    as _i458;
+import 'package:powerocr/features/scanning/domain/usecases/recognize_text.dart'
+    as _i418;
 
 extension GetItInjectableX on _i174.GetIt {
-  // initializes the registration of main-scope dependencies inside of GetIt
+// initializes the registration of main-scope dependencies inside of GetIt
   _i174.GetIt init({
     String? environment,
     _i526.EnvironmentFilter? environmentFilter,
   }) {
-    final gh = _i526.GetItHelper(this, environment, environmentFilter);
+    final gh = _i526.GetItHelper(
+      this,
+      environment,
+      environmentFilter,
+    );
     final registerModule = _$RegisterModule();
+    gh.lazySingleton<_i895.Connectivity>(() => registerModule.connectivity);
+    gh.lazySingleton<_i217.ScanningLocalDataSource>(
+        () => _i217.ScanningLocalDataSourceImpl());
     gh.lazySingleton<_i47.INetworkService>(() => _i169.NetworkService());
     gh.lazySingleton<_i361.Dio>(
       () => registerModule.provideVisionDio(),
       instanceName: 'VisionDio',
     );
-    gh.lazySingleton<_i150.RestClient>(
-      () => registerModule.provideRestClient(
-        gh<_i361.Dio>(instanceName: 'VisionDio'),
-      ),
-    );
+    gh.lazySingleton<_i150.RestClient>(() => registerModule
+        .provideRestClient(gh<_i361.Dio>(instanceName: 'VisionDio')));
+    gh.lazySingleton<_i543.ScanningRemoteDataSource>(
+        () => _i543.ScanningRemoteDataSourceImpl(gh<_i150.RestClient>()));
+    gh.lazySingleton<_i458.ScanningRepository>(
+        () => _i581.ScanningRepositoryImpl(
+              remoteDataSource: gh<_i543.ScanningRemoteDataSource>(),
+              localDataSource: gh<_i217.ScanningLocalDataSource>(),
+              connectivity: gh<_i895.Connectivity>(),
+            ));
+    gh.lazySingleton<_i418.RecognizeText>(
+        () => _i418.RecognizeText(gh<_i458.ScanningRepository>()));
     return this;
   }
 }

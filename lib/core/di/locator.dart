@@ -1,3 +1,4 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
@@ -25,6 +26,9 @@ abstract class RegisterModule {
 
   @lazySingleton
   RestClient provideRestClient(@Named('VisionDio') Dio dio) => RestClient(dio);
+
+  @lazySingleton
+  Connectivity get connectivity => Connectivity();
 }
 
 RestClient getRestClient() {
