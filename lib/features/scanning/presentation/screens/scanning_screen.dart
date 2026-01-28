@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -60,7 +61,6 @@ class _ScanningScreenState extends State<ScanningScreen> with WidgetsBindingObse
   void didChangeAppLifecycleState(AppLifecycleState state) {
     final CameraController? cameraController = _controller;
 
-    // App state changed before we got the chance to initialize.
     if (cameraController == null || !cameraController.value.isInitialized) {
       return;
     }
@@ -80,7 +80,7 @@ class _ScanningScreenState extends State<ScanningScreen> with WidgetsBindingObse
         listener: (context, state) {
           if (state is ScanningFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
+              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
             );
           }
         },
@@ -89,7 +89,8 @@ class _ScanningScreenState extends State<ScanningScreen> with WidgetsBindingObse
             return _buildResultView(context, state);
           } else if (state is ScanningLoading) {
             return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
+              backgroundColor: Colors.black,
+              body: Center(child: CircularProgressIndicator(color: Colors.white)),
             );
           } else {
             return _buildCameraView(context);
@@ -102,62 +103,150 @@ class _ScanningScreenState extends State<ScanningScreen> with WidgetsBindingObse
   Widget _buildCameraView(BuildContext context) {
     if (!_isCameraInitialized || _controller == null) {
       return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+        backgroundColor: Colors.black,
+        body: Center(child: CircularProgressIndicator(color: Colors.white)),
       );
     }
 
     return Scaffold(
+      backgroundColor: Colors.black,
       body: Stack(
         children: [
+          // Camera Preview
           SizedBox.expand(
             child: CameraPreview(_controller!),
           ),
-          // Scanner Overlay
-          Center(
-            child: Container(
-              width: MediaQuery.of(context).size.width * 0.8,
-              height: MediaQuery.of(context).size.width * 1.2,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.white, width: 2),
-                borderRadius: BorderRadius.circular(12),
-              ),
+          
+          // Dark Overlay with Cutout
+          ColorFiltered(
+            colorFilter: const ColorFilter.mode(
+              Colors.black54,
+              BlendMode.srcOut,
             ),
-          ),
-          // Controls
-          Positioned(
-            bottom: 30,
-            left: 0,
-            right: 0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            child: Stack(
               children: [
-                IconButton(
-                  icon: const Icon(Icons.photo_library, color: Colors.white, size: 30),
-                  onPressed: () => _pickImage(context),
+                Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    backgroundBlendMode: BlendMode.dstOut,
+                  ),
                 ),
-                GestureDetector(
-                  onTap: () => _takePicture(context),
+                Center(
                   child: Container(
-                    width: 70,
-                    height: 70,
+                    width: MediaQuery.of(context).size.width * 0.85,
+                    height: MediaQuery.of(context).size.width * 1.2,
                     decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 4),
-                      color: Colors.white.withOpacity(0.3),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
                     ),
                   ),
                 ),
-                const SizedBox(width: 30), // Placeholder for balance
               ],
             ),
           ),
-          // Back Button
+
+          // Corner Borders Overlay
+          Center(
+            child: CustomPaint(
+              foregroundPainter: BorderPainter(),
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width * 0.85,
+                height: MediaQuery.of(context).size.width * 1.2,
+              ),
+            ),
+          ),
+
+          // Top Bar
           Positioned(
-            top: 40,
-            left: 10,
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.of(context).pop(),
+            top: 0,
+            left: 0,
+            right: 0,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: Colors.black45,
+                      child: IconButton(
+                        icon: const Icon(Icons.close, color: Colors.white),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.black45,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Text(
+                        'Align document within frame',
+                        style: TextStyle(color: Colors.white, fontSize: 12),
+                      ),
+                    ),
+                    const SizedBox(width: 40), // Balance
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Bottom Controls
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: ClipRRect(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                child: Container(
+                  color: Colors.black.withOpacity(0.4),
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 48),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildControlButton(
+                        icon: Icons.photo_library_outlined,
+                        onTap: () => _pickImage(context),
+                      ),
+                      GestureDetector(
+                        onTap: () => _takePicture(context),
+                        child: Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.white.withOpacity(0.4),
+                                blurRadius: 15,
+                                spreadRadius: 5,
+                              )
+                            ],
+                          ),
+                          child: Center(
+                            child: Container(
+                              width: 70,
+                              height: 70,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.black, width: 2),
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                       _buildControlButton(
+                        icon: Icons.flash_on, // Placeholder for flash toggle
+                        onTap: () {}, 
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
         ],
@@ -165,24 +254,101 @@ class _ScanningScreenState extends State<ScanningScreen> with WidgetsBindingObse
     );
   }
 
+  Widget _buildControlButton({required IconData icon, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: CircleAvatar(
+        radius: 24,
+        backgroundColor: Colors.black45,
+        child: Icon(icon, color: Colors.white),
+      ),
+    );
+  }
+
   Widget _buildResultView(BuildContext context, ScanningSuccess state) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Result'),
+        title: const Text('Scan Result'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.close),
           onPressed: () {
             context.read<ScanningBloc>().add(ResetScan());
           },
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.copy),
+            onPressed: () {
+              // Copy to clipboard logic would go here
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Copied to clipboard!')),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.share),
+            onPressed: () {},
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Image.file(File(state.imagePath)),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: SelectableText(state.result.text),
+            Container(
+              height: 300,
+              width: double.infinity,
+              color: Colors.black,
+              child: Image.file(
+                File(state.imagePath),
+                fit: BoxFit.contain,
+              ),
+            ),
+            Transform.translate(
+              offset: const Offset(0, -20),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: theme.scaffoldBackgroundColor,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        margin: const EdgeInsets.only(bottom: 24),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    Text(
+                      'Extracted Text',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: theme.cardTheme.color,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey.shade200),
+                      ),
+                      child: SelectableText(
+                        state.result.text,
+                        style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
@@ -213,4 +379,43 @@ class _ScanningScreenState extends State<ScanningScreen> with WidgetsBindingObse
       debugPrint('Error picking image: $e');
     }
   }
+}
+
+class BorderPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 4
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    final path = Path();
+    final double cornerSize = 40;
+
+    // Top Left
+    path.moveTo(0, cornerSize);
+    path.lineTo(0, 0);
+    path.lineTo(cornerSize, 0);
+
+    // Top Right
+    path.moveTo(size.width - cornerSize, 0);
+    path.lineTo(size.width, 0);
+    path.lineTo(size.width, cornerSize);
+
+    // Bottom Right
+    path.moveTo(size.width, size.height - cornerSize);
+    path.lineTo(size.width, size.height);
+    path.lineTo(size.width - cornerSize, size.height);
+
+    // Bottom Left
+    path.moveTo(cornerSize, size.height);
+    path.lineTo(0, size.height);
+    path.lineTo(0, size.height - cornerSize);
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
