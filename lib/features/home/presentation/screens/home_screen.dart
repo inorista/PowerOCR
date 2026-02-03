@@ -10,14 +10,14 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(theme),
+            _buildHeader(theme, context),
             const SizedBox(height: 24),
             _buildMainAction(context, theme),
             const SizedBox(height: 32),
@@ -27,7 +27,6 @@ class HomeScreen extends StatelessWidget {
                 'Recent Scans',
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
                 ),
               ),
             ),
@@ -46,7 +45,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(ThemeData theme) {
+  Widget _buildHeader(ThemeData theme, BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
       child: Row(
@@ -57,16 +56,14 @@ class HomeScreen extends StatelessWidget {
             children: [
               Text(
                 'Welcome Back,',
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: Colors.grey[600],
-                ),
+                style: theme.textTheme.bodyLarge,
               ),
               const SizedBox(height: 4),
               Text(
                 'PowerOCR',
                 style: theme.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w800,
-                  color: theme.primaryColor,
+                  color: theme.colorScheme.primary,
                 ),
               ),
             ],

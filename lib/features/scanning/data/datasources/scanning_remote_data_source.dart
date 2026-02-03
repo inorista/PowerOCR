@@ -31,8 +31,8 @@ class ScanningRemoteDataSourceImpl implements ScanningRemoteDataSource {
         AnnotateImageRequestDto(
           image: VisionImageDto(content: base64Image),
           features: [
-            VisionFeatureDto(type: VisionFeatureType.TEXT_DETECTION),
-            VisionFeatureDto(type: VisionFeatureType.DOCUMENT_TEXT_DETECTION),
+            VisionFeatureDto(type: VisionFeatureType.textDetection),
+            VisionFeatureDto(type: VisionFeatureType.documentTextDetection),
           ],
         ),
       ],
@@ -49,20 +49,20 @@ class ScanningRemoteDataSourceImpl implements ScanningRemoteDataSource {
         (response['responses'] as List).isNotEmpty) {
       final firstResponse = response['responses'][0];
       final fullTextAnnotation = firstResponse['fullTextAnnotation'];
-      
+
       if (fullTextAnnotation != null) {
         final text = fullTextAnnotation['text'] as String;
         // Parse blocks if needed, for now just returning full text
         return TextRecognitionResult(text: text);
       } else if (firstResponse['textAnnotations'] != null) {
-          final textAnnotations = firstResponse['textAnnotations'] as List;
-          if (textAnnotations.isNotEmpty) {
-             final text = textAnnotations[0]['description'] as String;
-             return TextRecognitionResult(text: text);
-          }
+        final textAnnotations = firstResponse['textAnnotations'] as List;
+        if (textAnnotations.isNotEmpty) {
+          final text = textAnnotations[0]['description'] as String;
+          return TextRecognitionResult(text: text);
+        }
       }
     }
-    
+
     return const TextRecognitionResult(text: '');
   }
 }

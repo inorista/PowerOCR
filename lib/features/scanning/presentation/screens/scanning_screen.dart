@@ -16,7 +16,8 @@ class ScanningScreen extends StatefulWidget {
   State<ScanningScreen> createState() => _ScanningScreenState();
 }
 
-class _ScanningScreenState extends State<ScanningScreen> with WidgetsBindingObserver {
+class _ScanningScreenState extends State<ScanningScreen>
+    with WidgetsBindingObserver {
   CameraController? _controller;
   List<CameraDescription> _cameras = [];
   bool _isCameraInitialized = false;
@@ -49,7 +50,7 @@ class _ScanningScreenState extends State<ScanningScreen> with WidgetsBindingObse
       debugPrint('Error initializing camera: $e');
     }
   }
-  
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
@@ -74,13 +75,14 @@ class _ScanningScreenState extends State<ScanningScreen> with WidgetsBindingObse
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => locator<ScanningBloc>(),
+    return BlocProvider<ScanningBloc>(
+      create: (context) => ScanningBloc(),
       child: BlocConsumer<ScanningBloc, ScanningState>(
         listener: (context, state) {
           if (state is ScanningFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+              SnackBar(
+                  content: Text(state.message), backgroundColor: Colors.red),
             );
           }
         },
@@ -90,7 +92,8 @@ class _ScanningScreenState extends State<ScanningScreen> with WidgetsBindingObse
           } else if (state is ScanningLoading) {
             return const Scaffold(
               backgroundColor: Colors.black,
-              body: Center(child: CircularProgressIndicator(color: Colors.white)),
+              body:
+                  Center(child: CircularProgressIndicator(color: Colors.white)),
             );
           } else {
             return _buildCameraView(context);
@@ -116,7 +119,7 @@ class _ScanningScreenState extends State<ScanningScreen> with WidgetsBindingObse
           SizedBox.expand(
             child: CameraPreview(_controller!),
           ),
-          
+
           // Dark Overlay with Cutout
           ColorFiltered(
             colorFilter: const ColorFilter.mode(
@@ -163,7 +166,8 @@ class _ScanningScreenState extends State<ScanningScreen> with WidgetsBindingObse
             right: 0,
             child: SafeArea(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -175,7 +179,8 @@ class _ScanningScreenState extends State<ScanningScreen> with WidgetsBindingObse
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
                         color: Colors.black45,
                         borderRadius: BorderRadius.circular(20),
@@ -232,16 +237,17 @@ class _ScanningScreenState extends State<ScanningScreen> with WidgetsBindingObse
                               height: 70,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                border: Border.all(color: Colors.black, width: 2),
+                                border:
+                                    Border.all(color: Colors.black, width: 2),
                                 color: Colors.white,
                               ),
                             ),
                           ),
                         ),
                       ),
-                       _buildControlButton(
+                      _buildControlButton(
                         icon: Icons.flash_on, // Placeholder for flash toggle
-                        onTap: () {}, 
+                        onTap: () {},
                       ),
                     ],
                   ),
@@ -254,7 +260,8 @@ class _ScanningScreenState extends State<ScanningScreen> with WidgetsBindingObse
     );
   }
 
-  Widget _buildControlButton({required IconData icon, required VoidCallback onTap}) {
+  Widget _buildControlButton(
+      {required IconData icon, required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: CircleAvatar(
@@ -309,7 +316,8 @@ class _ScanningScreenState extends State<ScanningScreen> with WidgetsBindingObse
               child: Container(
                 decoration: BoxDecoration(
                   color: theme.scaffoldBackgroundColor,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(24)),
                 ),
                 padding: const EdgeInsets.all(24),
                 child: Column(
@@ -343,7 +351,8 @@ class _ScanningScreenState extends State<ScanningScreen> with WidgetsBindingObse
                       ),
                       child: SelectableText(
                         state.result.text,
-                        style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
+                        style:
+                            theme.textTheme.bodyMedium?.copyWith(height: 1.5),
                       ),
                     ),
                   ],

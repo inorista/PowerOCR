@@ -8,8 +8,8 @@ class AppTheme {
   static const _lightSurface = Colors.white;
   static const _lightError = Color(0xFFE57373); // Soft Red
 
-  // Pastel Dark Palette
-  static const _darkPrimary = Color(0xFFA5A9F2); // Lighter Periwinkle for contrast
+  static const _darkPrimary =
+      Color.fromARGB(255, 203, 205, 236); // Lighter Periwinkle for contrast
   static const _darkSecondary = Color(0xFF80CBC4); // Muted Mint
   static const _darkBackground = Color(0xFF23232F); // Dark Gunmetal
   static const _darkSurface = Color(0xFF2E2E3E); // Lighter Gunmetal
@@ -73,7 +73,9 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primary,
-          foregroundColor: brightness == Brightness.light ? Colors.white : const Color(0xFF1A1A24),
+          foregroundColor: brightness == Brightness.light
+              ? Colors.white
+              : const Color(0xFF1A1A24),
           elevation: 2,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -88,11 +90,13 @@ class AppTheme {
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: primary,
-        foregroundColor: brightness == Brightness.light ? Colors.white : const Color(0xFF1A1A24),
+        foregroundColor: brightness == Brightness.light
+            ? Colors.white
+            : const Color(0xFF1A1A24),
         elevation: 4,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: surface,
         elevation: 2,
         shadowColor: Colors.black.withOpacity(0.05),
@@ -101,7 +105,9 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: brightness == Brightness.light ? Colors.grey.shade100 : Colors.white.withOpacity(0.05),
+        fillColor: brightness == Brightness.light
+            ? Colors.grey.shade100
+            : Colors.white.withOpacity(0.05),
         hintStyle: TextStyle(color: onSurface.withOpacity(0.5)),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
