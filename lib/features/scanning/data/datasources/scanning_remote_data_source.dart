@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:injectable/injectable.dart';
 import 'package:powerocr/core/constants/enum.dart';
+import 'package:powerocr/core/di/locator.dart';
 import 'package:powerocr/core/environment/env.dart';
 import 'package:powerocr/core/network/rest_client.dart';
 import 'package:powerocr/features/scanning/data/models/annotate_image_request_dto.dart';
@@ -23,46 +24,43 @@ class ScanningRemoteDataSourceImpl implements ScanningRemoteDataSource {
 
   @override
   Future<TextRecognitionResult> recognizeText(String imagePath) async {
-    final bytes = await File(imagePath).readAsBytes();
-    final base64Image = base64Encode(bytes);
+    try {
+      final bytes = await File(imagePath).readAsBytes();
+      final base64Image = base64Encode(bytes);
 
-    final request = VisionRequestDto(
-      requests: [
-        AnnotateImageRequestDto(
-          image: VisionImageDto(content: base64Image),
-          features: [
-            VisionFeatureDto(type: VisionFeatureType.textDetection),
-            VisionFeatureDto(type: VisionFeatureType.documentTextDetection),
-          ],
-        ),
-      ],
-    );
+      final request = VisionRequestDto(
+        requests: [
+          AnnotateImageRequestDto(
+            image: VisionImageDto(content: base64Image),
+            features: [
+              VisionFeatureDto(type: VisionFeatureType.textDetection),
+              VisionFeatureDto(type: VisionFeatureType.documentTextDetection),
+            ],
+          ),
+        ],
+      );
 
-    final response = await restClient.sendRequestAnnotateImage(
-      request,
-      Env.apiKey,
-    );
+      final response = await getRestClient().sendRequestAnnotateImage(
+        request,
+        Env.apiKey,
+      );
 
-    // Parse response
-    if (response != null &&
-        response['responses'] != null &&
-        (response['responses'] as List).isNotEmpty) {
-      final firstResponse = response['responses'][0];
-      final fullTextAnnotation = firstResponse['fullTextAnnotation'];
-
-      if (fullTextAnnotation != null) {
-        final text = fullTextAnnotation['text'] as String;
-        // Parse blocks if needed, for now just returning full text
-        return TextRecognitionResult(text: text);
-      } else if (firstResponse['textAnnotations'] != null) {
-        final textAnnotations = firstResponse['textAnnotations'] as List;
-        if (textAnnotations.isNotEmpty) {
-          final text = textAnnotations[0]['description'] as String;
-          return TextRecognitionResult(text: text);
-        }
+      final firstResult = response.responses?.firstOrNull;
+      if (firstResult == null) {
+        return const TextRecognitionResult(text: '');
       }
+      if (firstResult.error != null) {
+        print('Vision API Error: ${firstResult.error!.message}');
+        return const TextRecognitionResult(text: '');
+      }
+      String detectedText = '';
+      if (firstResult.textAnnotations != null &&
+          firstResult.textAnnotations!.isNotEmpty) {
+        detectedText = firstResult.textAnnotations![0].description ?? '';
+      }
+      return TextRecognitionResult(text: detectedText);
+    } catch (e) {
+      return const TextRecognitionResult(text: '');
     }
-
-    return const TextRecognitionResult(text: '');
   }
 }
