@@ -1,4 +1,8 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:hive_ce/hive.dart';
+import 'package:powerocr/database/hive_database.dart';
+
+part 'enum.g.dart';
 
 enum VisionFeatureType {
   @JsonValue('TYPE_UNSPECIFIED')
@@ -23,4 +27,14 @@ enum VisionFeatureType {
   cropHints,
   @JsonValue('WEB_DETECTION')
   webDetection,
+}
+
+@HiveType(typeId: HiveBoxNums.themeMode)
+enum ThemeModeOption {
+  @HiveField(0)
+  system,
+  @HiveField(1)
+  light,
+  @HiveField(2)
+  dark,
 }

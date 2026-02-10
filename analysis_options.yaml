@@ -5,11 +5,9 @@ linter:
     use_named_constants: true
     avoid_print: false
     prefer_single_quotes: true
-    
-rules:
     prefer_const_constructors: true
     prefer_const_literals_to_create_immutables: true
-
+    
 analyzer:
   exclude:
     - /**/**.g.dart

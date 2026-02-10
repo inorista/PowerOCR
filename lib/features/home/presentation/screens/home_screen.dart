@@ -83,7 +83,12 @@ class HomeScreen extends StatelessWidget {
                     color: theme.colorScheme.primary,
                   ),
                   onPressed: () {
-                    context.read<ThemeCubit>().toggleTheme();
+                    final cubit = context.read<ThemeCubit>();
+                    final currentMode = cubit.state.themeMode;
+                    final newMode = currentMode == ThemeMode.light
+                        ? ThemeMode.dark
+                        : ThemeMode.light;
+                    cubit.setTheme(newMode);
                   },
                 ),
               ),

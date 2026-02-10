@@ -9,23 +9,30 @@ import 'package:powerocr/features/scanning/presentation/bloc/scanning_state.dart
 class ScanningBloc extends Bloc<ScanningEvent, ScanningState> {
   final RecognizeText recognizeText = locator<RecognizeText>();
 
-  ScanningBloc() : super(ScanningInitial()) {
+  ScanningBloc() : super(const ScanningState()) {
     on<ScanImage>(_onScanImage);
     on<ResetScan>(_onResetScan);
   }
 
   Future<void> _onScanImage(
       ScanImage event, Emitter<ScanningState> emit) async {
-    emit(ScanningLoading());
+    emit(state.copyWith(status: ScanningStatus.loading));
     try {
       final result = await recognizeText(event.imagePath);
-      emit(ScanningSuccess(result, event.imagePath));
+      emit(state.copyWith(
+        status: ScanningStatus.success,
+        result: result,
+        imagePath: event.imagePath,
+      ));
     } catch (e) {
-      emit(ScanningFailure(e.toString()));
+      emit(state.copyWith(
+        status: ScanningStatus.failure,
+        errorMessage: e.toString(),
+      ));
     }
   }
 
   void _onResetScan(ResetScan event, Emitter<ScanningState> emit) {
-    emit(ScanningInitial());
+    emit(const ScanningState());
   }
 }

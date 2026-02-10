@@ -4,7 +4,6 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:powerocr/core/di/locator.dart';
 import 'package:powerocr/features/scanning/presentation/bloc/scanning_bloc.dart';
 import 'package:powerocr/features/scanning/presentation/bloc/scanning_event.dart';
 import 'package:powerocr/features/scanning/presentation/bloc/scanning_state.dart';
@@ -79,17 +78,18 @@ class _ScanningScreenState extends State<ScanningScreen>
       create: (context) => ScanningBloc(),
       child: BlocConsumer<ScanningBloc, ScanningState>(
         listener: (context, state) {
-          if (state is ScanningFailure) {
+          if (state.status == ScanningStatus.failure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                  content: Text(state.message), backgroundColor: Colors.red),
+                  content: Text(state.errorMessage ?? 'Unknown error'),
+                  backgroundColor: Colors.red),
             );
           }
         },
         builder: (context, state) {
-          if (state is ScanningSuccess) {
+          if (state.status == ScanningStatus.success) {
             return _buildResultView(context, state);
-          } else if (state is ScanningLoading) {
+          } else if (state.status == ScanningStatus.loading) {
             return const Scaffold(
               backgroundColor: Colors.black,
               body:
@@ -272,7 +272,7 @@ class _ScanningScreenState extends State<ScanningScreen>
     );
   }
 
-  Widget _buildResultView(BuildContext context, ScanningSuccess state) {
+  Widget _buildResultView(BuildContext context, ScanningState state) {
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
@@ -307,7 +307,7 @@ class _ScanningScreenState extends State<ScanningScreen>
               width: double.infinity,
               color: Colors.black,
               child: Image.file(
-                File(state.imagePath),
+                File(state.imagePath!),
                 fit: BoxFit.contain,
               ),
             ),
@@ -350,7 +350,7 @@ class _ScanningScreenState extends State<ScanningScreen>
                         border: Border.all(color: Colors.grey.shade200),
                       ),
                       child: SelectableText(
-                        state.result.text,
+                        state.result?.text ?? '',
                         style:
                             theme.textTheme.bodyMedium?.copyWith(height: 1.5),
                       ),

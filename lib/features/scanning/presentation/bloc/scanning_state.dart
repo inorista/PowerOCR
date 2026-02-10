@@ -1,32 +1,35 @@
 import 'package:equatable/equatable.dart';
 import 'package:powerocr/features/scanning/domain/entities/text_recognition_result.dart';
 
-abstract class ScanningState extends Equatable {
-  const ScanningState();
-  
+enum ScanningStatus { initial, loading, success, failure }
+
+class ScanningState extends Equatable {
+  final ScanningStatus status;
+  final TextRecognitionResult? result;
+  final String? imagePath;
+  final String? errorMessage;
+
+  const ScanningState({
+    this.status = ScanningStatus.initial,
+    this.result,
+    this.imagePath,
+    this.errorMessage,
+  });
+
+  ScanningState copyWith({
+    ScanningStatus? status,
+    TextRecognitionResult? result,
+    String? imagePath,
+    String? errorMessage,
+  }) {
+    return ScanningState(
+      status: status ?? this.status,
+      result: result ?? this.result,
+      imagePath: imagePath ?? this.imagePath,
+      errorMessage: errorMessage ?? this.errorMessage,
+    );
+  }
+
   @override
-  List<Object> get props => [];
-}
-
-class ScanningInitial extends ScanningState {}
-
-class ScanningLoading extends ScanningState {}
-
-class ScanningSuccess extends ScanningState {
-  final TextRecognitionResult result;
-  final String imagePath;
-
-  const ScanningSuccess(this.result, this.imagePath);
-
-  @override
-  List<Object> get props => [result, imagePath];
-}
-
-class ScanningFailure extends ScanningState {
-  final String message;
-
-  const ScanningFailure(this.message);
-
-  @override
-  List<Object> get props => [message];
+  List<Object?> get props => [status, result, imagePath, errorMessage];
 }
