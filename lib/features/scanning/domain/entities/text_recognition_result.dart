@@ -15,7 +15,7 @@ class TextRecognitionResult extends Equatable {
 
 class TextBlock extends Equatable {
   final String text;
-  final List<double> boundingBox; // [left, top, right, bottom]
+  final List<double> boundingBox;
 
   const TextBlock({
     required this.text,

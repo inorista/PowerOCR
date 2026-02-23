@@ -20,14 +20,13 @@ class ScanningRepositoryImpl implements ScanningRepository {
   @override
   Future<TextRecognitionResult> recognizeText(String imagePath) async {
     final connectivityResult = await connectivity.checkConnectivity();
-    
+
     if (connectivityResult.contains(ConnectivityResult.none)) {
       return localDataSource.recognizeText(imagePath);
     } else {
       try {
         return await remoteDataSource.recognizeText(imagePath);
       } catch (e) {
-        // Fallback to local if remote fails
         return localDataSource.recognizeText(imagePath);
       }
     }

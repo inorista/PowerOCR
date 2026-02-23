@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // Pastel Light Palette
-  static const _lightPrimary = Color(0xFF8B8FE3); // Periwinkle
-  static const _lightSecondary = Color(0xFF95E1D3); // Soft Mint
-  static const _lightBackground = Color(0xFFF9FAFD); // Cool White
+  static const _lightPrimary = Color(0xFF8B8FE3);
+  static const _lightSecondary = Color(0xFF95E1D3);
+  static const _lightBackground = Color(0xFFF9FAFD);
   static const _lightSurface = Colors.white;
-  static const _lightError = Color(0xFFE57373); // Soft Red
+  static const _lightError = Color(0xFFE57373);
 
-  static const _darkPrimary =
-      Color.fromARGB(255, 203, 205, 236); // Lighter Periwinkle for contrast
-  static const _darkSecondary = Color(0xFF80CBC4); // Muted Mint
-  static const _darkBackground = Color(0xFF23232F); // Dark Gunmetal
-  static const _darkSurface = Color(0xFF2E2E3E); // Lighter Gunmetal
-  static const _darkError = Color(0xFFEF9A9A); // Pastel Red
+  static const _darkPrimary = Color.fromARGB(255, 203, 205, 236);
+  static const _darkSecondary = Color(0xFF80CBC4);
+  static const _darkBackground = Color(0xFF23232F);
+  static const _darkSurface = Color(0xFF2E2E3E);
+  static const _darkError = Color(0xFFEF9A9A);
 
   static final ThemeData lightTheme = _buildTheme(
     brightness: Brightness.light,
@@ -55,7 +53,6 @@ class AppTheme {
         secondary: secondary,
         surface: surface,
         error: error,
-        background: background,
         onSurface: onSurface,
       ),
       appBarTheme: AppBarTheme(
@@ -99,7 +96,7 @@ class AppTheme {
       cardTheme: CardThemeData(
         color: surface,
         elevation: 2,
-        shadowColor: Colors.black.withOpacity(0.05),
+        shadowColor: Colors.black.withValues(alpha: 0.05),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       ),
@@ -107,8 +104,8 @@ class AppTheme {
         filled: true,
         fillColor: brightness == Brightness.light
             ? Colors.grey.shade100
-            : Colors.white.withOpacity(0.05),
-        hintStyle: TextStyle(color: onSurface.withOpacity(0.5)),
+            : Colors.white.withValues(alpha: 0.05),
+        hintStyle: TextStyle(color: onSurface.withValues(alpha: 0.5)),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,

@@ -9,39 +9,38 @@ part 'theme_state.dart';
 
 class ThemeCubit extends Cubit<ThemeState> {
   final _themeSettingService = locator<IThemeSettingService>();
+
   ThemeCubit() : super(const ThemeState()) {
     _loadTheme();
   }
 
   Future<void> _loadTheme() async {
     final option = await _themeSettingService.getThemeMode();
-    emit(state.copyWith(themeMode: _mapOptionToMode(option)));
+
+    if (!isClosed) {
+      emit(state.copyWith(themeMode: _mapOptionToMode(option)));
+    }
   }
 
-  Future<void> setTheme(ThemeMode mode) async {
+  void setTheme(ThemeMode mode) {
     emit(state.copyWith(themeMode: mode));
-    await _themeSettingService.saveThemeMode(_mapModeToOption(mode));
+
+    _themeSettingService.saveThemeMode(_mapModeToOption(mode)).ignore();
   }
 
   ThemeMode _mapOptionToMode(ThemeModeOption option) {
-    switch (option) {
-      case ThemeModeOption.light:
-        return ThemeMode.light;
-      case ThemeModeOption.dark:
-        return ThemeMode.dark;
-      case ThemeModeOption.system:
-        return ThemeMode.system;
-    }
+    return switch (option) {
+      ThemeModeOption.light => ThemeMode.light,
+      ThemeModeOption.dark => ThemeMode.dark,
+      ThemeModeOption.system => ThemeMode.system,
+    };
   }
 
   ThemeModeOption _mapModeToOption(ThemeMode mode) {
-    switch (mode) {
-      case ThemeMode.light:
-        return ThemeModeOption.light;
-      case ThemeMode.dark:
-        return ThemeModeOption.dark;
-      case ThemeMode.system:
-        return ThemeModeOption.system;
-    }
+    return switch (mode) {
+      ThemeMode.light => ThemeModeOption.light,
+      ThemeMode.dark => ThemeModeOption.dark,
+      ThemeMode.system => ThemeModeOption.system,
+    };
   }
 }

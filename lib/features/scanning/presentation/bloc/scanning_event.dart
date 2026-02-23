@@ -17,3 +17,9 @@ class ScanImage extends ScanningEvent {
 }
 
 class ResetScan extends ScanningEvent {}
+
+class ToggleFlash extends ScanningEvent {}
+
+class CameraReady extends ScanningEvent {}
+
+class CameraNotReady extends ScanningEvent {}

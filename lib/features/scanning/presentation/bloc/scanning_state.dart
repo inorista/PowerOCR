@@ -1,3 +1,4 @@
+import 'package:camera/camera.dart';
 import 'package:equatable/equatable.dart';
 import 'package:powerocr/features/scanning/domain/entities/text_recognition_result.dart';
 
@@ -8,12 +9,17 @@ class ScanningState extends Equatable {
   final TextRecognitionResult? result;
   final String? imagePath;
   final String? errorMessage;
+  final FlashMode flashMode;
+
+  final bool isCameraInitialized;
 
   const ScanningState({
     this.status = ScanningStatus.initial,
     this.result,
     this.imagePath,
     this.errorMessage,
+    this.flashMode = FlashMode.auto,
+    this.isCameraInitialized = false,
   });
 
   ScanningState copyWith({
@@ -21,15 +27,20 @@ class ScanningState extends Equatable {
     TextRecognitionResult? result,
     String? imagePath,
     String? errorMessage,
+    FlashMode? flashMode,
+    bool? isCameraInitialized,
   }) {
     return ScanningState(
       status: status ?? this.status,
       result: result ?? this.result,
       imagePath: imagePath ?? this.imagePath,
       errorMessage: errorMessage ?? this.errorMessage,
+      flashMode: flashMode ?? this.flashMode,
+      isCameraInitialized: isCameraInitialized ?? this.isCameraInitialized,
     );
   }
 
   @override
-  List<Object?> get props => [status, result, imagePath, errorMessage];
+  List<Object?> get props =>
+      [status, result, imagePath, errorMessage, flashMode, isCameraInitialized];
 }

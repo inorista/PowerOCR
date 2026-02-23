@@ -19,16 +19,21 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => ThemeCubit(),
-      child: BlocBuilder<ThemeCubit, ThemeState>(
-        builder: (context, state) {
+      create: (_) => ThemeCubit(),
+      child: BlocSelector<ThemeCubit, ThemeState, ThemeMode>(
+        selector: (state) => state.themeMode,
+        builder: (context, themeMode) {
           return MaterialApp.router(
             title: 'PowerOCR',
             debugShowCheckedModeBanner: false,
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
-            themeMode: state.themeMode,
+            themeMode: themeMode,
             routerConfig: router,
+            themeAnimationStyle: const AnimationStyle(
+              curve: Curves.easeOut,
+              duration: Duration(milliseconds: 400),
+            ),
           );
         },
       ),
