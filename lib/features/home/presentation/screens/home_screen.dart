@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:powerocr/core/router/app_router.dart';
 import 'package:powerocr/core/theme/cubit/theme_cubit.dart';
+import 'package:powerocr/features/home/presentation/screens/widgets/ambient_orbs.dart';
+import 'package:powerocr/features/home/presentation/screens/widgets/stat_card.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -104,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           RepaintBoundary(
             child: AnimatedBuilder(
               animation: _orbRotate,
-              builder: (_, __) => _AmbientOrbs(
+              builder: (_, __) => AmbientOrbs(
                 rotate: _orbRotate.value,
                 isDark: isDark,
                 primary: primary,
@@ -310,7 +312,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       child: Row(
         children: [
           Expanded(
-            child: _StatCard(
+            child: StatCard(
               label: 'Scanned',
               value: 0,
               icon: Icons.document_scanner_rounded,
@@ -321,7 +323,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: _StatCard(
+            child: StatCard(
               label: 'Extracted',
               value: 0,
               icon: Icons.text_snippet_rounded,
@@ -332,7 +334,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: _StatCard(
+            child: StatCard(
               label: 'Saved',
               value: 0,
               icon: Icons.bookmark_rounded,
@@ -454,62 +456,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     if (hour < 17) return 'afternoon';
     return 'evening';
   }
-}
-
-class _AmbientOrbs extends StatelessWidget {
-  final double rotate;
-  final bool isDark;
-  final Color primary;
-  final Size size;
-
-  const _AmbientOrbs({
-    required this.rotate,
-    required this.isDark,
-    required this.primary,
-    required this.size,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      size: size,
-      painter: _OrbPainter(rotate: rotate, isDark: isDark, primary: primary),
-    );
-  }
-}
-
-class _OrbPainter extends CustomPainter {
-  final double rotate;
-  final bool isDark;
-  final Color primary;
-
-  _OrbPainter(
-      {required this.rotate, required this.isDark, required this.primary});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final ox = size.width * 0.85 + math.cos(rotate) * 12;
-    final oy = size.height * 0.08 + math.sin(rotate) * 8;
-    _drawOrb(canvas, Offset(ox, oy), 130,
-        primary.withValues(alpha: isDark ? 0.18 : 0.10));
-
-    final ox2 = size.width * 0.05 + math.sin(rotate) * 10;
-    final oy2 = size.height * 0.55 + math.cos(rotate) * 14;
-    _drawOrb(canvas, Offset(ox2, oy2), 110,
-        const Color(0xFF95E1D3).withValues(alpha: isDark ? 0.13 : 0.08));
-  }
-
-  void _drawOrb(Canvas canvas, Offset center, double radius, Color color) {
-    final paint = Paint()
-      ..shader = RadialGradient(colors: [color, Colors.transparent])
-          .createShader(Rect.fromCircle(center: center, radius: radius))
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 40);
-    canvas.drawCircle(center, radius, paint);
-  }
-
-  @override
-  bool shouldRepaint(_OrbPainter old) =>
-      old.rotate != rotate || old.isDark != isDark;
 }
 
 class _AnimatedHeroCard extends StatefulWidget {
@@ -698,85 +644,6 @@ class _AnimatedHeroCardState extends State<_AnimatedHeroCard>
                 ),
               ),
             ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _StatCard extends StatelessWidget {
-  final String label;
-  final int value;
-  final IconData icon;
-  final bool isDark;
-  final ThemeData theme;
-  final AnimationController controller;
-
-  const _StatCard({
-    required this.label,
-    required this.value,
-    required this.icon,
-    required this.isDark,
-    required this.theme,
-    required this.controller,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cardBg = isDark
-        ? const Color(0xFF2E2E3E).withValues(alpha: 0.85)
-        : Colors.white.withValues(alpha: 0.9);
-
-    return AnimatedBuilder(
-      animation: controller,
-      builder: (_, __) {
-        final displayed = (value * controller.value).round();
-        return Container(
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-          decoration: BoxDecoration(
-            color: cardBg,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.06)
-                  : Colors.black.withValues(alpha: 0.04),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(icon,
-                  size: 18,
-                  color: theme.colorScheme.primary.withValues(alpha: 0.8)),
-              const SizedBox(height: 8),
-              Text(
-                '$displayed',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  color: theme.colorScheme.onSurface,
-                  height: 1.0,
-                ),
-              ),
-              const SizedBox(height: 3),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                  letterSpacing: 0.2,
-                ),
-              ),
-            ],
           ),
         );
       },

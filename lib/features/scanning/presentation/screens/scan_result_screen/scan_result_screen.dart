@@ -2,10 +2,12 @@ import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
 import 'package:go_router/go_router.dart';
 import 'package:powerocr/core/router/app_router.dart';
 import 'package:powerocr/features/scanning/domain/entities/text_recognition_result.dart';
+import 'package:powerocr/features/scanning/presentation/screens/scan_result_screen/widgets/glass_button.dart';
+import 'package:powerocr/features/scanning/presentation/screens/scan_result_screen/widgets/outline_action_button.dart';
+import 'package:powerocr/features/scanning/presentation/screens/scan_result_screen/widgets/primary_action_button.dart';
 
 class ScanResultScreen extends StatefulWidget {
   final String imagePath;
@@ -103,7 +105,6 @@ class _ScanResultScreenState extends State<ScanResultScreen>
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final size = MediaQuery.sizeOf(context);
-
     final imageHeight = size.height * 0.42;
 
     return Scaffold(
@@ -178,11 +179,11 @@ class _ScanResultScreenState extends State<ScanResultScreen>
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  _GlassButton(
+                                  GlassButton(
                                     icon: Icons.arrow_back_ios_new_rounded,
                                     onTap: () => context.go(AppRouter.home),
                                   ),
-                                  _GlassButton(
+                                  GlassButton(
                                     icon: Icons.share_rounded,
                                     onTap: () {},
                                   ),
@@ -348,7 +349,7 @@ class _ScanResultScreenState extends State<ScanResultScreen>
                   child: Row(
                     children: [
                       Expanded(
-                        child: _OutlineActionButton(
+                        child: OutlineActionButton(
                           icon: Icons.camera_alt_rounded,
                           label: 'Re-scan',
                           theme: theme,
@@ -359,7 +360,7 @@ class _ScanResultScreenState extends State<ScanResultScreen>
                       const SizedBox(width: 12),
                       Expanded(
                         flex: 2,
-                        child: _PrimaryActionButton(
+                        child: PrimaryActionButton(
                           icon: _isCopied
                               ? Icons.check_rounded
                               : Icons.copy_rounded,
@@ -402,149 +403,6 @@ class _ScanResultScreenState extends State<ScanResultScreen>
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _GlassButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _GlassButton({required this.icon, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(14),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-          child: Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.35),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.15), width: 0.5),
-            ),
-            child: Icon(icon, color: Colors.white, size: 20),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _OutlineActionButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final ThemeData theme;
-  final bool isDark;
-  final VoidCallback onTap;
-
-  const _OutlineActionButton({
-    required this.icon,
-    required this.label,
-    required this.theme,
-    required this.isDark,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 52,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.12)
-                : Colors.black.withValues(alpha: 0.1),
-            width: 1.5,
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon,
-                size: 18,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
-            const SizedBox(width: 7),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PrimaryActionButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final bool isCopied;
-
-  const _PrimaryActionButton({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    required this.isCopied,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        height: 52,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          gradient: LinearGradient(
-            colors: isCopied
-                ? [const Color(0xFF55C7B5), const Color(0xFF3EA895)]
-                : [const Color(0xFF7A7EDB), const Color(0xFF55C7B5)],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color:
-                  (isCopied ? const Color(0xFF55C7B5) : const Color(0xFF7A7EDB))
-                      .withValues(alpha: 0.4),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 18, color: Colors.white),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-                letterSpacing: 0.2,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

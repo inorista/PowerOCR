@@ -2,6 +2,12 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:powerocr/core/router/app_router.dart';
+import 'package:powerocr/features/splash/presentation/screens/widgets/corner_deco_painter.dart';
+import 'package:powerocr/features/splash/presentation/screens/widgets/grid_painter.dart';
+import 'package:powerocr/features/splash/presentation/screens/widgets/logo_mark_painter.dart';
+import 'package:powerocr/features/splash/presentation/screens/widgets/particle_painter.dart';
+import 'package:powerocr/features/splash/presentation/screens/widgets/scan_beam_painter.dart';
+import 'package:powerocr/features/splash/presentation/screens/widgets/particle.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -29,7 +35,7 @@ class _SplashScreenState extends State<SplashScreen>
   late Animation<double> _exitScale;
   late Animation<double> _exitOpacity;
 
-  final List<_Particle> _particles = [];
+  final List<Particle> _particles = [];
   final int _particleCount = 60;
 
   @override
@@ -56,7 +62,7 @@ class _SplashScreenState extends State<SplashScreen>
   void _generateParticles() {
     final rng = math.Random(42);
     for (int i = 0; i < _particleCount; i++) {
-      _particles.add(_Particle(
+      _particles.add(Particle(
         x: rng.nextDouble(),
         y: rng.nextDouble(),
         size: rng.nextDouble() * 2.5 + 0.5,
@@ -161,7 +167,7 @@ class _SplashScreenState extends State<SplashScreen>
                   Opacity(
                     opacity: _particleOpacity.value,
                     child: CustomPaint(
-                      painter: _ParticlePainter(
+                      painter: ParticlePainter(
                         particles: _particles,
                         beamY: _scanPosition.value,
                         progress: _scanController.value,
@@ -171,20 +177,20 @@ class _SplashScreenState extends State<SplashScreen>
                   Opacity(
                     opacity: _bgOpacity.value * 0.35,
                     child: CustomPaint(
-                      painter: _GridPainter(),
+                      painter: GridPainter(),
                     ),
                   ),
                   if (_scanController.value > 0)
                     Positioned(
                       top: _scanPosition.value * size.height -
-                          _ScanBeamPainter.kBeamHeight / 2,
+                          ScanBeamPainter.kBeamHeight / 2,
                       left: 0,
                       right: 0,
-                      height: _ScanBeamPainter.kBeamHeight,
+                      height: ScanBeamPainter.kBeamHeight,
                       child: Opacity(
                         opacity: _scanOpacity.value,
                         child: CustomPaint(
-                          painter: _ScanBeamPainter(
+                          painter: ScanBeamPainter(
                             progress: _scanController.value,
                           ),
                         ),
@@ -229,7 +235,7 @@ class _SplashScreenState extends State<SplashScreen>
                     Opacity(
                       opacity: ((_bgOpacity.value - 0.5) * 2).clamp(0, 1),
                       child: CustomPaint(
-                        painter: _CornerDecoPainter(
+                        painter: CornerDecoPainter(
                           glowIntensity: _glowController.isAnimating
                               ? _glowPulse.value
                               : 0.7,
@@ -256,7 +262,7 @@ class _SplashScreenState extends State<SplashScreen>
           width: 80,
           height: 80,
           child: CustomPaint(
-            painter: _LogoMarkPainter(
+            painter: LogoMarkPainter(
               progress: t,
               glow: _glowController.isAnimating ? _glowPulse.value : 0.8,
             ),
@@ -394,253 +400,4 @@ class _SplashScreenState extends State<SplashScreen>
           ]),
         ),
       );
-}
-
-class _Particle {
-  final double x, y, size, opacity, speed;
-  _Particle(
-      {required this.x,
-      required this.y,
-      required this.size,
-      required this.opacity,
-      required this.speed});
-}
-
-class _ParticlePainter extends CustomPainter {
-  final List<_Particle> particles;
-  final double beamY;
-  final double progress;
-
-  _ParticlePainter(
-      {required this.particles, required this.beamY, required this.progress});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    for (final p in particles) {
-      final px = p.x * size.width;
-      final py = p.y * size.height;
-
-      final dy = ((py / size.height) - beamY).abs();
-      final boost = (1.0 - (dy / 0.12).clamp(0.0, 1.0)) * 0.8 * progress;
-
-      final paint = Paint()
-        ..color = Color.fromARGB(
-          ((p.opacity + boost) * 255).clamp(0, 255).toInt(),
-          0,
-          212,
-          255,
-        )
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1.5);
-
-      canvas.drawCircle(Offset(px, py), p.size + boost, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_ParticlePainter old) =>
-      old.beamY != beamY || old.progress != progress;
-}
-
-class _GridPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0xFF00D4FF).withValues(alpha: 0.07)
-      ..strokeWidth = 0.5;
-
-    const cols = 14;
-    const rows = 24;
-    for (int i = 0; i <= cols; i++) {
-      final x = i * size.width / cols;
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-    }
-    for (int i = 0; i <= rows; i++) {
-      final y = i * size.height / rows;
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_GridPainter old) => false;
-}
-
-class _ScanBeamPainter extends CustomPainter {
-  static const kBeamHeight = 80.0;
-  final double progress;
-
-  _ScanBeamPainter({required this.progress});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final beamPaint = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          Colors.transparent,
-          const Color(0xFF00D4FF).withValues(alpha: 0.0),
-          const Color(0xFF00D4FF).withValues(alpha: 0.12),
-          const Color(0xFF00D4FF).withValues(alpha: 0.45),
-          const Color(0xFF00AAFF).withValues(alpha: 0.65),
-          const Color(0xFF00D4FF).withValues(alpha: 0.45),
-          const Color(0xFF00D4FF).withValues(alpha: 0.12),
-          const Color(0xFF00D4FF).withValues(alpha: 0.0),
-          Colors.transparent,
-        ],
-        stops: const [0.0, 0.1, 0.3, 0.44, 0.5, 0.56, 0.7, 0.9, 1.0],
-      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
-
-    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), beamPaint);
-
-    final linePaint = Paint()
-      ..color = const Color(0xFFAAEEFF)
-      ..strokeWidth = 1.2;
-    canvas.drawLine(
-      Offset(0, size.height * 0.5),
-      Offset(size.width, size.height * 0.5),
-      linePaint,
-    );
-
-    final glowPaint = Paint()
-      ..color = const Color(0xFF00D4FF).withValues(alpha: 0.6)
-      ..strokeWidth = 4
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
-    canvas.drawLine(
-      Offset(0, size.height * 0.5),
-      Offset(size.width, size.height * 0.5),
-      glowPaint,
-    );
-
-    final dotPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.8)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
-
-    final rng = math.Random(7);
-    for (int i = 0; i < 5; i++) {
-      final x = size.width * rng.nextDouble();
-      canvas.drawCircle(Offset(x, size.height * 0.5), 1.5, dotPaint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_ScanBeamPainter old) => old.progress != progress;
-}
-
-class _CornerDecoPainter extends CustomPainter {
-  final double glowIntensity;
-  _CornerDecoPainter({required this.glowIntensity});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Color.fromARGB((180 * glowIntensity).toInt(), 0, 212, 255)
-      ..strokeWidth = 2.0
-      ..style = PaintingStyle.stroke
-      ..maskFilter = MaskFilter.blur(BlurStyle.normal, 2 * glowIntensity);
-
-    const margin = 24.0;
-    const length = 32.0;
-
-    canvas.drawPath(
-        Path()
-          ..moveTo(margin, margin + length)
-          ..lineTo(margin, margin)
-          ..lineTo(margin + length, margin),
-        paint);
-
-    canvas.drawPath(
-        Path()
-          ..moveTo(size.width - margin - length, margin)
-          ..lineTo(size.width - margin, margin)
-          ..lineTo(size.width - margin, margin + length),
-        paint);
-
-    canvas.drawPath(
-        Path()
-          ..moveTo(margin, size.height - margin - length)
-          ..lineTo(margin, size.height - margin)
-          ..lineTo(margin + length, size.height - margin),
-        paint);
-
-    canvas.drawPath(
-        Path()
-          ..moveTo(size.width - margin - length, size.height - margin)
-          ..lineTo(size.width - margin, size.height - margin)
-          ..lineTo(size.width - margin, size.height - margin - length),
-        paint);
-
-    final cy = size.height / 2 - 28;
-    final cx = size.width / 2;
-    final ringPaint = Paint()
-      ..color = const Color(0xFF00D4FF).withValues(alpha: 0.15 * glowIntensity)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0;
-    canvas.drawCircle(Offset(cx, cy), 60, ringPaint);
-    canvas.drawCircle(
-        Offset(cx, cy),
-        80,
-        ringPaint
-          ..color =
-              const Color(0xFF00D4FF).withValues(alpha: 0.08 * glowIntensity));
-  }
-
-  @override
-  bool shouldRepaint(_CornerDecoPainter old) =>
-      old.glowIntensity != glowIntensity;
-}
-
-class _LogoMarkPainter extends CustomPainter {
-  final double progress;
-  final double glow;
-  _LogoMarkPainter({required this.progress, required this.glow});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final cx = size.width / 2;
-    final cy = size.height / 2;
-    final r = size.width * 0.42;
-
-    final ringPaint = Paint()
-      ..color = const Color(0xFF00D4FF).withValues(alpha: 0.85)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0
-      ..maskFilter = MaskFilter.blur(BlurStyle.normal, 4 * glow);
-    canvas.drawCircle(Offset(cx, cy), r, ringPaint);
-
-    final innerPaint = Paint()
-      ..color = const Color(0xFF00AAFF).withValues(alpha: 0.4)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0;
-    canvas.drawCircle(Offset(cx, cy), r * 0.65, innerPaint);
-
-    final linePaint = Paint()
-      ..strokeWidth = 1.0
-      ..strokeCap = StrokeCap.round;
-
-    const lineCount = 6;
-    for (int i = 0; i < lineCount; i++) {
-      final t = i / (lineCount - 1);
-      final lineY = cy - r * 0.7 + t * r * 1.4;
-
-      final halfW = math.sqrt(math.max(0, r * r - math.pow(lineY - cy, 2)));
-      if (halfW < 2) continue;
-
-      final alpha = (0.3 + 0.4 * (1 - (t - 0.5).abs() * 2)) * progress;
-      linePaint.color = Color.fromARGB((alpha * 255).toInt(), 0, 212, 255);
-      canvas.drawLine(
-          Offset(cx - halfW, lineY), Offset(cx + halfW, lineY), linePaint);
-    }
-
-    canvas.drawCircle(
-        Offset(cx, cy),
-        4,
-        Paint()
-          ..color = const Color(0xFF00D4FF)
-          ..maskFilter = MaskFilter.blur(BlurStyle.normal, 3 * glow));
-    canvas.drawCircle(Offset(cx, cy), 2, Paint()..color = Colors.white);
-  }
-
-  @override
-  bool shouldRepaint(_LogoMarkPainter old) =>
-      old.progress != progress || old.glow != glow;
 }
