@@ -116,7 +116,7 @@ class _ScanningScreenState extends State<ScanningScreen>
           if (state.status == ScanningStatus.success &&
               state.result != null &&
               state.imagePath != null) {
-            context.push(
+            context.replace(
               AppRouter.scanResult,
               extra: {
                 'imagePath': state.imagePath!,
@@ -130,13 +130,15 @@ class _ScanningScreenState extends State<ScanningScreen>
                 SnackBar(
                   content: Row(
                     children: [
-                      const Icon(Icons.error_outline_rounded,
-                          color: Colors.white, size: 18),
+                      Icon(Icons.error_outline_rounded,
+                          color: Theme.of(context).colorScheme.error, size: 18),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           state.errorMessage ?? 'Scan failed',
-                          style: const TextStyle(fontWeight: FontWeight.w500),
+                          style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              color: Theme.of(context).colorScheme.error),
                         ),
                       ),
                     ],

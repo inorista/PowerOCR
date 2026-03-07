@@ -12,6 +12,11 @@ abstract class BaseDao<T> {
     return box.get(key);
   }
 
+  Future<T?> getById(String id) async {
+    final box = await _box;
+    return box.get(id);
+  }
+
   Future<List<T>> getAll() async {
     final box = await _box;
     return box.values.toList();

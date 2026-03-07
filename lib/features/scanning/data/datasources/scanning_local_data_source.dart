@@ -33,6 +33,8 @@ class ScanningLocalDataSourceImpl implements ScanningLocalDataSource {
       return TextRecognitionResult(
         text: recognizedText.text,
         blocks: blocks,
+        createdAt: DateTime.now(),
+        imagePath: imagePath,
       );
     } finally {
       await textRecognizer.close();
