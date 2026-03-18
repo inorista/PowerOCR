@@ -1,5 +1,7 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:injectable/injectable.dart';
+import 'package:powerocr/core/di/locator.dart';
+import 'package:powerocr/core/services/interfaces/iscan_history_service.dart';
 import 'package:powerocr/features/scanning/data/datasources/scanning_local_data_source.dart';
 import 'package:powerocr/features/scanning/data/datasources/scanning_remote_data_source.dart';
 import 'package:powerocr/features/scanning/domain/entities/text_recognition_result.dart';
@@ -10,7 +12,7 @@ class ScanningRepositoryImpl implements ScanningRepository {
   final ScanningRemoteDataSource remoteDataSource;
   final ScanningLocalDataSource localDataSource;
   final Connectivity connectivity;
-
+  final IScanHistoryService scanHistoryService = locator<IScanHistoryService>();
   ScanningRepositoryImpl({
     required this.remoteDataSource,
     required this.localDataSource,
@@ -30,5 +32,16 @@ class ScanningRepositoryImpl implements ScanningRepository {
         return localDataSource.recognizeText(imagePath);
       }
     }
+  }
+
+  @override
+  Future<void> saveScanHistory(TextRecognitionResult result) async {
+    final scanHistoryEntity = TextRecognitionResult.toScanHistoryEntity(result);
+    final scanTextBlockHistoryEntities =
+        TextRecognitionResult.toScanTextBlockHistoryEntities(
+            result, scanHistoryEntity.id);
+    await scanHistoryService.addScanHistory(scanHistoryEntity);
+    await scanHistoryService
+        .addScanTextBlockHistory(scanTextBlockHistoryEntities);
   }
 }

@@ -17,12 +17,19 @@ import 'package:powerocr/core/di/locator.dart' as _i537;
 import 'package:powerocr/core/network/rest_client.dart' as _i150;
 import 'package:powerocr/core/services/implements/network_service.dart'
     as _i169;
+import 'package:powerocr/core/services/implements/scan_history_service.dart'
+    as _i911;
 import 'package:powerocr/core/services/implements/theme_setting_service.dart'
     as _i1017;
 import 'package:powerocr/core/services/interfaces/inetwork_service.dart'
     as _i47;
+import 'package:powerocr/core/services/interfaces/iscan_history_service.dart'
+    as _i254;
 import 'package:powerocr/core/services/interfaces/itheme_setting_service.dart'
     as _i126;
+import 'package:powerocr/database/hive_daos/scan_history_dao.dart' as _i812;
+import 'package:powerocr/database/hive_daos/scan_text_block_history_dao.dart'
+    as _i1031;
 import 'package:powerocr/database/hive_daos/theme_setting_dao.dart' as _i406;
 import 'package:powerocr/features/scanning/data/datasources/scanning_local_data_source.dart'
     as _i217;
@@ -51,11 +58,16 @@ extension GetItInjectableX on _i174.GetIt {
     final registerModule = _$RegisterModule();
     gh.factory<_i320.ScanningBloc>(() => _i320.ScanningBloc());
     gh.lazySingleton<_i895.Connectivity>(() => registerModule.connectivity);
+    gh.lazySingleton<_i812.ScanHistoryDao>(() => _i812.ScanHistoryDao());
+    gh.lazySingleton<_i1031.ScanTextBlockHistoryDao>(
+        () => _i1031.ScanTextBlockHistoryDao());
     gh.lazySingleton<_i406.ThemeSettingDao>(() => _i406.ThemeSettingDao());
     gh.lazySingleton<_i126.IThemeSettingService>(
         () => _i1017.ThemeSettingService(gh<_i406.ThemeSettingDao>()));
     gh.lazySingleton<_i217.ScanningLocalDataSource>(
         () => _i217.ScanningLocalDataSourceImpl());
+    gh.lazySingleton<_i254.IScanHistoryService>(
+        () => _i911.ScanHistoryService());
     gh.lazySingleton<_i47.INetworkService>(() => _i169.NetworkService());
     gh.lazySingleton<_i361.Dio>(
       () => registerModule.provideVisionDio(),

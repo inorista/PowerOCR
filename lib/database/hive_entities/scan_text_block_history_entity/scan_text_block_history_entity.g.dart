@@ -21,19 +21,22 @@ class ScanTextBlockHistoryEntityAdapter
       id: fields[0] as String?,
       text: fields[1] as String,
       boundingBox: (fields[2] as List).cast<double>(),
+      scanHistoryId: fields[3] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, ScanTextBlockHistoryEntity obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(4)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
       ..write(obj.text)
       ..writeByte(2)
-      ..write(obj.boundingBox);
+      ..write(obj.boundingBox)
+      ..writeByte(3)
+      ..write(obj.scanHistoryId);
   }
 
   @override

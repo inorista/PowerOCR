@@ -4,7 +4,7 @@ import 'package:injectable/injectable.dart';
 import 'package:powerocr/core/di/locator.dart';
 import 'package:powerocr/core/services/interfaces/iscan_history_service.dart'
     show IScanHistoryService;
-import 'package:powerocr/features/scanning/domain/entities/text_recognition_result.dart';
+import 'package:powerocr/features/scanning/domain/repositories/scanning_repository.dart';
 import 'package:powerocr/features/scanning/domain/usecases/recognize_text.dart';
 import 'package:powerocr/features/scanning/presentation/bloc/scanning_event.dart';
 import 'package:powerocr/features/scanning/presentation/bloc/scanning_state.dart';
@@ -27,15 +27,7 @@ class ScanningBloc extends Bloc<ScanningEvent, ScanningState> {
     emit(state.copyWith(status: ScanningStatus.loading));
     try {
       final result = await recognizeText(event.imagePath);
-      final scanHistoryEntity =
-          TextRecognitionResult.toScanHistoryEntity(result);
-      final scanTextBlockHistoryEntities =
-          TextRecognitionResult.toScanTextBlockHistoryEntities(
-              result, scanHistoryEntity.id);
-      await scanHistoryService.addScanHistory(scanHistoryEntity);
-      await scanHistoryService
-          .addScanTextBlockHistory(scanTextBlockHistoryEntities);
-
+      await locator<ScanningRepository>().saveScanHistory(result);
       emit(state.copyWith(
         status: ScanningStatus.success,
         result: result,
