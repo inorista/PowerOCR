@@ -1,6 +1,7 @@
 import 'package:injectable/injectable.dart';
 import 'package:powerocr/database/hive_daos/scan_history_dao.dart';
 import 'package:powerocr/features/home/data/models/scan_history_model.dart';
+import 'package:path_provider/path_provider.dart';
 
 abstract class HomeLocalDataSource {
   Future<List<ScanHistoryModel>> getScanHistory();
@@ -18,6 +19,23 @@ class HomeLocalDataSourceImpl implements HomeLocalDataSource {
   Future<List<ScanHistoryModel>> getScanHistory() async {
     final entities = await _scanHistoryDao.getAll();
     entities.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+    try {
+      final docDir = await getApplicationDocumentsDirectory();
+      for (var entity in entities) {
+        if (entity.imagePath.isNotEmpty) {
+          if (!entity.imagePath.contains('/')) {
+            entity.imagePath = '${docDir.path}/${entity.imagePath}';
+          } else if (entity.imagePath.contains('/Documents/')) {
+            final parts = entity.imagePath.split('/Documents/');
+            if (parts.length > 1) {
+              entity.imagePath = '${docDir.path}/${parts.last}';
+            }
+          }
+        }
+      }
+    } catch (e) {}
+
     return ScanHistoryModel.fromHiveList(entities);
   }
 

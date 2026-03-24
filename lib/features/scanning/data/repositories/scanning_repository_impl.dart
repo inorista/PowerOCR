@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:injectable/injectable.dart';
 import 'package:powerocr/core/di/locator.dart';
@@ -36,10 +38,39 @@ class ScanningRepositoryImpl implements ScanningRepository {
 
   @override
   Future<void> saveScanHistory(TextRecognitionResult result) async {
-    final scanHistoryEntity = TextRecognitionResult.toScanHistoryEntity(result);
+    String finalImagePath = result.imagePath;
+
+    if (finalImagePath.isNotEmpty) {
+      try {
+        final docDir = await getApplicationDocumentsDirectory();
+        final originalFile = File(finalImagePath);
+
+        if (await originalFile.exists()) {
+          final fileName =
+              'ocr_scan_${DateTime.now().millisecondsSinceEpoch}.jpg';
+          await originalFile.copy('${docDir.path}/$fileName');
+
+          finalImagePath = fileName;
+        }
+      } catch (e) {}
+    }
+
+    // Cập nhật lại result với finalImagePath
+    final processedResult = TextRecognitionResult(
+      text: result.text,
+      blocks: result.blocks,
+      imageWidth: result.imageWidth,
+      imageHeight: result.imageHeight,
+      imagePath: finalImagePath,
+      createdAt: result.createdAt,
+    );
+
+    final scanHistoryEntity =
+        TextRecognitionResult.toScanHistoryEntity(processedResult);
     final scanTextBlockHistoryEntities =
         TextRecognitionResult.toScanTextBlockHistoryEntities(
-            result, scanHistoryEntity.id);
+            processedResult, scanHistoryEntity.id);
+
     await scanHistoryService.addScanHistory(scanHistoryEntity);
     await scanHistoryService
         .addScanTextBlockHistory(scanTextBlockHistoryEntities);

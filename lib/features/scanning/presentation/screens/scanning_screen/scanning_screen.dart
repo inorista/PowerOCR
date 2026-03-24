@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:powerocr/core/di/locator.dart';
 import 'package:powerocr/core/router/app_router.dart';
 import 'package:powerocr/features/scanning/presentation/bloc/scanning_bloc.dart';
 import 'package:powerocr/features/scanning/presentation/bloc/scanning_event.dart';
@@ -62,7 +63,7 @@ class _ScanningScreenState extends State<ScanningScreen>
     _cornerGlow = Tween(begin: 0.5, end: 1.0)
         .animate(CurvedAnimation(parent: _cornerCtrl, curve: Curves.easeInOut));
 
-    _bloc = ScanningBloc();
+    _bloc = locator<ScanningBloc>();
     _initCamera();
   }
 
@@ -511,12 +512,25 @@ class _ScanningScreenState extends State<ScanningScreen>
 
   Future<void> _pickImage(BuildContext context) async {
     try {
+      // Pause camera preview before opening gallery to avoid Impeller drawable error on iOS
+      if (_controller != null && _controller!.value.isInitialized) {
+        await _controller!.pausePreview();
+      }
+      
       final image = await _picker.pickImage(source: ImageSource.gallery);
       if (image != null && context.mounted) {
         context.read<ScanningBloc>().add(ScanImage(image.path));
+      } else {
+        // Resume camera preview if user cancelled image picking
+        if (_controller != null && _controller!.value.isInitialized) {
+          await _controller!.resumePreview();
+        }
       }
     } catch (e) {
       debugPrint('Gallery error: $e');
+      if (_controller != null && _controller!.value.isInitialized) {
+        await _controller!.resumePreview();
+      }
     }
   }
 }

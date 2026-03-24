@@ -23,29 +23,37 @@ class ScanningBloc extends Bloc<ScanningEvent, ScanningState> {
   }
 
   Future<void> _onScanImage(
-      ScanImage event, Emitter<ScanningState> emit) async {
+    ScanImage event,
+    Emitter<ScanningState> emit,
+  ) async {
     emit(state.copyWith(status: ScanningStatus.loading));
     try {
       final result = await recognizeText(event.imagePath);
       await locator<ScanningRepository>().saveScanHistory(result);
-      emit(state.copyWith(
-        status: ScanningStatus.success,
-        result: result,
-        imagePath: event.imagePath,
-      ));
+      emit(
+        state.copyWith(
+          status: ScanningStatus.success,
+          result: result,
+          imagePath: event.imagePath,
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: ScanningStatus.failure,
-        errorMessage: e.toString(),
-      ));
+      emit(
+        state.copyWith(
+          status: ScanningStatus.failure,
+          errorMessage: e.toString(),
+        ),
+      );
     }
   }
 
   void _onResetScan(ResetScan event, Emitter<ScanningState> emit) {
-    emit(ScanningState(
-      flashMode: state.flashMode,
-      isCameraInitialized: state.isCameraInitialized,
-    ));
+    emit(
+      ScanningState(
+        flashMode: state.flashMode,
+        isCameraInitialized: state.isCameraInitialized,
+      ),
+    );
   }
 
   void _onToggleFlash(ToggleFlash event, Emitter<ScanningState> emit) {

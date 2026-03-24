@@ -8,9 +8,7 @@ import 'package:powerocr/features/home/presentation/bloc/home_state.dart';
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final GetScanHistory getScanHistory;
 
-  HomeBloc({
-    required this.getScanHistory,
-  }) : super(const HomeState()) {
+  HomeBloc({required this.getScanHistory}) : super(const HomeState()) {
     on<LoadHomeData>(_onLoadHomeData);
   }
 
@@ -18,7 +16,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       LoadHomeData event, Emitter<HomeState> emit) async {
     emit(state.copyWith(status: HomeStatus.loading));
     try {
-      final history = await getScanHistory();
+      final history = await getScanHistory.call();
       emit(state.copyWith(status: HomeStatus.success, history: history));
     } catch (e) {
       emit(state.copyWith(

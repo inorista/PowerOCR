@@ -1,9 +1,15 @@
+import 'dart:io';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:powerocr/core/di/locator.dart';
 import 'package:powerocr/core/router/app_router.dart';
 import 'package:powerocr/core/theme/cubit/theme_cubit.dart';
+import 'package:powerocr/features/home/domain/entities/scan_history.dart';
+import 'package:powerocr/features/home/presentation/bloc/home_bloc.dart';
+import 'package:powerocr/features/home/presentation/bloc/home_event.dart';
+import 'package:powerocr/features/home/presentation/bloc/home_state.dart';
 import 'package:powerocr/features/home/presentation/screens/widgets/ambient_orbs.dart';
 import 'package:powerocr/features/home/presentation/screens/widgets/stat_card.dart';
 
@@ -31,54 +37,83 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late Animation<double> _orbRotate;
   late Animation<double> _shimmerPos;
 
+  late final HomeBloc _bloc;
   @override
   void initState() {
     super.initState();
+    _bloc = locator<HomeBloc>();
 
     _entryCtrl = AnimationController(
-        duration: const Duration(milliseconds: 900), vsync: this);
+      duration: const Duration(milliseconds: 900),
+      vsync: this,
+    );
 
-    _headerFade = Tween(begin: 0.0, end: 1.0).animate(CurvedAnimation(
+    _headerFade = Tween(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
         parent: _entryCtrl,
-        curve: const Interval(0.0, 0.4, curve: Curves.easeOut)));
+        curve: const Interval(0.0, 0.4, curve: Curves.easeOut),
+      ),
+    );
     _headerSlide = Tween(begin: const Offset(0, -0.15), end: Offset.zero)
-        .animate(CurvedAnimation(
+        .animate(
+          CurvedAnimation(
             parent: _entryCtrl,
-            curve: const Interval(0.0, 0.45, curve: Curves.easeOut)));
+            curve: const Interval(0.0, 0.45, curve: Curves.easeOut),
+          ),
+        );
 
-    _heroFade = Tween(begin: 0.0, end: 1.0).animate(CurvedAnimation(
+    _heroFade = Tween(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
         parent: _entryCtrl,
-        curve: const Interval(0.15, 0.55, curve: Curves.easeOut)));
+        curve: const Interval(0.15, 0.55, curve: Curves.easeOut),
+      ),
+    );
     _heroSlide = Tween(begin: const Offset(0, 0.1), end: Offset.zero).animate(
-        CurvedAnimation(
-            parent: _entryCtrl,
-            curve: const Interval(0.15, 0.55, curve: Curves.easeOut)));
-
-    _statFade = Tween(begin: 0.0, end: 1.0).animate(CurvedAnimation(
+      CurvedAnimation(
         parent: _entryCtrl,
-        curve: const Interval(0.40, 0.70, curve: Curves.easeOut)));
+        curve: const Interval(0.15, 0.55, curve: Curves.easeOut),
+      ),
+    );
 
-    _actionsFade = Tween(begin: 0.0, end: 1.0).animate(CurvedAnimation(
+    _statFade = Tween(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
         parent: _entryCtrl,
-        curve: const Interval(0.58, 0.90, curve: Curves.easeOut)));
+        curve: const Interval(0.40, 0.70, curve: Curves.easeOut),
+      ),
+    );
+
+    _actionsFade = Tween(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _entryCtrl,
+        curve: const Interval(0.58, 0.90, curve: Curves.easeOut),
+      ),
+    );
     _actionsSlide = Tween(begin: const Offset(0, 0.08), end: Offset.zero)
-        .animate(CurvedAnimation(
+        .animate(
+          CurvedAnimation(
             parent: _entryCtrl,
-            curve: const Interval(0.58, 0.90, curve: Curves.easeOut)));
+            curve: const Interval(0.58, 0.90, curve: Curves.easeOut),
+          ),
+        );
 
-    _orbCtrl =
-        AnimationController(duration: const Duration(seconds: 12), vsync: this)
-          ..repeat();
+    _orbCtrl = AnimationController(
+      duration: const Duration(seconds: 12),
+      vsync: this,
+    )..repeat();
     _orbRotate = Tween(begin: 0.0, end: 2 * math.pi).animate(_orbCtrl);
 
     _heroShimmerCtrl = AnimationController(
-        duration: const Duration(milliseconds: 2200), vsync: this)
-      ..repeat(min: 0, max: 1);
+      duration: const Duration(milliseconds: 2200),
+      vsync: this,
+    )..repeat(min: 0, max: 1);
     _shimmerPos = Tween(begin: -1.0, end: 2.0).animate(
-        CurvedAnimation(parent: _heroShimmerCtrl, curve: Curves.easeInOut));
+      CurvedAnimation(parent: _heroShimmerCtrl, curve: Curves.easeInOut),
+    );
 
     _statCtrl = AnimationController(
-        duration: const Duration(milliseconds: 1200), vsync: this);
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    );
 
     _entryCtrl.forward().then((_) => _statCtrl.forward());
   }
@@ -99,116 +134,147 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final primary = theme.colorScheme.primary;
     final size = MediaQuery.sizeOf(context);
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      body: Stack(
-        children: [
-          RepaintBoundary(
-            child: AnimatedBuilder(
-              animation: _orbRotate,
-              builder: (_, __) => AmbientOrbs(
-                rotate: _orbRotate.value,
-                isDark: isDark,
-                primary: primary,
-                size: size,
+    return BlocProvider<HomeBloc>.value(
+      value: _bloc..add(LoadHomeData()),
+      child: Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        body: Stack(
+          children: [
+            RepaintBoundary(
+              child: AnimatedBuilder(
+                animation: _orbRotate,
+                builder: (_, __) => AmbientOrbs(
+                  rotate: _orbRotate.value,
+                  isDark: isDark,
+                  primary: primary,
+                  size: size,
+                ),
               ),
             ),
-          ),
-          SafeArea(
-            child: CustomScrollView(
-              physics: const BouncingScrollPhysics(),
-              slivers: [
-                SliverToBoxAdapter(
-                  child: FadeTransition(
-                    opacity: _headerFade,
-                    child: SlideTransition(
-                      position: _headerSlide,
-                      child: _buildHeader(context, theme, isDark),
+            SafeArea(
+              child: CustomScrollView(
+                physics: const BouncingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics(),
+                ),
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: FadeTransition(
+                      opacity: _headerFade,
+                      child: SlideTransition(
+                        position: _headerSlide,
+                        child: _buildHeader(context, theme, isDark),
+                      ),
                     ),
                   ),
-                ),
-                SliverToBoxAdapter(
-                  child: FadeTransition(
-                    opacity: _heroFade,
-                    child: SlideTransition(
-                      position: _heroSlide,
-                      child: _buildHeroCard(context, theme, isDark),
+                  SliverToBoxAdapter(
+                    child: FadeTransition(
+                      opacity: _heroFade,
+                      child: SlideTransition(
+                        position: _heroSlide,
+                        child: _buildHeroCard(context, theme, isDark),
+                      ),
                     ),
                   ),
-                ),
-                SliverToBoxAdapter(
-                  child: FadeTransition(
-                    opacity: _statFade,
-                    child: _buildStats(theme, isDark),
+                  SliverToBoxAdapter(
+                    child: FadeTransition(
+                      opacity: _statFade,
+                      child: _buildStats(theme, isDark),
+                    ),
                   ),
-                ),
-                SliverToBoxAdapter(
-                  child: FadeTransition(
-                    opacity: _actionsFade,
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 28, 24, 12),
-                      child: Text(
-                        'Quick Actions',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.3,
+                  SliverToBoxAdapter(
+                    child: FadeTransition(
+                      opacity: _actionsFade,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 28, 24, 12),
+                        child: Text(
+                          'Quick Actions',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.3,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                SliverToBoxAdapter(
-                  child: FadeTransition(
-                    opacity: _actionsFade,
-                    child: SlideTransition(
-                      position: _actionsSlide,
-                      child: _buildQuickActions(context, theme, isDark),
-                    ),
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: FadeTransition(
-                    opacity: _actionsFade,
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 28, 24, 12),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Recent Scans',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.3,
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: () {},
-                            style: TextButton.styleFrom(
-                              foregroundColor: theme.colorScheme.primary,
-                              padding: EdgeInsets.zero,
-                              minimumSize: const Size(44, 32),
-                            ),
-                            child: const Text(
-                              'See all',
-                              style: TextStyle(fontSize: 13),
-                            ),
-                          ),
-                        ],
+                  SliverToBoxAdapter(
+                    child: FadeTransition(
+                      opacity: _actionsFade,
+                      child: SlideTransition(
+                        position: _actionsSlide,
+                        child: _buildQuickActions(context, theme, isDark),
                       ),
                     ),
                   ),
-                ),
-                SliverToBoxAdapter(
-                  child: FadeTransition(
-                    opacity: _actionsFade,
-                    child: _buildEmptyState(theme, isDark),
+                  SliverToBoxAdapter(
+                    child: FadeTransition(
+                      opacity: _actionsFade,
+                      child: Padding(
+                        padding: const .symmetric(horizontal: 24.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Recent Scans',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.3,
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () {},
+                              style: TextButton.styleFrom(
+                                foregroundColor: theme.colorScheme.primary,
+                                padding: EdgeInsets.zero,
+                                minimumSize: const Size(44, 32),
+                              ),
+                              child: const Text(
+                                'See all',
+                                style: TextStyle(fontSize: 13),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-                const SliverToBoxAdapter(child: SizedBox(height: 32)),
-              ],
+                  BlocSelector<HomeBloc, HomeState, List<ScanHistory>>(
+                    selector: (state) {
+                      return state.history;
+                    },
+                    builder: (context, history) {
+                      if (history.isEmpty) {
+                        return SliverToBoxAdapter(
+                          child: FadeTransition(
+                            opacity: _actionsFade,
+                            child: _buildEmptyState(theme, isDark),
+                          ),
+                        );
+                      }
+                      return SliverList.builder(
+                        itemCount: history.length,
+                        itemBuilder: (context, index) {
+                          final item = history[index];
+                          return FadeTransition(
+                            opacity: _actionsFade,
+                            child: SlideTransition(
+                              position: _actionsSlide,
+                              child: _buildHistoryItem(
+                                context,
+                                theme,
+                                isDark,
+                                item,
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -233,14 +299,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ShaderMask(
                   shaderCallback: (bounds) => LinearGradient(
                     colors: isDark
-                        ? [
-                            const Color(0xFFCBCDEC),
-                            const Color(0xFF95E1D3),
-                          ]
-                        : [
-                            const Color(0xFF6B6FCC),
-                            const Color(0xFF55C7B5),
-                          ],
+                        ? [const Color(0xFFCBCDEC), const Color(0xFF95E1D3)]
+                        : [const Color(0xFF6B6FCC), const Color(0xFF55C7B5)],
                   ).createShader(bounds),
                   child: Text(
                     'PowerOCR',
@@ -259,8 +319,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             icon: isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
             onTap: () {
               context.read<ThemeCubit>().setTheme(
-                    isDark ? ThemeMode.light : ThemeMode.dark,
-                  );
+                isDark ? ThemeMode.light : ThemeMode.dark,
+              );
             },
             theme: theme,
           ),
@@ -286,8 +346,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
               ],
             ),
-            child:
-                const Icon(Icons.person_rounded, color: Colors.white, size: 22),
+            child: const Icon(
+              Icons.person_rounded,
+              color: Colors.white,
+              size: 22,
+            ),
           ),
         ],
       ),
@@ -310,37 +373,61 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
       child: Row(
+        spacing: 12.0,
         children: [
           Expanded(
-            child: StatCard(
-              label: 'Scanned',
-              value: 0,
-              icon: Icons.document_scanner_rounded,
-              isDark: isDark,
-              theme: theme,
-              controller: _statCtrl,
+            child: BlocSelector<HomeBloc, HomeState, int>(
+              selector: (state) {
+                return state.history.length;
+              },
+              builder: (context, historyCount) {
+                return StatCard(
+                  label: 'Scanned',
+                  value: historyCount,
+                  icon: Icons.document_scanner_rounded,
+                  isDark: isDark,
+                  theme: theme,
+                  controller: _statCtrl,
+                );
+              },
             ),
           ),
-          const SizedBox(width: 12),
           Expanded(
-            child: StatCard(
-              label: 'Extracted',
-              value: 0,
-              icon: Icons.text_snippet_rounded,
-              isDark: isDark,
-              theme: theme,
-              controller: _statCtrl,
+            child: BlocSelector<HomeBloc, HomeState, int>(
+              selector: (state) {
+                return state.history.fold(
+                  0,
+                  (previousValue, element) =>
+                      previousValue + element.text.split(' ').length,
+                );
+              },
+              builder: (context, wordCount) {
+                return StatCard(
+                  label: 'Extracted',
+                  value: wordCount,
+                  icon: Icons.text_snippet_rounded,
+                  isDark: isDark,
+                  theme: theme,
+                  controller: _statCtrl,
+                );
+              },
             ),
           ),
-          const SizedBox(width: 12),
           Expanded(
-            child: StatCard(
-              label: 'Saved',
-              value: 0,
-              icon: Icons.bookmark_rounded,
-              isDark: isDark,
-              theme: theme,
-              controller: _statCtrl,
+            child: BlocSelector<HomeBloc, HomeState, int>(
+              selector: (state) {
+                return state.history.length;
+              },
+              builder: (context, savedCount) {
+                return StatCard(
+                  label: 'Saved',
+                  value: savedCount,
+                  icon: Icons.bookmark_rounded,
+                  isDark: isDark,
+                  theme: theme,
+                  controller: _statCtrl,
+                );
+              },
             ),
           ),
         ],
@@ -349,7 +436,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildQuickActions(
-      BuildContext context, ThemeData theme, bool isDark) {
+    BuildContext context,
+    ThemeData theme,
+    bool isDark,
+  ) {
     final actions = [
       _QuickAction(
         icon: Icons.camera_alt_rounded,
@@ -387,8 +477,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         crossAxisSpacing: 10,
         childAspectRatio: 0.82,
         children: actions
-            .map((a) =>
-                _QuickActionTile(action: a, isDark: isDark, theme: theme))
+            .map(
+              (a) => _QuickActionTile(action: a, isDark: isDark, theme: theme),
+            )
             .toList(),
       ),
     );
@@ -402,7 +493,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 24),
         decoration: BoxDecoration(
           color: cardColor,
           borderRadius: BorderRadius.circular(20),
@@ -450,6 +540,154 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
+  Widget _buildHistoryItem(
+    BuildContext context,
+    ThemeData theme,
+    bool isDark,
+    ScanHistory item,
+  ) {
+    final cardColor = isDark
+        ? const Color(0xFF2E2E3E).withValues(alpha: 0.75)
+        : Colors.white.withValues(alpha: 0.85);
+    final borderColor = isDark
+        ? Colors.white.withValues(alpha: 0.07)
+        : Colors.black.withValues(alpha: 0.05);
+    final subtitleColor = theme.colorScheme.onSurface.withValues(
+      alpha: isDark ? 0.5 : 0.45,
+    );
+
+    final now = DateTime.now();
+    final diff = now.difference(item.createdAt);
+    final String timeLabel;
+    if (diff.inMinutes < 1) {
+      timeLabel = 'Just now';
+    } else if (diff.inHours < 1) {
+      timeLabel = '${diff.inMinutes}m ago';
+    } else if (diff.inDays < 1) {
+      timeLabel = '${diff.inHours}h ago';
+    } else if (diff.inDays == 1) {
+      timeLabel = 'Yesterday';
+    } else {
+      timeLabel = '${diff.inDays}d ago';
+    }
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 10),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {},
+          child: Ink(
+            decoration: BoxDecoration(
+              color: cardColor,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: borderColor),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.18 : 0.06),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: SizedBox(
+                      width: 56,
+                      height: 56,
+                      child: item.imagePath.isNotEmpty
+                          ? Image.file(
+                              File(item.imagePath),
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) =>
+                                  _HistoryThumbnailPlaceholder(
+                                    isDark: isDark,
+                                    theme: theme,
+                                  ),
+                            )
+                          : _HistoryThumbnailPlaceholder(
+                              isDark: isDark,
+                              theme: theme,
+                            ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          item.text.isNotEmpty
+                              ? item.text
+                              : 'No text extracted',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            height: 1.35,
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: isDark ? 0.9 : 0.85,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.access_time_rounded,
+                              size: 12,
+                              color: subtitleColor,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              timeLabel,
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: subtitleColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Icon(
+                              Icons.text_fields_rounded,
+                              size: 12,
+                              color: subtitleColor,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${item.text.split(' ').where((w) => w.isNotEmpty).length} words',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: subtitleColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // ── Trailing chevron ───────────────────────────────────
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    size: 20,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   String _greeting() {
     final hour = DateTime.now().hour;
     if (hour < 12) return 'morning';
@@ -484,9 +722,13 @@ class _AnimatedHeroCardState extends State<_AnimatedHeroCard>
   void initState() {
     super.initState();
     _pressCtrl = AnimationController(
-        duration: const Duration(milliseconds: 120), vsync: this);
-    _pressScale = Tween(begin: 1.0, end: 0.97)
-        .animate(CurvedAnimation(parent: _pressCtrl, curve: Curves.easeInOut));
+      duration: const Duration(milliseconds: 120),
+      vsync: this,
+    );
+    _pressScale = Tween(
+      begin: 1.0,
+      end: 0.97,
+    ).animate(CurvedAnimation(parent: _pressCtrl, curve: Curves.easeInOut));
   }
 
   @override
@@ -517,7 +759,7 @@ class _AnimatedHeroCardState extends State<_AnimatedHeroCard>
                   colors: [
                     Color(0xFF7A7EDB),
                     Color(0xFF5A9ED4),
-                    Color(0xFF55C7B5)
+                    Color(0xFF55C7B5),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -689,9 +931,13 @@ class _QuickActionTileState extends State<_QuickActionTile>
   void initState() {
     super.initState();
     _pressCtrl = AnimationController(
-        duration: const Duration(milliseconds: 100), vsync: this);
-    _pressScale = Tween(begin: 1.0, end: 0.93)
-        .animate(CurvedAnimation(parent: _pressCtrl, curve: Curves.easeInOut));
+      duration: const Duration(milliseconds: 100),
+      vsync: this,
+    );
+    _pressScale = Tween(
+      begin: 1.0,
+      end: 0.93,
+    ).animate(CurvedAnimation(parent: _pressCtrl, curve: Curves.easeInOut));
   }
 
   @override
@@ -746,8 +992,9 @@ class _QuickActionTileState extends State<_QuickActionTile>
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
                   height: 1.3,
-                  color: widget.theme.colorScheme.onSurface
-                      .withValues(alpha: isDark ? 0.75 : 0.65),
+                  color: widget.theme.colorScheme.onSurface.withValues(
+                    alpha: isDark ? 0.75 : 0.65,
+                  ),
                   letterSpacing: 0.1,
                 ),
               ),
@@ -785,9 +1032,13 @@ class _HeaderIconButtonState extends State<_HeaderIconButton>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        duration: const Duration(milliseconds: 100), vsync: this);
-    _scale = Tween(begin: 1.0, end: 0.88)
-        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
+      duration: const Duration(milliseconds: 100),
+      vsync: this,
+    );
+    _scale = Tween(
+      begin: 1.0,
+      end: 0.88,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
   }
 
   @override
@@ -818,12 +1069,42 @@ class _HeaderIconButtonState extends State<_HeaderIconButton>
                   : Colors.black.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(widget.icon,
-                color:
-                    widget.theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                size: 20),
+            child: Icon(
+              widget.icon,
+              color: widget.theme.colorScheme.onSurface.withValues(alpha: 0.7),
+              size: 20,
+            ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _HistoryThumbnailPlaceholder extends StatelessWidget {
+  final bool isDark;
+  final ThemeData theme;
+
+  const _HistoryThumbnailPlaceholder({
+    required this.isDark,
+    required this.theme,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 56,
+      height: 56,
+      decoration: BoxDecoration(
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.08)
+            : theme.colorScheme.primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Icon(
+        Icons.image_outlined,
+        size: 24,
+        color: theme.colorScheme.primary.withValues(alpha: 0.45),
       ),
     );
   }

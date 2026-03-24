@@ -8,7 +8,8 @@ class StatCard extends StatelessWidget {
   final ThemeData theme;
   final AnimationController controller;
 
-  const StatCard({super.key, 
+  const StatCard({
+    super.key,
     required this.label,
     required this.value,
     required this.icon,

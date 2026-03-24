@@ -52,7 +52,8 @@ class _ScanResultScreenState extends State<ScanResultScreen>
 
     for (int i = 1; i < sortedBlocks.length; i++) {
       final curr = sortedBlocks[i];
-      double currentLineAvgY = currentLine
+      double currentLineAvgY =
+          currentLine
               .map((b) => (b.boundingBox[1] + b.boundingBox[3]) / 2)
               .reduce((a, b) => a + b) /
           currentLine.length;
@@ -81,8 +82,9 @@ class _ScanResultScreenState extends State<ScanResultScreen>
       totalCharWidth += w;
       totalChars += block.text.length;
     }
-    double avgCharWidth =
-        totalChars > 0 ? (totalCharWidth / totalChars) * 1.05 : 9.0;
+    double avgCharWidth = totalChars > 0
+        ? (totalCharWidth / totalChars) * 1.05
+        : 9.0;
     if (avgCharWidth <= 0) avgCharWidth = 9.0;
 
     StringBuffer sb = StringBuffer();
@@ -119,15 +121,23 @@ class _ScanResultScreenState extends State<ScanResultScreen>
   void initState() {
     super.initState();
     _entryCtrl = AnimationController(
-        duration: const Duration(milliseconds: 700), vsync: this);
+      duration: const Duration(milliseconds: 700),
+      vsync: this,
+    );
 
-    _imageFade = Tween(begin: 0.0, end: 1.0).animate(CurvedAnimation(
+    _imageFade = Tween(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
         parent: _entryCtrl,
-        curve: const Interval(0.0, 0.5, curve: Curves.easeOut)));
+        curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
+      ),
+    );
 
-    _contentFade = Tween(begin: 0.0, end: 1.0).animate(CurvedAnimation(
+    _contentFade = Tween(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
         parent: _entryCtrl,
-        curve: const Interval(0.35, 0.85, curve: Curves.easeOut)));
+        curve: const Interval(0.35, 0.85, curve: Curves.easeOut),
+      ),
+    );
 
     _entryCtrl.forward();
   }
@@ -169,8 +179,9 @@ class _ScanResultScreenState extends State<ScanResultScreen>
             ),
             backgroundColor: const Color(0xFF2D2D3F),
             behavior: SnackBarBehavior.floating,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             duration: const Duration(seconds: 2),
           ),
@@ -190,8 +201,9 @@ class _ScanResultScreenState extends State<ScanResultScreen>
     final expandedImageHeight = size.height * 0.46;
 
     return Scaffold(
-      backgroundColor:
-          isDark ? const Color(0xFF1A1A26) : const Color(0xFFF2F3F8),
+      backgroundColor: isDark
+          ? const Color(0xFF1A1A26)
+          : const Color(0xFFF2F3F8),
       body: Stack(
         children: [
           // ──────── CustomScrollView ────────
@@ -247,7 +259,9 @@ class _ScanResultScreenState extends State<ScanResultScreen>
                               child: SafeArea(
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 6),
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
                                   child: Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
@@ -271,10 +285,13 @@ class _ScanResultScreenState extends State<ScanResultScreen>
                                 child: ClipRect(
                                   child: BackdropFilter(
                                     filter: ImageFilter.blur(
-                                        sigmaX: 20, sigmaY: 20),
+                                      sigmaX: 20,
+                                      sigmaY: 20,
+                                    ),
                                     child: Container(
-                                      color:
-                                          Colors.black.withValues(alpha: 0.6),
+                                      color: Colors.black.withValues(
+                                        alpha: 0.6,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -296,7 +313,8 @@ class _ScanResultScreenState extends State<ScanResultScreen>
                             ? const Color(0xFF1A1A26)
                             : const Color(0xFFF2F3F8),
                         borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(28)),
+                          top: Radius.circular(28),
+                        ),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -330,29 +348,33 @@ class _ScanResultScreenState extends State<ScanResultScreen>
                                         'Extracted Text',
                                         style: theme.textTheme.titleLarge
                                             ?.copyWith(
-                                          fontWeight: FontWeight.w800,
-                                          letterSpacing: -0.3,
-                                          color: theme.colorScheme.onSurface,
-                                        ),
+                                              fontWeight: FontWeight.w800,
+                                              letterSpacing: -0.3,
+                                              color:
+                                                  theme.colorScheme.onSurface,
+                                            ),
                                       ),
                                       const SizedBox(height: 3),
                                       Text(
                                         '$_wordCount words · $_charCount characters',
-                                        style:
-                                            theme.textTheme.bodySmall?.copyWith(
-                                          color: theme.colorScheme.onSurface
-                                              .withValues(alpha: 0.45),
-                                        ),
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(
+                                              color: theme.colorScheme.onSurface
+                                                  .withValues(alpha: 0.45),
+                                            ),
                                       ),
                                     ],
                                   ),
                                 ),
                                 Container(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 5),
+                                    horizontal: 10,
+                                    vertical: 5,
+                                  ),
                                   decoration: BoxDecoration(
-                                    color: theme.colorScheme.primary
-                                        .withValues(alpha: 0.12),
+                                    color: theme.colorScheme.primary.withValues(
+                                      alpha: 0.12,
+                                    ),
                                     borderRadius: BorderRadius.circular(20),
                                   ),
                                   child: Row(
@@ -382,7 +404,9 @@ class _ScanResultScreenState extends State<ScanResultScreen>
                           // Divider
                           Padding(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 14),
+                              horizontal: 20,
+                              vertical: 14,
+                            ),
                             child: Divider(
                               height: 1,
                               color: isDark
@@ -394,7 +418,9 @@ class _ScanResultScreenState extends State<ScanResultScreen>
                           // Segmented toggle Pure / Visual
                           Padding(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 0),
+                              horizontal: 20,
+                              vertical: 0,
+                            ),
                             child: Container(
                               height: 40,
                               padding: const EdgeInsets.all(4),
@@ -411,14 +437,16 @@ class _ScanResultScreenState extends State<ScanResultScreen>
                                     selected: !_showAlignedFormat,
                                     theme: theme,
                                     onTap: () => setState(
-                                        () => _showAlignedFormat = false),
+                                      () => _showAlignedFormat = false,
+                                    ),
                                   ),
                                   _SegmentButton(
                                     label: 'Visual Layout',
                                     selected: _showAlignedFormat,
                                     theme: theme,
                                     onTap: () => setState(
-                                        () => _showAlignedFormat = true),
+                                      () => _showAlignedFormat = true,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -447,8 +475,12 @@ class _ScanResultScreenState extends State<ScanResultScreen>
                             color: isDark
                                 ? const Color(0xFF1A1A26)
                                 : const Color(0xFFF2F3F8),
-                            padding:
-                                EdgeInsets.fromLTRB(20, 0, 20, bottomPad + 90),
+                            padding: EdgeInsets.fromLTRB(
+                              20,
+                              0,
+                              20,
+                              bottomPad + 90,
+                            ),
                             child: _showAlignedFormat
                                 ? _buildAlignedTextView(theme)
                                 : _buildPureTextView(theme),
@@ -524,9 +556,11 @@ class _ScanResultScreenState extends State<ScanResultScreen>
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const SizedBox(height: 40),
-        Icon(Icons.text_fields_rounded,
-            size: 48,
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.2)),
+        Icon(
+          Icons.text_fields_rounded,
+          size: 48,
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
+        ),
         const SizedBox(height: 12),
         Text(
           'No text detected',
@@ -602,9 +636,10 @@ class _SegmentButton extends StatelessWidget {
             boxShadow: selected
                 ? [
                     BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.10),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2))
+                      color: Colors.black.withValues(alpha: 0.10),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
                   ]
                 : null,
           ),
