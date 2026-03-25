@@ -2,5 +2,6 @@ import 'package:powerocr/features/scanning/domain/entities/text_recognition_resu
 
 abstract class ScanningRepository {
   Future<TextRecognitionResult> recognizeText(String imagePath);
+  Future<TextRecognitionResult> recognizeQR(String imagePath);
   Future<void> saveScanHistory(TextRecognitionResult result);
 }

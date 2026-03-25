@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:path_provider/path_provider.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:injectable/injectable.dart';
@@ -22,18 +23,29 @@ class ScanningRepositoryImpl implements ScanningRepository {
   });
 
   @override
+  Future<TextRecognitionResult> recognizeQR(String imagePath) async {
+    try {
+      return await localDataSource.recognizeQR(imagePath);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
   Future<TextRecognitionResult> recognizeText(String imagePath) async {
     final connectivityResult = await connectivity.checkConnectivity();
 
+    TextRecognitionResult result;
     if (connectivityResult.contains(ConnectivityResult.none)) {
-      return localDataSource.recognizeText(imagePath);
+      result = await localDataSource.recognizeText(imagePath);
     } else {
       try {
-        return await remoteDataSource.recognizeText(imagePath);
+        result = await remoteDataSource.recognizeText(imagePath);
       } catch (e) {
-        return localDataSource.recognizeText(imagePath);
+        result = await localDataSource.recognizeText(imagePath);
       }
     }
+    return result;
   }
 
   @override
@@ -52,7 +64,9 @@ class ScanningRepositoryImpl implements ScanningRepository {
 
           finalImagePath = fileName;
         }
-      } catch (e) {}
+      } catch (e) {
+        // Ignore if file copying fails
+      }
     }
 
     // Cập nhật lại result với finalImagePath
@@ -65,14 +79,18 @@ class ScanningRepositoryImpl implements ScanningRepository {
       createdAt: result.createdAt,
     );
 
-    final scanHistoryEntity =
-        TextRecognitionResult.toScanHistoryEntity(processedResult);
+    final scanHistoryEntity = TextRecognitionResult.toScanHistoryEntity(
+      processedResult,
+    );
     final scanTextBlockHistoryEntities =
         TextRecognitionResult.toScanTextBlockHistoryEntities(
-            processedResult, scanHistoryEntity.id);
+          processedResult,
+          scanHistoryEntity.id,
+        );
 
     await scanHistoryService.addScanHistory(scanHistoryEntity);
-    await scanHistoryService
-        .addScanTextBlockHistory(scanTextBlockHistoryEntities);
+    await scanHistoryService.addScanTextBlockHistory(
+      scanTextBlockHistoryEntities,
+    );
   }
 }

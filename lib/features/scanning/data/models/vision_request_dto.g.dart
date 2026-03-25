@@ -9,8 +9,9 @@ part of 'vision_request_dto.dart';
 VisionRequestDto _$VisionRequestDtoFromJson(Map<String, dynamic> json) =>
     VisionRequestDto(
       requests: (json['requests'] as List<dynamic>)
-          .map((e) =>
-              AnnotateImageRequestDto.fromJson(e as Map<String, dynamic>))
+          .map(
+            (e) => AnnotateImageRequestDto.fromJson(e as Map<String, dynamic>),
+          )
           .toList(),
     );
 

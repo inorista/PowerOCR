@@ -1,17 +1,20 @@
-import 'dart:io';
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:powerocr/core/di/locator.dart';
+
 import 'package:powerocr/core/router/app_router.dart';
-import 'package:powerocr/core/theme/cubit/theme_cubit.dart';
 import 'package:powerocr/features/home/domain/entities/scan_history.dart';
 import 'package:powerocr/features/home/presentation/bloc/home_bloc.dart';
-import 'package:powerocr/features/home/presentation/bloc/home_event.dart';
+
 import 'package:powerocr/features/home/presentation/bloc/home_state.dart';
 import 'package:powerocr/features/home/presentation/screens/widgets/ambient_orbs.dart';
-import 'package:powerocr/features/home/presentation/screens/widgets/stat_card.dart';
+import 'package:powerocr/features/home/presentation/screens/widgets/empty_state_view.dart';
+import 'package:powerocr/features/home/presentation/screens/widgets/history_item.dart';
+import 'package:powerocr/features/home/presentation/screens/widgets/home_header.dart';
+import 'package:powerocr/features/home/presentation/screens/widgets/home_hero_card.dart';
+import 'package:powerocr/features/home/presentation/screens/widgets/home_stats_row.dart';
+import 'package:powerocr/features/home/presentation/screens/widgets/quick_actions_grid.dart';
+import 'dart:math' as math;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -37,11 +40,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late Animation<double> _orbRotate;
   late Animation<double> _shimmerPos;
 
-  late final HomeBloc _bloc;
   @override
   void initState() {
     super.initState();
-    _bloc = locator<HomeBloc>();
 
     _entryCtrl = AnimationController(
       duration: const Duration(milliseconds: 900),
@@ -134,977 +135,151 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final primary = theme.colorScheme.primary;
     final size = MediaQuery.sizeOf(context);
 
-    return BlocProvider<HomeBloc>.value(
-      value: _bloc..add(LoadHomeData()),
-      child: Scaffold(
-        backgroundColor: theme.scaffoldBackgroundColor,
-        body: Stack(
-          children: [
-            RepaintBoundary(
-              child: AnimatedBuilder(
-                animation: _orbRotate,
-                builder: (_, __) => AmbientOrbs(
-                  rotate: _orbRotate.value,
-                  isDark: isDark,
-                  primary: primary,
-                  size: size,
-                ),
-              ),
-            ),
-            SafeArea(
-              child: CustomScrollView(
-                physics: const BouncingScrollPhysics(
-                  parent: AlwaysScrollableScrollPhysics(),
-                ),
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: FadeTransition(
-                      opacity: _headerFade,
-                      child: SlideTransition(
-                        position: _headerSlide,
-                        child: _buildHeader(context, theme, isDark),
-                      ),
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: FadeTransition(
-                      opacity: _heroFade,
-                      child: SlideTransition(
-                        position: _heroSlide,
-                        child: _buildHeroCard(context, theme, isDark),
-                      ),
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: FadeTransition(
-                      opacity: _statFade,
-                      child: _buildStats(theme, isDark),
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: FadeTransition(
-                      opacity: _actionsFade,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(24, 28, 24, 12),
-                        child: Text(
-                          'Quick Actions',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.3,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: FadeTransition(
-                      opacity: _actionsFade,
-                      child: SlideTransition(
-                        position: _actionsSlide,
-                        child: _buildQuickActions(context, theme, isDark),
-                      ),
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: FadeTransition(
-                      opacity: _actionsFade,
-                      child: Padding(
-                        padding: const .symmetric(horizontal: 24.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Recent Scans',
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.3,
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () {},
-                              style: TextButton.styleFrom(
-                                foregroundColor: theme.colorScheme.primary,
-                                padding: EdgeInsets.zero,
-                                minimumSize: const Size(44, 32),
-                              ),
-                              child: const Text(
-                                'See all',
-                                style: TextStyle(fontSize: 13),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  BlocSelector<HomeBloc, HomeState, List<ScanHistory>>(
-                    selector: (state) {
-                      return state.history;
-                    },
-                    builder: (context, history) {
-                      if (history.isEmpty) {
-                        return SliverToBoxAdapter(
-                          child: FadeTransition(
-                            opacity: _actionsFade,
-                            child: _buildEmptyState(theme, isDark),
-                          ),
-                        );
-                      }
-                      return SliverList.builder(
-                        itemCount: history.length,
-                        itemBuilder: (context, index) {
-                          final item = history[index];
-                          return FadeTransition(
-                            opacity: _actionsFade,
-                            child: SlideTransition(
-                              position: _actionsSlide,
-                              child: _buildHistoryItem(
-                                context,
-                                theme,
-                                isDark,
-                                item,
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context, ThemeData theme, bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 20, 20, 0),
-      child: Row(
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: Stack(
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Good ${_greeting()},',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
-                    letterSpacing: 0.2,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                ShaderMask(
-                  shaderCallback: (bounds) => LinearGradient(
-                    colors: isDark
-                        ? [const Color(0xFFCBCDEC), const Color(0xFF95E1D3)]
-                        : [const Color(0xFF6B6FCC), const Color(0xFF55C7B5)],
-                  ).createShader(bounds),
-                  child: Text(
-                    'PowerOCR',
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                      letterSpacing: -0.5,
+          RepaintBoundary(
+            child: AnimatedBuilder(
+              animation: _orbRotate,
+              builder: (context, child) => AmbientOrbs(
+                rotate: _orbRotate.value,
+                isDark: isDark,
+                primary: primary,
+                size: size,
+              ),
+            ),
+          ),
+          SafeArea(
+            child: CustomScrollView(
+              physics: const BouncingScrollPhysics(
+                parent: AlwaysScrollableScrollPhysics(),
+              ),
+              slivers: [
+                SliverToBoxAdapter(
+                  child: FadeTransition(
+                    opacity: _headerFade,
+                    child: SlideTransition(
+                      position: _headerSlide,
+                      child: HomeHeader(isDark: isDark, theme: theme),
                     ),
                   ),
                 ),
-              ],
-            ),
-          ),
-          _HeaderIconButton(
-            isDark: isDark,
-            icon: isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
-            onTap: () {
-              context.read<ThemeCubit>().setTheme(
-                isDark ? ThemeMode.light : ThemeMode.dark,
-              );
-            },
-            theme: theme,
-          ),
-          const SizedBox(width: 10),
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                colors: [
-                  theme.colorScheme.primary,
-                  theme.colorScheme.secondary,
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.35),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: const Icon(
-              Icons.person_rounded,
-              color: Colors.white,
-              size: 22,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeroCard(BuildContext context, ThemeData theme, bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-      child: _AnimatedHeroCard(
-        shimmerPos: _shimmerPos,
-        isDark: isDark,
-        onTap: () => context.push(AppRouter.scanning),
-        theme: theme,
-      ),
-    );
-  }
-
-  Widget _buildStats(ThemeData theme, bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-      child: Row(
-        spacing: 12.0,
-        children: [
-          Expanded(
-            child: BlocSelector<HomeBloc, HomeState, int>(
-              selector: (state) {
-                return state.history.length;
-              },
-              builder: (context, historyCount) {
-                return StatCard(
-                  label: 'Scanned',
-                  value: historyCount,
-                  icon: Icons.document_scanner_rounded,
-                  isDark: isDark,
-                  theme: theme,
-                  controller: _statCtrl,
-                );
-              },
-            ),
-          ),
-          Expanded(
-            child: BlocSelector<HomeBloc, HomeState, int>(
-              selector: (state) {
-                return state.history.fold(
-                  0,
-                  (previousValue, element) =>
-                      previousValue + element.text.split(' ').length,
-                );
-              },
-              builder: (context, wordCount) {
-                return StatCard(
-                  label: 'Extracted',
-                  value: wordCount,
-                  icon: Icons.text_snippet_rounded,
-                  isDark: isDark,
-                  theme: theme,
-                  controller: _statCtrl,
-                );
-              },
-            ),
-          ),
-          Expanded(
-            child: BlocSelector<HomeBloc, HomeState, int>(
-              selector: (state) {
-                return state.history.length;
-              },
-              builder: (context, savedCount) {
-                return StatCard(
-                  label: 'Saved',
-                  value: savedCount,
-                  icon: Icons.bookmark_rounded,
-                  isDark: isDark,
-                  theme: theme,
-                  controller: _statCtrl,
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildQuickActions(
-    BuildContext context,
-    ThemeData theme,
-    bool isDark,
-  ) {
-    final actions = [
-      _QuickAction(
-        icon: Icons.camera_alt_rounded,
-        label: 'Camera\nScan',
-        gradient: [const Color(0xFF8B8FE3), const Color(0xFF6B6FCC)],
-        onTap: () => context.push(AppRouter.scanning),
-      ),
-      _QuickAction(
-        icon: Icons.photo_library_rounded,
-        label: 'Gallery\nImport',
-        gradient: [const Color(0xFF95E1D3), const Color(0xFF5ABCAE)],
-        onTap: () => context.push(AppRouter.scanning),
-      ),
-      _QuickAction(
-        icon: Icons.history_rounded,
-        label: 'Scan\nHistory',
-        gradient: [const Color(0xFFFFB7A3), const Color(0xFFE8896E)],
-        onTap: () {},
-      ),
-      _QuickAction(
-        icon: Icons.share_rounded,
-        label: 'Share\nText',
-        gradient: [const Color(0xFFA8E6CF), const Color(0xFF68C49A)],
-        onTap: () {},
-      ),
-    ];
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: GridView.count(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        crossAxisCount: 4,
-        mainAxisSpacing: 0,
-        crossAxisSpacing: 10,
-        childAspectRatio: 0.82,
-        children: actions
-            .map(
-              (a) => _QuickActionTile(action: a, isDark: isDark, theme: theme),
-            )
-            .toList(),
-      ),
-    );
-  }
-
-  Widget _buildEmptyState(ThemeData theme, bool isDark) {
-    final cardColor = isDark
-        ? const Color(0xFF2E2E3E).withValues(alpha: 0.7)
-        : Colors.white.withValues(alpha: 0.8);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Container(
-        decoration: BoxDecoration(
-          color: cardColor,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.06)
-                : Colors.black.withValues(alpha: 0.05),
-          ),
-        ),
-        child: Column(
-          children: [
-            Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.document_scanner_outlined,
-                size: 30,
-                color: theme.colorScheme.primary.withValues(alpha: 0.7),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'No scans yet',
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'Your scanned documents will appear here.\nTap Scan to get started!',
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
-                height: 1.5,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHistoryItem(
-    BuildContext context,
-    ThemeData theme,
-    bool isDark,
-    ScanHistory item,
-  ) {
-    final cardColor = isDark
-        ? const Color(0xFF2E2E3E).withValues(alpha: 0.75)
-        : Colors.white.withValues(alpha: 0.85);
-    final borderColor = isDark
-        ? Colors.white.withValues(alpha: 0.07)
-        : Colors.black.withValues(alpha: 0.05);
-    final subtitleColor = theme.colorScheme.onSurface.withValues(
-      alpha: isDark ? 0.5 : 0.45,
-    );
-
-    final now = DateTime.now();
-    final diff = now.difference(item.createdAt);
-    final String timeLabel;
-    if (diff.inMinutes < 1) {
-      timeLabel = 'Just now';
-    } else if (diff.inHours < 1) {
-      timeLabel = '${diff.inMinutes}m ago';
-    } else if (diff.inDays < 1) {
-      timeLabel = '${diff.inHours}h ago';
-    } else if (diff.inDays == 1) {
-      timeLabel = 'Yesterday';
-    } else {
-      timeLabel = '${diff.inDays}d ago';
-    }
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 10),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: () {},
-          child: Ink(
-            decoration: BoxDecoration(
-              color: cardColor,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: borderColor),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: isDark ? 0.18 : 0.06),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: SizedBox(
-                      width: 56,
-                      height: 56,
-                      child: item.imagePath.isNotEmpty
-                          ? Image.file(
-                              File(item.imagePath),
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) =>
-                                  _HistoryThumbnailPlaceholder(
-                                    isDark: isDark,
-                                    theme: theme,
-                                  ),
-                            )
-                          : _HistoryThumbnailPlaceholder(
-                              isDark: isDark,
-                              theme: theme,
-                            ),
+                SliverToBoxAdapter(
+                  child: FadeTransition(
+                    opacity: _heroFade,
+                    child: SlideTransition(
+                      position: _heroSlide,
+                      child: HomeHeroCard(
+                        shimmerPos: _shimmerPos,
+                        isDark: isDark,
+                        onTap: () => context.push(AppRouter.scanning),
+                        theme: theme,
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          item.text.isNotEmpty
-                              ? item.text
-                              : 'No text extracted',
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            height: 1.35,
-                            color: theme.colorScheme.onSurface.withValues(
-                              alpha: isDark ? 0.9 : 0.85,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 5),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.access_time_rounded,
-                              size: 12,
-                              color: subtitleColor,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              timeLabel,
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: subtitleColor,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Icon(
-                              Icons.text_fields_rounded,
-                              size: 12,
-                              color: subtitleColor,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '${item.text.split(' ').where((w) => w.isNotEmpty).length} words',
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: subtitleColor,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                ),
+                SliverToBoxAdapter(
+                  child: FadeTransition(
+                    opacity: _statFade,
+                    child: HomeStatsRow(
+                      theme: theme,
+                      isDark: isDark,
+                      statCtrl: _statCtrl,
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  // ── Trailing chevron ───────────────────────────────────
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    size: 20,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  String _greeting() {
-    final hour = DateTime.now().hour;
-    if (hour < 12) return 'morning';
-    if (hour < 17) return 'afternoon';
-    return 'evening';
-  }
-}
-
-class _AnimatedHeroCard extends StatefulWidget {
-  final Animation<double> shimmerPos;
-  final bool isDark;
-  final VoidCallback onTap;
-  final ThemeData theme;
-
-  const _AnimatedHeroCard({
-    required this.shimmerPos,
-    required this.isDark,
-    required this.onTap,
-    required this.theme,
-  });
-
-  @override
-  State<_AnimatedHeroCard> createState() => _AnimatedHeroCardState();
-}
-
-class _AnimatedHeroCardState extends State<_AnimatedHeroCard>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _pressCtrl;
-  late Animation<double> _pressScale;
-
-  @override
-  void initState() {
-    super.initState();
-    _pressCtrl = AnimationController(
-      duration: const Duration(milliseconds: 120),
-      vsync: this,
-    );
-    _pressScale = Tween(
-      begin: 1.0,
-      end: 0.97,
-    ).animate(CurvedAnimation(parent: _pressCtrl, curve: Curves.easeInOut));
-  }
-
-  @override
-  void dispose() {
-    _pressCtrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: Listenable.merge([widget.shimmerPos, _pressCtrl]),
-      builder: (_, __) {
-        return GestureDetector(
-          onTapDown: (_) => _pressCtrl.forward(),
-          onTapUp: (_) {
-            _pressCtrl.reverse();
-            widget.onTap();
-          },
-          onTapCancel: () => _pressCtrl.reverse(),
-          child: Transform.scale(
-            scale: _pressScale.value,
-            child: Container(
-              height: 164,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
-                gradient: const LinearGradient(
-                  colors: [
-                    Color(0xFF7A7EDB),
-                    Color(0xFF5A9ED4),
-                    Color(0xFF55C7B5),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  stops: [0.0, 0.5, 1.0],
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF8B8FE3).withValues(alpha: 0.45),
-                    blurRadius: 28,
-                    spreadRadius: -4,
-                    offset: const Offset(0, 12),
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(24),
-                child: Stack(
-                  children: [
-                    Positioned.fill(
-                      child: Transform.translate(
-                        offset: Offset(widget.shimmerPos.value * 360 - 60, 0),
-                        child: Container(
-                          width: 80,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Colors.white.withValues(alpha: 0.0),
-                                Colors.white.withValues(alpha: 0.12),
-                                Colors.white.withValues(alpha: 0.0),
-                              ],
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
-                            ),
-                          ),
+                SliverToBoxAdapter(
+                  child: FadeTransition(
+                    opacity: _actionsFade,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 28, 24, 12),
+                      child: Text(
+                        'Quick Actions',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.3,
                         ),
                       ),
                     ),
-                    Positioned(
-                      top: -28,
-                      right: -28,
-                      child: Container(
-                        width: 130,
-                        height: 130,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white.withValues(alpha: 0.08),
-                        ),
-                      ),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: FadeTransition(
+                    opacity: _actionsFade,
+                    child: SlideTransition(
+                      position: _actionsSlide,
+                      child: QuickActionsGrid(theme: theme, isDark: isDark),
                     ),
-                    Positioned(
-                      bottom: -40,
-                      right: 60,
-                      child: Container(
-                        width: 90,
-                        height: 90,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white.withValues(alpha: 0.06),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(22),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: FadeTransition(
+                    opacity: _actionsFade,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
                       child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.2),
-                                    borderRadius: BorderRadius.circular(14),
-                                  ),
-                                  child: const Icon(
-                                    Icons.document_scanner_rounded,
-                                    color: Colors.white,
-                                    size: 26,
-                                  ),
-                                ),
-                                const Spacer(),
-                                const Text(
-                                  'Start Scanning',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: -0.3,
-                                    height: 1.1,
-                                  ),
-                                ),
-                                const SizedBox(height: 5),
-                                Text(
-                                  'Digitize any document instantly with AI',
-                                  style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.75),
-                                    fontSize: 12.5,
-                                    height: 1.3,
-                                  ),
-                                ),
-                              ],
+                          Text(
+                            'Recent Scans',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.3,
                             ),
                           ),
-                          const SizedBox(width: 12),
-                          Container(
-                            width: 46,
-                            height: 46,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.22),
-                              borderRadius: BorderRadius.circular(14),
+                          TextButton(
+                            onPressed: () {},
+                            style: TextButton.styleFrom(
+                              foregroundColor: theme.colorScheme.primary,
+                              padding: EdgeInsets.zero,
+                              minimumSize: const Size(44, 32),
                             ),
-                            child: const Icon(
-                              Icons.arrow_forward_rounded,
-                              color: Colors.white,
-                              size: 22,
+                            child: const Text(
+                              'See all',
+                              style: TextStyle(fontSize: 13),
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _QuickAction {
-  final IconData icon;
-  final String label;
-  final List<Color> gradient;
-  final VoidCallback onTap;
-
-  const _QuickAction({
-    required this.icon,
-    required this.label,
-    required this.gradient,
-    required this.onTap,
-  });
-}
-
-class _QuickActionTile extends StatefulWidget {
-  final _QuickAction action;
-  final bool isDark;
-  final ThemeData theme;
-
-  const _QuickActionTile({
-    required this.action,
-    required this.isDark,
-    required this.theme,
-  });
-
-  @override
-  State<_QuickActionTile> createState() => _QuickActionTileState();
-}
-
-class _QuickActionTileState extends State<_QuickActionTile>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _pressCtrl;
-  late Animation<double> _pressScale;
-
-  @override
-  void initState() {
-    super.initState();
-    _pressCtrl = AnimationController(
-      duration: const Duration(milliseconds: 100),
-      vsync: this,
-    );
-    _pressScale = Tween(
-      begin: 1.0,
-      end: 0.93,
-    ).animate(CurvedAnimation(parent: _pressCtrl, curve: Curves.easeInOut));
-  }
-
-  @override
-  void dispose() {
-    _pressCtrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final action = widget.action;
-    final isDark = widget.isDark;
-
-    return AnimatedBuilder(
-      animation: _pressCtrl,
-      builder: (_, __) => GestureDetector(
-        onTapDown: (_) => _pressCtrl.forward(),
-        onTapUp: (_) {
-          _pressCtrl.reverse();
-          action.onTap();
-        },
-        onTapCancel: () => _pressCtrl.reverse(),
-        child: Transform.scale(
-          scale: _pressScale.value,
-          child: Column(
-            children: [
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: action.gradient,
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
                   ),
-                  borderRadius: BorderRadius.circular(18),
-                  boxShadow: [
-                    BoxShadow(
-                      color: action.gradient.first.withValues(alpha: 0.35),
-                      blurRadius: 12,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
                 ),
-                child: Icon(action.icon, color: Colors.white, size: 26),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                action.label,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  height: 1.3,
-                  color: widget.theme.colorScheme.onSurface.withValues(
-                    alpha: isDark ? 0.75 : 0.65,
-                  ),
-                  letterSpacing: 0.1,
+                BlocSelector<HomeBloc, HomeState, List<ScanHistory>>(
+                  selector: (state) => state.history,
+                  builder: (context, history) {
+                    if (history.isEmpty) {
+                      return SliverToBoxAdapter(
+                        child: FadeTransition(
+                          opacity: _actionsFade,
+                          child: EmptyStateView(theme: theme, isDark: isDark),
+                        ),
+                      );
+                    }
+                    return SliverList.builder(
+                      itemCount: history.length > 5 ? 5 : history.length,
+                      itemBuilder: (context, index) {
+                        final item = history[index];
+                        return FadeTransition(
+                          opacity: _actionsFade,
+                          child: SlideTransition(
+                            position: _actionsSlide,
+                            child: HistoryItem(
+                              theme: theme,
+                              isDark: isDark,
+                              item: item,
+                              onTap: () {},
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
                 ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _HeaderIconButton extends StatefulWidget {
-  final bool isDark;
-  final IconData icon;
-  final VoidCallback onTap;
-  final ThemeData theme;
-
-  const _HeaderIconButton({
-    required this.isDark,
-    required this.icon,
-    required this.onTap,
-    required this.theme,
-  });
-
-  @override
-  State<_HeaderIconButton> createState() => _HeaderIconButtonState();
-}
-
-class _HeaderIconButtonState extends State<_HeaderIconButton>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _ctrl;
-  late Animation<double> _scale;
-
-  @override
-  void initState() {
-    super.initState();
-    _ctrl = AnimationController(
-      duration: const Duration(milliseconds: 100),
-      vsync: this,
-    );
-    _scale = Tween(
-      begin: 1.0,
-      end: 0.88,
-    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
-  }
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _ctrl,
-      builder: (_, __) => GestureDetector(
-        onTapDown: (_) => _ctrl.forward(),
-        onTapUp: (_) {
-          _ctrl.reverse();
-          widget.onTap();
-        },
-        onTapCancel: () => _ctrl.reverse(),
-        child: Transform.scale(
-          scale: _scale.value,
-          child: Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: widget.isDark
-                  ? Colors.white.withValues(alpha: 0.08)
-                  : Colors.black.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(
-              widget.icon,
-              color: widget.theme.colorScheme.onSurface.withValues(alpha: 0.7),
-              size: 20,
+              ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _HistoryThumbnailPlaceholder extends StatelessWidget {
-  final bool isDark;
-  final ThemeData theme;
-
-  const _HistoryThumbnailPlaceholder({
-    required this.isDark,
-    required this.theme,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 56,
-      height: 56,
-      decoration: BoxDecoration(
-        color: isDark
-            ? Colors.white.withValues(alpha: 0.08)
-            : theme.colorScheme.primary.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Icon(
-        Icons.image_outlined,
-        size: 24,
-        color: theme.colorScheme.primary.withValues(alpha: 0.45),
+        ],
       ),
     );
   }

@@ -34,7 +34,9 @@ class HomeLocalDataSourceImpl implements HomeLocalDataSource {
           }
         }
       }
-    } catch (e) {}
+    } catch (e) {
+      // Ignore if document directory access fails
+    }
 
     return ScanHistoryModel.fromHiveList(entities);
   }

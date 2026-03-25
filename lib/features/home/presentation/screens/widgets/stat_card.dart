@@ -26,7 +26,7 @@ class StatCard extends StatelessWidget {
 
     return AnimatedBuilder(
       animation: controller,
-      builder: (_, __) {
+      builder: (context, child) {
         final displayed = (value * controller.value).round();
         return Container(
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),

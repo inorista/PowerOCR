@@ -7,11 +7,7 @@ part of 'vision_image_dto.dart';
 // **************************************************************************
 
 VisionImageDto _$VisionImageDtoFromJson(Map<String, dynamic> json) =>
-    VisionImageDto(
-      content: json['content'] as String,
-    );
+    VisionImageDto(content: json['content'] as String);
 
 Map<String, dynamic> _$VisionImageDtoToJson(VisionImageDto instance) =>
-    <String, dynamic>{
-      'content': instance.content,
-    };
+    <String, dynamic>{'content': instance.content};

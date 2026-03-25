@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,13 +5,13 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:powerocr/core/di/locator.dart';
 import 'package:powerocr/core/router/app_router.dart';
+
 import 'package:powerocr/features/scanning/presentation/bloc/scanning_bloc.dart';
 import 'package:powerocr/features/scanning/presentation/bloc/scanning_event.dart';
 import 'package:powerocr/features/scanning/presentation/bloc/scanning_state.dart';
-import 'package:powerocr/features/scanning/presentation/screens/scanning_screen/widgets/corner_bracket_painter.dart';
-import 'package:powerocr/features/scanning/presentation/screens/scanning_screen/widgets/control_button.dart';
-import 'package:powerocr/features/scanning/presentation/screens/scanning_screen/widgets/flash_button.dart';
-import 'package:powerocr/features/scanning/presentation/screens/scanning_screen/widgets/top_bar_button.dart';
+import 'package:powerocr/features/scanning/presentation/screens/scanning_screen/widgets/loading_widget.dart';
+import 'package:powerocr/features/scanning/presentation/screens/scanning_screen/widgets/scanner_top_bar.dart';
+import 'package:powerocr/features/scanning/presentation/screens/scanning_screen/widgets/scanner_controls.dart';
 
 class ScanningScreen extends StatefulWidget {
   const ScanningScreen({super.key});
@@ -24,65 +23,77 @@ class ScanningScreen extends StatefulWidget {
 class _ScanningScreenState extends State<ScanningScreen>
     with TickerProviderStateMixin, WidgetsBindingObserver {
   CameraController? _controller;
-  List<CameraDescription> _cameras = [];
-  final ImagePicker _picker = ImagePicker();
-
-  late final ScanningBloc _bloc;
-
   late AnimationController _scanLineCtrl;
-  late AnimationController _pulseCtrl;
-  late AnimationController _cornerCtrl;
-
   late Animation<double> _scanLinePos;
+
+  late AnimationController _beamCtrl;
+  late Animation<double> _beamFade;
+
+  late AnimationController _pulseCtrl;
   late Animation<double> _pulseScale;
   late Animation<double> _pulseOpacity;
-  late Animation<double> _cornerGlow;
+  late ScanningBloc _bloc;
+  final ImagePicker _picker = ImagePicker();
+  bool _isInit = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-
+    _bloc = locator<ScanningBloc>();
     _scanLineCtrl = AnimationController(
-        duration: const Duration(milliseconds: 2800), vsync: this)
-      ..repeat();
-    _scanLinePos = Tween(begin: 0.0, end: 1.0).animate(
-        CurvedAnimation(parent: _scanLineCtrl, curve: Curves.easeInOut));
+      duration: const Duration(seconds: 3),
+      vsync: this,
+    )..repeat(reverse: true);
+    _scanLinePos = Tween(
+      begin: 0.1,
+      end: 0.9,
+    ).animate(CurvedAnimation(parent: _scanLineCtrl, curve: Curves.easeInOut));
+
+    _beamCtrl = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    )..repeat(reverse: true);
+    _beamFade = Tween(
+      begin: 0.3,
+      end: 0.7,
+    ).animate(CurvedAnimation(parent: _beamCtrl, curve: Curves.easeInOut));
 
     _pulseCtrl = AnimationController(
-        duration: const Duration(milliseconds: 900), vsync: this)
-      ..repeat(reverse: true);
-    _pulseScale = Tween(begin: 1.0, end: 1.07)
-        .animate(CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut));
-    _pulseOpacity = Tween(begin: 0.5, end: 1.0)
-        .animate(CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut));
+      duration: const Duration(milliseconds: 1800),
+      vsync: this,
+    )..repeat();
+    _pulseScale = Tween(
+      begin: 1.0,
+      end: 1.4,
+    ).animate(CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeOutCubic));
+    _pulseOpacity = Tween(
+      begin: 1.0,
+      end: 0.0,
+    ).animate(CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeOutCubic));
 
-    _cornerCtrl = AnimationController(
-        duration: const Duration(milliseconds: 1400), vsync: this)
-      ..repeat(reverse: true);
-    _cornerGlow = Tween(begin: 0.5, end: 1.0)
-        .animate(CurvedAnimation(parent: _cornerCtrl, curve: Curves.easeInOut));
-
-    _bloc = locator<ScanningBloc>();
     _initCamera();
   }
 
   Future<void> _initCamera() async {
+    final cameras = await availableCameras();
+    if (cameras.isEmpty) return;
+
+    _controller = CameraController(
+      cameras.first,
+      ResolutionPreset.max,
+      enableAudio: false,
+      imageFormatGroup: ImageFormatGroup.jpeg,
+    );
+
     try {
-      _cameras = await availableCameras();
-      if (_cameras.isNotEmpty) {
-        _controller = CameraController(
-          _cameras[0],
-          ResolutionPreset.high,
-          enableAudio: false,
-          imageFormatGroup: ImageFormatGroup.jpeg,
-        );
-        await _controller!.initialize();
-        if (!_bloc.isClosed) _bloc.add(CameraReady());
+      await _controller!.initialize();
+      if (mounted) {
+        setState(() => _isInit = true);
+        _bloc.add(CameraReady());
       }
     } catch (e) {
       debugPrint('Camera init error: $e');
-      if (!_bloc.isClosed) _bloc.add(CameraNotReady());
     }
   }
 
@@ -90,26 +101,44 @@ class _ScanningScreenState extends State<ScanningScreen>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _controller?.dispose();
-    _bloc.close();
     _scanLineCtrl.dispose();
+    _beamCtrl.dispose();
     _pulseCtrl.dispose();
-    _cornerCtrl.dispose();
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final cam = _controller;
+    final CameraController? cameraController = _controller;
+
+    if (cameraController == null || !cameraController.value.isInitialized) {
+      return;
+    }
+
     if (state == AppLifecycleState.inactive) {
-      cam?.dispose();
-      if (!_bloc.isClosed) _bloc.add(CameraNotReady());
+      cameraController.dispose();
     } else if (state == AppLifecycleState.resumed) {
       _initCamera();
     }
   }
 
+  Future<void> _onFlashModeChanged(FlashMode mode) async {
+    if (_controller == null || !_controller!.value.isInitialized) return;
+    try {
+      await _controller!.setFlashMode(mode);
+    } catch (e) {
+      debugPrint('Flash error: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
+
+    // Frame dims
+    final frameW = size.width * 0.85;
+    final frameH = frameW * 1.25;
+
     return BlocProvider<ScanningBloc>.value(
       value: _bloc,
       child: BlocListener<ScanningBloc, ScanningState>(
@@ -119,10 +148,7 @@ class _ScanningScreenState extends State<ScanningScreen>
               state.imagePath != null) {
             context.replace(
               AppRouter.scanResult,
-              extra: {
-                'imagePath': state.imagePath!,
-                'result': state.result!,
-              },
+              extra: {'imagePath': state.imagePath!, 'result': state.result!},
             );
           } else if (state.status == ScanningStatus.failure) {
             ScaffoldMessenger.of(context)
@@ -131,15 +157,19 @@ class _ScanningScreenState extends State<ScanningScreen>
                 SnackBar(
                   content: Row(
                     children: [
-                      Icon(Icons.error_outline_rounded,
-                          color: Theme.of(context).colorScheme.error, size: 18),
+                      Icon(
+                        Icons.error_outline_rounded,
+                        color: Theme.of(context).colorScheme.error,
+                        size: 18,
+                      ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           state.errorMessage ?? 'Scan failed',
                           style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                              color: Theme.of(context).colorScheme.error),
+                            fontWeight: FontWeight.w500,
+                            color: Theme.of(context).colorScheme.error,
+                          ),
                         ),
                       ),
                     ],
@@ -147,350 +177,177 @@ class _ScanningScreenState extends State<ScanningScreen>
                   backgroundColor: const Color(0xFFE57373),
                   behavior: SnackBarBehavior.floating,
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 ),
               );
           }
-
           _controller?.setFlashMode(state.flashMode);
         },
-        child: BlocBuilder<ScanningBloc, ScanningState>(
-          builder: (context, state) {
-            if (state.status == ScanningStatus.loading) {
-              return _buildLoadingView();
-            }
-            return _buildCameraView(
-              context,
-              flashMode: state.flashMode,
-              isCameraInitialized: state.isCameraInitialized,
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLoadingView() {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: 72,
-              height: 72,
-              child: Stack(
-                alignment: Alignment.center,
+        child: Scaffold(
+          backgroundColor: Colors.black,
+          body: BlocConsumer<ScanningBloc, ScanningState>(
+            listenWhen: (prev, curr) => prev.flashMode != curr.flashMode,
+            listener: (context, state) {
+              if (_isInit) {
+                _onFlashModeChanged(state.flashMode);
+              }
+            },
+            builder: (context, state) {
+              if (state.status == ScanningStatus.loading) {
+                return const LoadingView();
+              }
+              final flashMode = state.flashMode;
+              return Stack(
                 children: [
-                  const CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    valueColor:
-                        AlwaysStoppedAnimation<Color>(Color(0xFF8B8FE3)),
-                  ),
-                  Icon(Icons.auto_awesome_rounded,
-                      color: const Color(0xFF8B8FE3).withValues(alpha: 0.8),
-                      size: 28),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Recognizing text...',
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 6),
-            const Text(
-              'AI is processing your image',
-              style: TextStyle(color: Colors.white38, fontSize: 12),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+                  if (_isInit && _controller != null)
+                    Positioned.fill(
+                      child: FittedBox(
+                        fit: BoxFit.cover,
+                        child: SizedBox(
+                          width:
+                              _controller!.value.previewSize?.height ??
+                              MediaQuery.sizeOf(context).width,
+                          height:
+                              _controller!.value.previewSize?.width ??
+                              MediaQuery.sizeOf(context).height,
+                          child: CameraPreview(_controller!),
+                        ),
+                      ),
+                    )
+                  else
+                    Container(
+                      color: const Color(0xFF121212),
+                      child: const Center(
+                        child: CircularProgressIndicator(
+                          color: Color(0xFF8B8FE3),
+                          strokeWidth: 2,
+                        ),
+                      ),
+                    ),
 
-  Widget _buildCameraView(
-    BuildContext context, {
-    required FlashMode flashMode,
-    required bool isCameraInitialized,
-  }) {
-    final size = MediaQuery.sizeOf(context);
-    final frameW = size.width * 0.85;
-    final frameH = frameW * 1.25;
+                  _buildCameraOverlay(context, size),
 
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          if (isCameraInitialized && _controller != null)
-            Positioned.fill(
-              child: FittedBox(
-                fit: BoxFit.cover,
-                child: SizedBox(
-                  width: _controller!.value.previewSize?.height ??
-                      MediaQuery.sizeOf(context).width,
-                  height: _controller!.value.previewSize?.width ??
-                      MediaQuery.sizeOf(context).height,
-                  child: CameraPreview(_controller!),
-                ),
-              ),
-            )
-          else
-            const Center(
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white38),
-              ),
-            ),
-          if (isCameraInitialized)
-            ColorFiltered(
-              colorFilter: const ColorFilter.mode(
-                Color(0xBB000000),
-                BlendMode.srcOut,
-              ),
-              child: Stack(
-                children: [
-                  Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.transparent,
-                      backgroundBlendMode: BlendMode.dstOut,
-                    ),
-                  ),
-                  Center(
-                    child: Container(
-                      width: frameW,
-                      height: frameH,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          if (isCameraInitialized)
-            AnimatedBuilder(
-              animation: _cornerGlow,
-              builder: (_, __) => Center(
-                child: CustomPaint(
-                  size: Size(frameW, frameH),
-                  painter: CornerBracketPainter(
-                    glow: _cornerGlow.value,
-                    color: const Color(0xFF8B8FE3),
-                  ),
-                ),
-              ),
-            ),
-          if (isCameraInitialized)
-            AnimatedBuilder(
-              animation: _scanLinePos,
-              builder: (_, __) {
-                final topOffset = (size.height - frameH) / 2;
-                final beamY =
-                    topOffset + (_scanLinePos.value * frameH).clamp(0, frameH);
-                return Positioned(
-                  top: beamY - 24,
-                  left: (size.width - frameW) / 2,
-                  width: frameW,
-                  height: 48,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.transparent,
-                            const Color(0xFF8B8FE3).withValues(alpha: 0.08),
-                            const Color(0xFF95E1D3).withValues(alpha: 0.45),
-                            const Color(0xFF8B8FE3).withValues(alpha: 0.08),
-                            Colors.transparent,
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          if (isCameraInitialized)
-            AnimatedBuilder(
-              animation: _scanLinePos,
-              builder: (_, __) {
-                final topOffset = (size.height - frameH) / 2;
-                final lineY =
-                    topOffset + (_scanLinePos.value * frameH).clamp(0, frameH);
-                return Positioned(
-                  top: lineY,
-                  left: (size.width - frameW) / 2 + 4,
-                  width: frameW - 8,
-                  height: 1.5,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [
-                          Colors.transparent,
-                          Color(0xFF95E1D3),
-                          Color(0xFF8B8FE3),
-                          Color(0xFF95E1D3),
-                          Colors.transparent,
-                        ],
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF8B8FE3).withValues(alpha: 0.8),
-                          blurRadius: 6,
-                          spreadRadius: 1,
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                child: Row(
-                  children: [
-                    TopBarButton(
-                      icon: Icons.close_rounded,
-                      onTap: () => context.go(AppRouter.home),
-                    ),
-                    const Spacer(),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 7),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.4),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.1)),
-                          ),
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.document_scanner_rounded,
-                                  color: Colors.white70, size: 14),
-                              SizedBox(width: 6),
-                              Text(
-                                'Align document in frame',
-                                style: TextStyle(
-                                    color: Colors.white70, fontSize: 12),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const Spacer(),
-                    FlashButton(
-                      mode: flashMode,
-                      onTap: () =>
-                          context.read<ScanningBloc>().add(ToggleFlash()),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: ClipRect(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-                child: Container(
-                  color: Colors.black.withValues(alpha: 0.45),
-                  padding: EdgeInsets.fromLTRB(
-                      32, 20, 32, MediaQuery.paddingOf(context).bottom + 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      ControlButton(
-                        icon: Icons.photo_library_rounded,
-                        label: 'Gallery',
-                        onTap: () => _pickImage(context),
-                      ),
-                      const SizedBox(width: 8),
-                      AnimatedBuilder(
-                        animation: _pulseCtrl,
-                        builder: (_, __) => GestureDetector(
-                          onTap: () => _takePicture(context),
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Transform.scale(
-                                scale: _pulseScale.value,
-                                child: Container(
-                                  width: 84,
-                                  height: 84,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: Colors.white.withValues(
-                                          alpha: _pulseOpacity.value * 0.5),
-                                      width: 2,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Container(
-                                width: 70,
-                                height: 70,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  gradient: const LinearGradient(
-                                    colors: [
-                                      Color(0xFF8B8FE3),
-                                      Color(0xFF55C7B5),
-                                    ],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: const Color(0xFF8B8FE3)
-                                          .withValues(alpha: 0.5),
-                                      blurRadius: 20,
-                                      spreadRadius: 2,
-                                    ),
+                  if (_isInit)
+                    AnimatedBuilder(
+                      animation: _beamFade,
+                      builder: (context, child) {
+                        final beamY = (size.height - frameH) / 2 + (frameH / 2);
+                        return Positioned(
+                          top: beamY - 24,
+                          left: (size.width - frameW) / 2,
+                          width: frameW,
+                          height: 48,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Colors.transparent,
+                                    const Color(
+                                      0xFF8B8FE3,
+                                    ).withValues(alpha: 0.08),
+                                    const Color(
+                                      0xFF95E1D3,
+                                    ).withValues(alpha: 0.45),
+                                    const Color(
+                                      0xFF8B8FE3,
+                                    ).withValues(alpha: 0.08),
+                                    Colors.transparent,
                                   ],
                                 ),
-                                child: const Icon(
-                                  Icons.camera_alt_rounded,
-                                  color: Colors.white,
-                                  size: 30,
-                                ),
                               ),
-                            ],
+                            ),
                           ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      const SizedBox(width: 52),
-                    ],
+                        );
+                      },
+                    ),
+
+                  if (_isInit)
+                    AnimatedBuilder(
+                      animation: _scanLinePos,
+                      builder: (context, child) {
+                        final topOffset = (size.height - frameH) / 2;
+                        final lineY =
+                            topOffset +
+                            (_scanLinePos.value * frameH).clamp(0, frameH);
+                        return Positioned(
+                          top: lineY,
+                          left: (size.width - frameW) / 2 + 4,
+                          width: frameW - 8,
+                          height: 1.5,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [
+                                  Colors.transparent,
+                                  Color(0xFF95E1D3),
+                                  Color(0xFF8B8FE3),
+                                  Color(0xFF95E1D3),
+                                  Colors.transparent,
+                                ],
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(
+                                    0xFF8B8FE3,
+                                  ).withValues(alpha: 0.8),
+                                  blurRadius: 6,
+                                  spreadRadius: 1,
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+
+                  ScannerTopBar(flashMode: flashMode),
+
+                  ScannerControls(
+                    onGalleryTap: () => _pickImage(context),
+                    onCaptureTap: () => _takePicture(context),
+                    pulseScale: _pulseScale,
+                    pulseOpacity: _pulseOpacity,
                   ),
-                ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCameraOverlay(BuildContext context, Size size) {
+    final frameW = size.width * 0.82;
+    final frameH = frameW * 1.35;
+
+    return ColorFiltered(
+      colorFilter: ColorFilter.mode(
+        Colors.black.withValues(alpha: 0.45),
+        BlendMode.srcOut,
+      ),
+      child: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              color: Colors.black,
+              backgroundBlendMode: BlendMode.dstOut,
+            ),
+          ),
+          Align(
+            alignment: Alignment.center,
+            child: Container(
+              width: frameW,
+              height: frameH,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
               ),
             ),
           ),
@@ -500,10 +357,14 @@ class _ScanningScreenState extends State<ScanningScreen>
   }
 
   Future<void> _takePicture(BuildContext context) async {
-    if (_controller == null || !_controller!.value.isInitialized) return;
+    if (_controller == null || !_controller!.value.isInitialized) {
+      return;
+    }
     try {
       final image = await _controller!.takePicture();
-      if (!context.mounted) return;
+      if (!context.mounted) {
+        return;
+      }
       context.read<ScanningBloc>().add(ScanImage(image.path));
     } catch (e) {
       debugPrint('Capture error: $e');
@@ -512,16 +373,14 @@ class _ScanningScreenState extends State<ScanningScreen>
 
   Future<void> _pickImage(BuildContext context) async {
     try {
-      // Pause camera preview before opening gallery to avoid Impeller drawable error on iOS
       if (_controller != null && _controller!.value.isInitialized) {
         await _controller!.pausePreview();
       }
-      
+
       final image = await _picker.pickImage(source: ImageSource.gallery);
       if (image != null && context.mounted) {
         context.read<ScanningBloc>().add(ScanImage(image.path));
       } else {
-        // Resume camera preview if user cancelled image picking
         if (_controller != null && _controller!.value.isInitialized) {
           await _controller!.resumePreview();
         }

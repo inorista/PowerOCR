@@ -5,6 +5,9 @@ import 'package:powerocr/core/router/app_router.dart';
 import 'package:powerocr/core/theme/app_theme.dart';
 import 'package:powerocr/core/theme/cubit/theme_cubit.dart';
 import 'package:powerocr/database/hive_database.dart';
+import 'package:powerocr/features/home/domain/usecases/get_scan_history.dart';
+import 'package:powerocr/features/home/presentation/bloc/home_bloc.dart';
+import 'package:powerocr/features/home/presentation/bloc/home_event.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,8 +21,15 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => ThemeCubit(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<ThemeCubit>(create: (_) => ThemeCubit()),
+        BlocProvider<HomeBloc>(
+          create: (_) =>
+              HomeBloc(getScanHistory: locator<GetScanHistory>())
+                ..add(LoadHomeData()),
+        ),
+      ],
       child: BlocSelector<ThemeCubit, ThemeState, ThemeMode>(
         selector: (state) => state.themeMode,
         builder: (context, themeMode) {
