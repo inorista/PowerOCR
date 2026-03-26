@@ -11,6 +11,7 @@ import 'package:powerocr/database/hive_entities/theme_setting_entity/theme_setti
 extension HiveRegistrar on HiveInterface {
   void registerAdapters() {
     registerAdapter(ScanHistoryEntityAdapter());
+    registerAdapter(ScanHistoryTypeAdapter());
     registerAdapter(ScanTextBlockHistoryEntityAdapter());
     registerAdapter(ThemeModeOptionAdapter());
     registerAdapter(ThemeSettingEntityAdapter());
@@ -20,6 +21,7 @@ extension HiveRegistrar on HiveInterface {
 extension IsolatedHiveRegistrar on IsolatedHiveInterface {
   void registerAdapters() {
     registerAdapter(ScanHistoryEntityAdapter());
+    registerAdapter(ScanHistoryTypeAdapter());
     registerAdapter(ScanTextBlockHistoryEntityAdapter());
     registerAdapter(ThemeModeOptionAdapter());
     registerAdapter(ThemeSettingEntityAdapter());

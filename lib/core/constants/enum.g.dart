@@ -6,6 +6,43 @@ part of 'enum.dart';
 // TypeAdapterGenerator
 // **************************************************************************
 
+class ScanHistoryTypeAdapter extends TypeAdapter<ScanHistoryType> {
+  @override
+  final typeId = 4;
+
+  @override
+  ScanHistoryType read(BinaryReader reader) {
+    switch (reader.readByte()) {
+      case 0:
+        return ScanHistoryType.document;
+      case 1:
+        return ScanHistoryType.qr;
+      default:
+        return ScanHistoryType.document;
+    }
+  }
+
+  @override
+  void write(BinaryWriter writer, ScanHistoryType obj) {
+    switch (obj) {
+      case ScanHistoryType.document:
+        writer.writeByte(0);
+      case ScanHistoryType.qr:
+        writer.writeByte(1);
+    }
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ScanHistoryTypeAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
 class ThemeModeOptionAdapter extends TypeAdapter<ThemeModeOption> {
   @override
   final typeId = 1;

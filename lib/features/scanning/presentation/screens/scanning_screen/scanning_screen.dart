@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:powerocr/core/constants/enum.dart';
 import 'package:powerocr/core/di/locator.dart';
 import 'package:powerocr/core/router/app_router.dart';
 
@@ -14,7 +15,8 @@ import 'package:powerocr/features/scanning/presentation/screens/scanning_screen/
 import 'package:powerocr/features/scanning/presentation/screens/scanning_screen/widgets/scanner_controls.dart';
 
 class ScanningScreen extends StatefulWidget {
-  const ScanningScreen({super.key});
+  final FeatureOption featureOption;
+  const ScanningScreen({super.key, required this.featureOption});
 
   @override
   State<ScanningScreen> createState() => _ScanningScreenState();
@@ -365,7 +367,9 @@ class _ScanningScreenState extends State<ScanningScreen>
       if (!context.mounted) {
         return;
       }
-      context.read<ScanningBloc>().add(ScanImage(image.path));
+      context.read<ScanningBloc>().add(
+        ScanImage(image.path, widget.featureOption),
+      );
     } catch (e) {
       debugPrint('Capture error: $e');
     }
@@ -379,7 +383,9 @@ class _ScanningScreenState extends State<ScanningScreen>
 
       final image = await _picker.pickImage(source: ImageSource.gallery);
       if (image != null && context.mounted) {
-        context.read<ScanningBloc>().add(ScanImage(image.path));
+        context.read<ScanningBloc>().add(
+          ScanImage(image.path, widget.featureOption),
+        );
       } else {
         if (_controller != null && _controller!.value.isInitialized) {
           await _controller!.resumePreview();

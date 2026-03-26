@@ -4,6 +4,23 @@ import 'package:powerocr/database/hive_database.dart';
 
 part 'enum.g.dart';
 
+enum FeatureOption {
+  @JsonValue('scan_document')
+  scanDocument,
+  @JsonValue('scan_qr')
+  scanQR,
+}
+
+@HiveType(typeId: HiveBoxNums.scanHistoryType)
+enum ScanHistoryType {
+  @HiveField(0)
+  @JsonValue('document')
+  document,
+  @HiveField(1)
+  @JsonValue('qr')
+  qr,
+}
+
 enum VisionFeatureType {
   @JsonValue('TYPE_UNSPECIFIED')
   typeUnspecified,

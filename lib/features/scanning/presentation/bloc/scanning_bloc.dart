@@ -1,10 +1,13 @@
 import 'package:camera/camera.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:powerocr/core/constants/enum.dart';
 import 'package:powerocr/core/di/locator.dart';
 import 'package:powerocr/core/services/interfaces/iscan_history_service.dart'
     show IScanHistoryService;
+import 'package:powerocr/features/scanning/domain/entities/text_recognition_result.dart';
 import 'package:powerocr/features/scanning/domain/repositories/scanning_repository.dart';
+import 'package:powerocr/features/scanning/domain/usecases/recognize_qr.dart';
 import 'package:powerocr/features/scanning/domain/usecases/recognize_text.dart';
 import 'package:powerocr/features/scanning/presentation/bloc/scanning_event.dart';
 import 'package:powerocr/features/scanning/presentation/bloc/scanning_state.dart';
@@ -12,6 +15,7 @@ import 'package:powerocr/features/scanning/presentation/bloc/scanning_state.dart
 @injectable
 class ScanningBloc extends Bloc<ScanningEvent, ScanningState> {
   final RecognizeText recognizeText = locator<RecognizeText>();
+  final RecognizeQR recognizeQR = locator<RecognizeQR>();
   final scanHistoryService = locator<IScanHistoryService>();
 
   ScanningBloc() : super(const ScanningState()) {
@@ -28,7 +32,12 @@ class ScanningBloc extends Bloc<ScanningEvent, ScanningState> {
   ) async {
     emit(state.copyWith(status: ScanningStatus.loading));
     try {
-      final result = await recognizeText(event.imagePath);
+      TextRecognitionResult result;
+      if (event.featureOption == FeatureOption.scanDocument) {
+        result = await recognizeText(event.imagePath);
+      } else {
+        result = await recognizeQR(event.imagePath);
+      }
       await locator<ScanningRepository>().saveScanHistory(result);
       emit(
         state.copyWith(

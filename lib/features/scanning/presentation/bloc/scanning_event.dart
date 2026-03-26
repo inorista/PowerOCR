@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:powerocr/core/constants/enum.dart';
 
 abstract class ScanningEvent extends Equatable {
   const ScanningEvent();
@@ -9,11 +10,12 @@ abstract class ScanningEvent extends Equatable {
 
 class ScanImage extends ScanningEvent {
   final String imagePath;
+  final FeatureOption featureOption;
 
-  const ScanImage(this.imagePath);
+  const ScanImage(this.imagePath, this.featureOption);
 
   @override
-  List<Object> get props => [imagePath];
+  List<Object> get props => [imagePath, featureOption];
 }
 
 class ResetScan extends ScanningEvent {}

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:powerocr/core/constants/enum.dart';
 
 import 'package:powerocr/core/router/app_router.dart';
 import 'package:powerocr/features/home/domain/entities/scan_history.dart';
@@ -173,7 +174,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       child: HomeHeroCard(
                         shimmerPos: _shimmerPos,
                         isDark: isDark,
-                        onTap: () => context.push(AppRouter.scanning),
+                        onTap: () => context.push(
+                          AppRouter.scanning,
+                          extra: FeatureOption.scanDocument,
+                        ),
                         theme: theme,
                       ),
                     ),

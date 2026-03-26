@@ -7,6 +7,7 @@ class ScanHistoryModel extends ScanHistory {
     required super.imagePath,
     required super.text,
     required super.createdAt,
+    required super.type,
   });
 
   factory ScanHistoryModel.fromHive(ScanHistoryEntity entity) {
@@ -15,6 +16,7 @@ class ScanHistoryModel extends ScanHistory {
       imagePath: entity.imagePath,
       text: entity.text,
       createdAt: entity.createdAt,
+      type: entity.type,
     );
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:powerocr/core/constants/enum.dart';
 import 'package:powerocr/features/home/presentation/screens/home_screen.dart';
 import 'package:powerocr/features/scanning/domain/entities/text_recognition_result.dart';
 import 'package:powerocr/features/scanning/presentation/screens/scan_result_screen/scan_result_screen.dart';
@@ -22,7 +23,10 @@ final GoRouter router = GoRouter(
     ),
     GoRoute(
       path: AppRouter.scanning,
-      builder: (context, state) => const ScanningScreen(),
+      builder: (context, state) {
+        final extra = state.extra as FeatureOption;
+        return ScanningScreen(featureOption: extra);
+      },
     ),
     GoRoute(
       path: AppRouter.scanResult,

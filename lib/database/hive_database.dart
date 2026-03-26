@@ -21,13 +21,15 @@ class HiveDatabase {
     Hive.registerAdapter(ThemeModeOptionAdapter());
     Hive.registerAdapter(ScanHistoryEntityAdapter());
     Hive.registerAdapter(ScanTextBlockHistoryEntityAdapter());
+    Hive.registerAdapter(ScanHistoryTypeAdapter());
   }
 
   Future<void> _initBoxes() async {
     await Hive.openBox<ThemeSettingEntity>(HiveBoxIds.themeSettingEntity);
     await Hive.openBox<ScanHistoryEntity>(HiveBoxIds.scanHistoryEntity);
     await Hive.openBox<ScanTextBlockHistoryEntity>(
-        HiveBoxIds.scanTextBlockHistoryEntity);
+      HiveBoxIds.scanTextBlockHistoryEntity,
+    );
   }
 }
 
@@ -42,4 +44,5 @@ class HiveBoxNums {
   static const themeMode = 1;
   static const scanHistoryEntity = 2;
   static const scanTextBlockHistoryEntity = 3;
+  static const scanHistoryType = 4;
 }

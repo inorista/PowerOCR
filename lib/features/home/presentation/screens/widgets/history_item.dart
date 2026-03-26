@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:powerocr/core/constants/enum.dart';
 import 'package:powerocr/core/utils/extension.dart';
 import 'package:powerocr/features/home/domain/entities/scan_history.dart';
 import 'package:powerocr/features/home/presentation/screens/widgets/history_thumbnail_place_holder.dart';
@@ -73,8 +74,8 @@ class HistoryItem extends StatelessWidget {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: SizedBox(
-                      width: 56,
-                      height: 56,
+                      width: 64,
+                      height: 64,
                       child:
                           item.imagePath.isNotEmpty &&
                               File(item.imagePath).existsSync()
@@ -115,6 +116,7 @@ class HistoryItem extends StatelessWidget {
                         ),
                         const SizedBox(height: 5),
                         Row(
+                          crossAxisAlignment: .center,
                           children: [
                             Icon(
                               Icons.access_time_rounded,
@@ -129,6 +131,13 @@ class HistoryItem extends StatelessWidget {
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
+                            Text(
+                              " • ${item.type == ScanHistoryType.document ? 'Document' : 'QR'}",
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: subtitleColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
                             const SizedBox(width: 10),
                             Icon(
                               Icons.text_fields_rounded,
@@ -136,11 +145,15 @@ class HistoryItem extends StatelessWidget {
                               color: subtitleColor,
                             ),
                             const SizedBox(width: 4),
-                            Text(
-                              '${item.text.split(' ').where((w) => w.isNotEmpty).length} words',
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: subtitleColor,
-                                fontWeight: FontWeight.w500,
+                            Expanded(
+                              child: Text(
+                                '${item.text.split(' ').where((w) => w.isNotEmpty).length} words',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: subtitleColor,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                             ),
                           ],
