@@ -11,6 +11,7 @@ import 'package:powerocr/features/scanning/data/models/annotate_image_request_dt
 import 'package:powerocr/features/scanning/data/models/vision_feature_dto.dart';
 import 'package:powerocr/features/scanning/data/models/vision_image_dto.dart';
 import 'package:powerocr/features/scanning/data/models/vision_request_dto.dart';
+import 'package:powerocr/features/scanning/domain/entities/text_block.dart';
 import 'package:powerocr/features/scanning/domain/entities/text_recognition_result.dart';
 
 abstract class ScanningRemoteDataSource {
@@ -54,12 +55,20 @@ class ScanningRemoteDataSourceImpl implements ScanningRemoteDataSource {
       final firstResult = response.responses?.firstOrNull;
       if (firstResult == null) {
         return TextRecognitionResult(
-            text: '', imagePath: imagePath, createdAt: DateTime.now());
+          text: '',
+          imagePath: imagePath,
+          createdAt: DateTime.now(),
+          type: ScanHistoryType.document,
+        );
       }
       if (firstResult.error != null) {
         print('Vision API Error: ${firstResult.error!.message}');
         return TextRecognitionResult(
-            text: '', imagePath: imagePath, createdAt: DateTime.now());
+          text: '',
+          imagePath: imagePath,
+          createdAt: DateTime.now(),
+          type: ScanHistoryType.document,
+        );
       }
       String detectedText = '';
       List<TextBlock> detectedBlocks = [];
@@ -161,9 +170,12 @@ class ScanningRemoteDataSourceImpl implements ScanningRemoteDataSource {
             finalMaxY = rawH - minY;
           }
 
-          detectedBlocks.add(TextBlock(
+          detectedBlocks.add(
+            TextBlock(
               text: blockTexts[i],
-              boundingBox: [finalMinX, finalMinY, finalMaxX, finalMaxY]));
+              boundingBox: [finalMinX, finalMinY, finalMaxX, finalMaxY],
+            ),
+          );
         }
       }
       return TextRecognitionResult(
@@ -173,10 +185,15 @@ class ScanningRemoteDataSourceImpl implements ScanningRemoteDataSource {
         imageHeight: imageHeight,
         createdAt: DateTime.now(),
         imagePath: imagePath,
+        type: ScanHistoryType.document,
       );
     } catch (e) {
       return TextRecognitionResult(
-          text: '', imagePath: imagePath, createdAt: DateTime.now());
+        text: '',
+        imagePath: imagePath,
+        createdAt: DateTime.now(),
+        type: ScanHistoryType.document,
+      );
     }
   }
 }

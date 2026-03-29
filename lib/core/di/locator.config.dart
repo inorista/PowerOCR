@@ -31,14 +31,20 @@ import 'package:powerocr/database/hive_daos/scan_history_dao.dart' as _i812;
 import 'package:powerocr/database/hive_daos/scan_text_block_history_dao.dart'
     as _i1031;
 import 'package:powerocr/database/hive_daos/theme_setting_dao.dart' as _i406;
-import 'package:powerocr/features/home/data/datasources/home_local_data_source.dart'
-    as _i857;
-import 'package:powerocr/features/home/data/repositories/home_repository_impl.dart'
-    as _i366;
-import 'package:powerocr/features/home/domain/repositories/home_repository.dart'
-    as _i131;
-import 'package:powerocr/features/home/domain/usecases/get_scan_history.dart'
-    as _i552;
+import 'package:powerocr/features/home_screen/data/datasources/home_local_data_source.dart'
+    as _i577;
+import 'package:powerocr/features/home_screen/data/repositories/home_repository_impl.dart'
+    as _i576;
+import 'package:powerocr/features/home_screen/domain/repositories/home_repository.dart'
+    as _i729;
+import 'package:powerocr/features/home_screen/domain/usecases/get_scan_history.dart'
+    as _i445;
+import 'package:powerocr/features/scan_history_screen/data/datasource/scan_history_screen_data_source.dart'
+    as _i290;
+import 'package:powerocr/features/scan_history_screen/data/repositories/scan_history_screen_repository_impl.dart'
+    as _i51;
+import 'package:powerocr/features/scan_history_screen/domain/repositories/scan_history_screen_repository.dart'
+    as _i986;
 import 'package:powerocr/features/scanning/data/datasources/scanning_local_data_source.dart'
     as _i217;
 import 'package:powerocr/features/scanning/data/datasources/scanning_remote_data_source.dart'
@@ -69,25 +75,32 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i1031.ScanTextBlockHistoryDao(),
     );
     gh.lazySingleton<_i406.ThemeSettingDao>(() => _i406.ThemeSettingDao());
+    gh.lazySingleton<_i729.HomeRepository>(() => _i576.HomeRepositoryImpl());
     gh.lazySingleton<_i126.IThemeSettingService>(
       () => _i1017.ThemeSettingService(gh<_i406.ThemeSettingDao>()),
     );
     gh.lazySingleton<_i217.ScanningLocalDataSource>(
       () => _i217.ScanningLocalDataSourceImpl(),
     );
-    gh.lazySingleton<_i857.HomeLocalDataSource>(
-      () => _i857.HomeLocalDataSourceImpl(gh<_i812.ScanHistoryDao>()),
+    gh.lazySingleton<_i290.ScanHistoryScreenDataSource>(
+      () => _i290.ScanHistoryScreenDataSourceImpl(),
+    );
+    gh.lazySingleton<_i445.GetScanHistory>(
+      () => _i445.GetScanHistory(gh<_i729.HomeRepository>()),
+    );
+    gh.lazySingleton<_i986.ScanHistoryScreenRepository>(
+      () => _i51.ScanHistoryScreenRepositoryImpl(),
     );
     gh.lazySingleton<_i254.IScanHistoryService>(
       () => _i911.ScanHistoryService(),
+    );
+    gh.lazySingleton<_i577.HomeLocalDataSource>(
+      () => _i577.HomeLocalDataSourceImpl(gh<_i812.ScanHistoryDao>()),
     );
     gh.lazySingleton<_i47.INetworkService>(() => _i169.NetworkService());
     gh.lazySingleton<_i361.Dio>(
       () => registerModule.provideVisionDio(),
       instanceName: 'VisionDio',
-    );
-    gh.lazySingleton<_i131.HomeRepository>(
-      () => _i366.HomeRepositoryImpl(gh<_i857.HomeLocalDataSource>()),
     );
     gh.lazySingleton<_i150.RestClient>(
       () => registerModule.provideRestClient(
@@ -96,9 +109,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i543.ScanningRemoteDataSource>(
       () => _i543.ScanningRemoteDataSourceImpl(gh<_i150.RestClient>()),
-    );
-    gh.lazySingleton<_i552.GetScanHistory>(
-      () => _i552.GetScanHistory(gh<_i131.HomeRepository>()),
     );
     gh.lazySingleton<_i458.ScanningRepository>(
       () => _i581.ScanningRepositoryImpl(

@@ -45,6 +45,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: brightness,
+      fontFamily: 'Montserrat',
       scaffoldBackgroundColor: background,
       colorScheme: ColorScheme.fromSeed(
         seedColor: primary,
@@ -120,14 +121,23 @@ class AppTheme {
         ),
         contentPadding: const EdgeInsets.all(16),
       ),
-      iconTheme: IconThemeData(
-        color: onSurface,
-      ),
+      iconTheme: IconThemeData(color: onSurface),
       textTheme: TextTheme(
-        bodyLarge: TextStyle(color: onSurface),
-        bodyMedium: TextStyle(color: onSurface),
-        titleLarge: TextStyle(color: onSurface),
-        headlineMedium: TextStyle(color: onSurface),
+        displayLarge: TextStyle(fontFamily: 'Montserrat', color: onSurface),
+        displayMedium: TextStyle(fontFamily: 'Montserrat', color: onSurface),
+        displaySmall: TextStyle(fontFamily: 'Montserrat', color: onSurface),
+        headlineLarge: TextStyle(fontFamily: 'Montserrat', color: onSurface),
+        headlineMedium: TextStyle(fontFamily: 'Montserrat', color: onSurface),
+        headlineSmall: TextStyle(fontFamily: 'Montserrat', color: onSurface),
+        titleLarge: TextStyle(fontFamily: 'Montserrat', color: onSurface),
+        titleMedium: TextStyle(fontFamily: 'Montserrat', color: onSurface),
+        titleSmall: TextStyle(fontFamily: 'Montserrat', color: onSurface),
+        bodyLarge: TextStyle(fontFamily: 'Montserrat', color: onSurface),
+        bodyMedium: TextStyle(fontFamily: 'Montserrat', color: onSurface),
+        bodySmall: TextStyle(fontFamily: 'Montserrat', color: onSurface),
+        labelLarge: TextStyle(fontFamily: 'Montserrat', color: onSurface),
+        labelMedium: TextStyle(fontFamily: 'Montserrat', color: onSurface),
+        labelSmall: TextStyle(fontFamily: 'Montserrat', color: onSurface),
       ),
     );
   }

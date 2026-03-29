@@ -21,6 +21,8 @@ class ScanHistoryEntityAdapter extends TypeAdapter<ScanHistoryEntity> {
       imagePath: fields[1] as String,
       text: fields[2] as String,
       createdAt: fields[3] as DateTime,
+      imageWidth: (fields[5] as num?)?.toInt(),
+      imageHeight: (fields[6] as num?)?.toInt(),
       type: fields[4] == null
           ? ScanHistoryType.document
           : fields[4] as ScanHistoryType?,
@@ -30,7 +32,7 @@ class ScanHistoryEntityAdapter extends TypeAdapter<ScanHistoryEntity> {
   @override
   void write(BinaryWriter writer, ScanHistoryEntity obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(7)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -40,7 +42,11 @@ class ScanHistoryEntityAdapter extends TypeAdapter<ScanHistoryEntity> {
       ..writeByte(3)
       ..write(obj.createdAt)
       ..writeByte(4)
-      ..write(obj.type);
+      ..write(obj.type)
+      ..writeByte(5)
+      ..write(obj.imageWidth)
+      ..writeByte(6)
+      ..write(obj.imageHeight);
   }
 
   @override

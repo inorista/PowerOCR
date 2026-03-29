@@ -15,12 +15,18 @@ class ScanHistoryEntity extends BaseEntity {
   DateTime createdAt;
   @HiveField(4)
   ScanHistoryType? type;
+  @HiveField(5)
+  int? imageWidth;
+  @HiveField(6)
+  int? imageHeight;
 
   ScanHistoryEntity({
     super.id,
     required this.imagePath,
     required this.text,
     required this.createdAt,
+    this.imageWidth,
+    this.imageHeight,
     this.type = ScanHistoryType.document,
   });
 }

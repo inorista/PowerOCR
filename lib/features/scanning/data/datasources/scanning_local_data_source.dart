@@ -1,6 +1,8 @@
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart'
     as ml;
 import 'package:injectable/injectable.dart';
+import 'package:powerocr/core/constants/enum.dart';
+import 'package:powerocr/features/scanning/domain/entities/text_block.dart';
 import 'package:powerocr/features/scanning/domain/entities/text_recognition_result.dart';
 import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart'
     as ml_barcode;
@@ -34,6 +36,7 @@ class ScanningLocalDataSourceImpl implements ScanningLocalDataSource {
         imageHeight: 0,
         imagePath: imagePath,
         createdAt: DateTime.now(),
+        type: ScanHistoryType.qr,
       );
     } catch (e) {
       rethrow;
@@ -67,6 +70,7 @@ class ScanningLocalDataSourceImpl implements ScanningLocalDataSource {
         blocks: blocks,
         createdAt: DateTime.now(),
         imagePath: imagePath,
+        type: ScanHistoryType.document,
       );
     } finally {
       await textRecognizer.close();

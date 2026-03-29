@@ -1,3 +1,4 @@
+import 'package:powerocr/features/scanning/domain/entities/text_block.dart';
 import 'package:powerocr/features/scanning/domain/entities/text_recognition_result.dart';
 
 class TextAlignmentUtils {
@@ -18,7 +19,8 @@ class TextAlignmentUtils {
 
     for (int i = 1; i < sortedBlocks.length; i++) {
       final curr = sortedBlocks[i];
-      double currentLineAvgY = currentLine
+      double currentLineAvgY =
+          currentLine
               .map((b) => (b.boundingBox[1] + b.boundingBox[3]) / 2)
               .reduce((a, b) => a + b) /
           currentLine.length;
@@ -47,8 +49,9 @@ class TextAlignmentUtils {
       totalCharWidth += w;
       totalChars += block.text.length;
     }
-    double avgCharWidth =
-        totalChars > 0 ? (totalCharWidth / totalChars) * 1.05 : 9.0;
+    double avgCharWidth = totalChars > 0
+        ? (totalCharWidth / totalChars) * 1.05
+        : 9.0;
     if (avgCharWidth <= 0) avgCharWidth = 9.0;
 
     StringBuffer sb = StringBuffer();

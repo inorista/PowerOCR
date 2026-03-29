@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:powerocr/core/constants/enum.dart';
-import 'package:powerocr/features/home/presentation/screens/home_screen.dart';
+import 'package:powerocr/features/home_screen/presentation/screens/home_screen.dart';
+import 'package:powerocr/features/scan_history_screen/presentation/scan_history_screen/scan_history_screen.dart';
 import 'package:powerocr/features/scanning/domain/entities/text_recognition_result.dart';
 import 'package:powerocr/features/scanning/presentation/screens/scan_result_screen/scan_result_screen.dart';
 import 'package:powerocr/features/scanning/presentation/screens/scanning_screen/scanning_screen.dart';
-import 'package:powerocr/features/splash/presentation/screens/splash_screen.dart';
+import 'package:powerocr/features/splash_screen/presentation/screens/splash_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -38,6 +39,10 @@ final GoRouter router = GoRouter(
         );
       },
     ),
+    GoRoute(
+      path: AppRouter.scanHistory,
+      builder: (context, state) => const ScanHistoryScreen(),
+    ),
   ],
 );
 
@@ -48,4 +53,5 @@ class AppRouter {
   static const String home = '/home';
   static const String scanning = '/scanning';
   static const String scanResult = '/scan-result';
+  static const String scanHistory = '/scan-history';
 }

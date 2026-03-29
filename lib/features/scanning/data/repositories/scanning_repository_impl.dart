@@ -69,7 +69,6 @@ class ScanningRepositoryImpl implements ScanningRepository {
       }
     }
 
-    // Cập nhật lại result với finalImagePath
     final processedResult = TextRecognitionResult(
       text: result.text,
       blocks: result.blocks,
@@ -77,6 +76,7 @@ class ScanningRepositoryImpl implements ScanningRepository {
       imageHeight: result.imageHeight,
       imagePath: finalImagePath,
       createdAt: result.createdAt,
+      type: result.type,
     );
 
     final scanHistoryEntity = TextRecognitionResult.toScanHistoryEntity(

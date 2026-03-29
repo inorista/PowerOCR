@@ -5,8 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:powerocr/core/router/app_router.dart';
-import 'package:powerocr/features/home/presentation/bloc/home_bloc.dart';
-import 'package:powerocr/features/home/presentation/bloc/home_event.dart';
+import 'package:powerocr/features/home_screen/presentation/bloc/home_bloc.dart';
+import 'package:powerocr/features/home_screen/presentation/bloc/home_event.dart';
 import 'package:powerocr/features/scanning/domain/entities/text_recognition_result.dart';
 import 'package:powerocr/features/scanning/presentation/screens/scan_result_screen/widgets/outline_action_button.dart';
 import 'package:powerocr/features/scanning/presentation/screens/scan_result_screen/widgets/primary_action_button.dart';
