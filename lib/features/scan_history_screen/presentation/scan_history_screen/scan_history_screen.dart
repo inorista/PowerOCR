@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:powerocr/core/domain/entities/scan_history.dart';
@@ -18,6 +19,9 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen>
   late final AnimationController _entryCtrl;
   late final Animation<double> _orbRotate;
   late final Animation<double> _gridFade;
+
+  final ScrollController _scrollController = ScrollController();
+  double _appBarOpacity = 0.1;
 
   @override
   void initState() {
@@ -40,10 +44,26 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen>
         curve: const Interval(0.2, 1.0, curve: Curves.easeOut),
       ),
     );
+
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    double offset = _scrollController.offset;
+    double newOpacity = 0.1 + (offset / 100);
+    newOpacity = newOpacity.clamp(0.1, 1.0);
+    if (newOpacity != _appBarOpacity) {
+      setState(() {
+        _appBarOpacity = newOpacity;
+      });
+    }
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     _orbCtrl.dispose();
     _entryCtrl.dispose();
     super.dispose();
@@ -55,6 +75,7 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen>
     final isDark = theme.brightness == Brightness.dark;
     final primary = theme.colorScheme.primary;
     final size = MediaQuery.sizeOf(context);
+    final topPadding = MediaQuery.paddingOf(context).top;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -80,89 +101,23 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen>
             BlocBuilder<ScanHistoryScreenBlocBloc, ScanHistoryScreenBlocState>(
               builder: (context, state) {
                 return CustomScrollView(
+                  controller: _scrollController,
                   physics: const BouncingScrollPhysics(
                     parent: AlwaysScrollableScrollPhysics(),
                   ),
                   slivers: [
-                    // ── SliverAppBar ──────────────────────────────────
-                    SliverAppBar(
-                      pinned: true,
-                      floating: false,
-                      expandedHeight: 130,
-                      backgroundColor: theme.scaffoldBackgroundColor,
-                      surfaceTintColor: Colors.transparent,
-                      shadowColor: Colors.transparent,
-                      leading: IconButton(
-                        icon: Icon(
-                          Icons.arrow_back_ios_new_rounded,
-                          color: theme.colorScheme.onSurface,
-                          size: 20,
-                        ),
-                        onPressed: () => Navigator.of(context).maybePop(),
-                      ),
-                      actions: [
-                        if (state.status ==
-                                ScanHistoryScreenBlocStatus.loaded &&
-                            state.scanHistory.isNotEmpty)
-                          IconButton(
-                            icon: Icon(
-                              Icons.tune_rounded,
-                              color: theme.colorScheme.onSurface.withValues(
-                                alpha: 0.6,
-                              ),
-                              size: 22,
-                            ),
-                            onPressed: () {},
-                          ),
-                        const SizedBox(width: 4),
-                      ],
-                      flexibleSpace: FlexibleSpaceBar(
-                        titlePadding: const EdgeInsets.only(
-                          left: 20,
-                          bottom: 14,
-                        ),
-                        title: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Scan History',
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.w800,
-                                fontSize: 22,
-                                letterSpacing: -0.3,
-                              ),
-                            ),
-                            if (state.status ==
-                                    ScanHistoryScreenBlocStatus.loaded &&
-                                state.scanHistory.isNotEmpty)
-                              Text(
-                                '${state.scanHistory.length} scan${state.scanHistory.length == 1 ? '' : 's'}',
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: theme.colorScheme.onSurface.withValues(
-                                    alpha: 0.45,
-                                  ),
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 11,
-                                ),
-                              ),
-                          ],
-                        ),
-                        background: _AppBarBackground(
-                          isDark: isDark,
-                          theme: theme,
-                        ),
-                        collapseMode: CollapseMode.parallax,
-                      ),
+                    SliverToBoxAdapter(
+                      child: SizedBox(height: topPadding + 64),
                     ),
 
-                    // ── Body states ───────────────────────────────────
                     if (state.status == ScanHistoryScreenBlocStatus.loading)
                       const SliverFillRemaining(
+                        hasScrollBody: false,
                         child: Center(child: _LoadingIndicator()),
                       )
                     else if (state.status == ScanHistoryScreenBlocStatus.error)
                       SliverFillRemaining(
+                        hasScrollBody: false,
                         child: _ErrorView(
                           message: state.errorMessage ?? 'Something went wrong',
                           theme: theme,
@@ -174,13 +129,14 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen>
                       )
                     else if (state.scanHistory.isEmpty)
                       SliverFillRemaining(
+                        hasScrollBody: false,
                         child: _EmptyView(theme: theme, isDark: isDark),
                       )
                     else ...[
                       SliverFadeTransition(
                         opacity: _gridFade,
                         sliver: SliverPadding(
-                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
                           sliver: SliverGrid.builder(
                             gridDelegate:
                                 const SliverGridDelegateWithFixedCrossAxisCount(
@@ -207,6 +163,94 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen>
                 );
               },
             ),
+
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: Opacity(
+                      opacity: _appBarOpacity,
+                      child: ClipRect(
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                          child: Container(
+                            color: theme.scaffoldBackgroundColor.withValues(
+                              alpha: 0.65,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  SafeArea(
+                    bottom: false,
+                    child: Container(
+                      height: 56,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child:
+                          BlocBuilder<
+                            ScanHistoryScreenBlocBloc,
+                            ScanHistoryScreenBlocState
+                          >(
+                            builder: (context, state) {
+                              return Row(
+                                children: [
+                                  IconButton(
+                                    icon: Icon(
+                                      Icons.arrow_back_ios_new_rounded,
+                                      color: theme.colorScheme.onSurface,
+                                      size: 20,
+                                    ),
+                                    onPressed: () =>
+                                        Navigator.of(context).maybePop(),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      'Scan History',
+                                      style: theme.textTheme.titleLarge
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: 20,
+                                            letterSpacing: -0.3,
+                                          ),
+                                    ),
+                                  ),
+                                  if (state.status ==
+                                          ScanHistoryScreenBlocStatus.loaded &&
+                                      state.scanHistory.isNotEmpty) ...[
+                                    Text(
+                                      '${state.scanHistory.length}',
+                                      style: theme.textTheme.labelMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: theme.colorScheme.primary,
+                                          ),
+                                    ),
+                                    IconButton(
+                                      icon: Icon(
+                                        Icons.tune_rounded,
+                                        color: theme.colorScheme.onSurface
+                                            .withValues(alpha: 0.6),
+                                        size: 22,
+                                      ),
+                                      onPressed: () {},
+                                    ),
+                                  ],
+                                  const SizedBox(width: 4),
+                                ],
+                              );
+                            },
+                          ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -216,36 +260,6 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen>
   void _onItemTap(BuildContext context, ScanHistory item) {}
 }
 
-// ── AppBar decorative background ───────────────────────────────────────────
-class _AppBarBackground extends StatelessWidget {
-  final bool isDark;
-  final ThemeData theme;
-
-  const _AppBarBackground({required this.isDark, required this.theme});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: isDark
-              ? [
-                  theme.colorScheme.primary.withValues(alpha: 0.12),
-                  theme.scaffoldBackgroundColor,
-                ]
-              : [
-                  theme.colorScheme.primary.withValues(alpha: 0.06),
-                  theme.scaffoldBackgroundColor,
-                ],
-        ),
-      ),
-    );
-  }
-}
-
-// ── Loading indicator ──────────────────────────────────────────────────────
 class _LoadingIndicator extends StatelessWidget {
   const _LoadingIndicator();
 
@@ -275,7 +289,6 @@ class _LoadingIndicator extends StatelessWidget {
   }
 }
 
-// ── Empty state ────────────────────────────────────────────────────────────
 class _EmptyView extends StatelessWidget {
   final ThemeData theme;
   final bool isDark;
@@ -327,7 +340,6 @@ class _EmptyView extends StatelessWidget {
   }
 }
 
-// ── Error state ────────────────────────────────────────────────────────────
 class _ErrorView extends StatelessWidget {
   final String message;
   final ThemeData theme;
@@ -393,7 +405,6 @@ class _ErrorView extends StatelessWidget {
   }
 }
 
-// ── Ambient orb painter for this screen ───────────────────────────────────
 class _ScanHistoryOrbPainter extends CustomPainter {
   final double rotate;
   final bool isDark;

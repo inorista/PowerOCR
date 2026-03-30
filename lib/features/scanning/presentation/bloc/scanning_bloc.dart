@@ -38,7 +38,9 @@ class ScanningBloc extends Bloc<ScanningEvent, ScanningState> {
       } else {
         result = await recognizeQR(event.imagePath);
       }
-      await locator<ScanningRepository>().saveScanHistory(result);
+      if (result.text.isNotEmpty) {
+        await locator<ScanningRepository>().saveScanHistory(result);
+      }
       emit(
         state.copyWith(
           status: ScanningStatus.success,

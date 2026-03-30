@@ -49,9 +49,11 @@ class StatCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(icon,
-                  size: 18,
-                  color: theme.colorScheme.primary.withValues(alpha: 0.8)),
+              Icon(
+                icon,
+                size: 18,
+                color: theme.colorScheme.primary.withValues(alpha: 0.8),
+              ),
               const SizedBox(height: 8),
               Text(
                 '$displayed',
@@ -63,13 +65,17 @@ class StatCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 3),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                  letterSpacing: 0.2,
+              FittedBox(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                    letterSpacing: 0.2,
+                  ),
                 ),
               ),
             ],

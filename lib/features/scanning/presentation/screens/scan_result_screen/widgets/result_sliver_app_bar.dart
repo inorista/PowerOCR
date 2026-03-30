@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:powerocr/core/router/app_router.dart';
 import 'package:powerocr/features/scanning/presentation/screens/scan_result_screen/widgets/glass_button.dart';
+import 'package:powerocr/features/scanning/presentation/screens/scan_result_screen/widgets/photo_viewer_overlay.dart';
 
 class ResultSliverAppBar extends StatelessWidget {
   final String imagePath;
@@ -16,6 +17,8 @@ class ResultSliverAppBar extends StatelessWidget {
     required this.expandedHeight,
     required this.isDark,
   });
+
+  static const String _heroTag = 'scan_result_image';
 
   @override
   Widget build(BuildContext context) {
@@ -31,11 +34,18 @@ class ResultSliverAppBar extends StatelessWidget {
             background: Stack(
               fit: StackFit.expand,
               children: [
-                Image.file(
-                  File(imagePath),
-                  fit: BoxFit.cover,
+                GestureDetector(
+                  onTap: () => PhotoViewerOverlay.show(
+                    context,
+                    imagePath: imagePath,
+                    heroTag: _heroTag,
+                  ),
+                  child: Hero(
+                    tag: _heroTag,
+                    child: Image.file(File(imagePath), fit: BoxFit.cover),
+                  ),
                 ),
-                // Bottom fade into sheet color
+
                 Positioned(
                   bottom: 0,
                   left: 0,
@@ -48,13 +58,60 @@ class ResultSliverAppBar extends StatelessWidget {
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          isDark ? const Color(0xFF1A1A26) : const Color(0xFFF2F3F8),
+                          isDark
+                              ? const Color(0xFF1A1A26)
+                              : const Color(0xFFF2F3F8),
                         ],
                       ),
                     ),
                   ),
                 ),
-                // Overlay buttons row
+
+                if (!isCollapsed)
+                  Positioned(
+                    bottom: 56,
+                    right: 16,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.35),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.18),
+                              width: 0.5,
+                            ),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.zoom_out_map_rounded,
+                                color: Colors.white,
+                                size: 13,
+                              ),
+                              SizedBox(width: 4),
+                              Text(
+                                'Tap to expand',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
                 Positioned(
                   top: 0,
                   left: 0,
@@ -72,16 +129,13 @@ class ResultSliverAppBar extends StatelessWidget {
                             icon: Icons.arrow_back_ios_new_rounded,
                             onTap: () => context.go(AppRouter.home),
                           ),
-                          GlassButton(
-                            icon: Icons.share_rounded,
-                            onTap: () {},
-                          ),
+                          GlassButton(icon: Icons.share_rounded, onTap: () {}),
                         ],
                       ),
                     ),
                   ),
                 ),
-                // Collapsed appbar backdrop (when scrolled up)
+
                 if (isCollapsed)
                   Positioned.fill(
                     child: ClipRect(

@@ -3,6 +3,8 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:injectable/injectable.dart';
+import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart'
+    as ml;
 import 'package:powerocr/core/constants/enum.dart';
 import 'package:powerocr/core/di/locator.dart';
 import 'package:powerocr/core/environment/env.dart';
@@ -27,6 +29,27 @@ class ScanningRemoteDataSourceImpl implements ScanningRemoteDataSource {
   @override
   Future<TextRecognitionResult> recognizeText(String imagePath) async {
     try {
+      final inputImage = ml.InputImage.fromFilePath(imagePath);
+      final textRecognizer = ml.TextRecognizer(
+        script: ml.TextRecognitionScript.latin,
+      );
+      try {
+        final localResult = await textRecognizer.processImage(inputImage);
+        if (localResult.text.trim().isEmpty) {
+          return TextRecognitionResult(
+            text: '',
+            blocks: const [],
+            imageWidth: 0,
+            imageHeight: 0,
+            createdAt: DateTime.now(),
+            imagePath: imagePath,
+            type: ScanHistoryType.document,
+          );
+        }
+      } finally {
+        await textRecognizer.close();
+      }
+
       final bytes = await File(imagePath).readAsBytes();
       final base64Image = base64Encode(bytes);
 
