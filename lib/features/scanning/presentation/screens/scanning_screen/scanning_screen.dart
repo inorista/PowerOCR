@@ -324,8 +324,8 @@ class _ScanningScreenState extends State<ScanningScreen>
                     pulseOpacity: _pulseOpacity,
                   ),
 
-                  // Nút kết thúc Batch Scan hiển thị nếu ở chế độ batch scan
-                  if (widget.featureOption == FeatureOption.batchScan && state.batchImagePaths.isNotEmpty)
+                  if (widget.featureOption == FeatureOption.batchScan &&
+                      state.batchImagePaths.isNotEmpty)
                     Positioned(
                       bottom: size.height * 0.18,
                       right: 24,
@@ -335,10 +335,7 @@ class _ScanningScreenState extends State<ScanningScreen>
                         builder: (context, value, child) {
                           return Transform.scale(
                             scale: value,
-                            child: Opacity(
-                              opacity: value,
-                              child: child,
-                            ),
+                            child: Opacity(opacity: value, child: child),
                           );
                         },
                         child: FloatingActionButton.extended(
@@ -346,8 +343,12 @@ class _ScanningScreenState extends State<ScanningScreen>
                           onPressed: () {
                             context.read<ScanningBloc>().add(FinishBatchScan());
                           },
-                          backgroundColor: Theme.of(context).colorScheme.primary,
-                          foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.primary,
+                          foregroundColor: Theme.of(
+                            context,
+                          ).colorScheme.onPrimary,
                           icon: const Icon(Icons.check_circle_outline_rounded),
                           label: Text(
                             'Finish (${state.batchImagePaths.length})',

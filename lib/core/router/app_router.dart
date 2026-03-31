@@ -47,7 +47,7 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: AppRouter.batchResult,
       builder: (context, state) {
-        final imagePaths = state.extra as List<String>;
+        final imagePaths = (state.extra as List<dynamic>).cast<String>();
         return BatchResultScreen(imagePaths: imagePaths);
       },
     ),
