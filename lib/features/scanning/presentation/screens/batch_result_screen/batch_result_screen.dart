@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
+import 'package:powerocr/core/di/locator.dart';
+import 'package:powerocr/core/services/interfaces/ipdf_service.dart';
 import 'package:share_plus/share_plus.dart';
 
 class BatchResultScreen extends StatefulWidget {
@@ -19,35 +21,7 @@ class _BatchResultScreenState extends State<BatchResultScreen> {
   Future<void> _exportToPdf() async {
     setState(() => _isExporting = true);
     try {
-      final pdf = pw.Document();
-
-      for (var imagePath in widget.imagePaths) {
-        final image = pw.MemoryImage(File(imagePath).readAsBytesSync());
-
-        pdf.addPage(
-          pw.Page(
-            pageFormat: PdfPageFormat.a4,
-            build: (pw.Context context) {
-              return pw.FullPage(
-                ignoreMargins: true,
-                child: pw.Image(image, fit: pw.BoxFit.contain),
-              );
-            },
-          ),
-        );
-      }
-
-      final dir = await getTemporaryDirectory();
-      final file = File(
-        '${dir.path}/PowerOCR_Batch_${DateTime.now().millisecondsSinceEpoch}.pdf',
-      );
-      await file.writeAsBytes(await pdf.save());
-
-      if (mounted) {
-        await SharePlus.instance.share(
-          ShareParams(files: [XFile(file.path)], subject: 'Batch Scanned PDF'),
-        );
-      }
+      await locator<IPdfService>().exportToPdf(widget.imagePaths);
     } catch (e) {
       debugPrint('Export PDF Error: $e');
       if (mounted) {
@@ -98,6 +72,8 @@ class _BatchResultScreenState extends State<BatchResultScreen> {
                       child: Image.file(
                         File(widget.imagePaths[index]),
                         fit: BoxFit.cover,
+                        cacheHeight: 350,
+                        cacheWidth: 250,
                       ),
                     ),
                     Positioned(
