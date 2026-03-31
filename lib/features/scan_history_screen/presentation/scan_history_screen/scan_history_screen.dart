@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:powerocr/core/domain/entities/scan_history.dart';
-import 'package:powerocr/features/scan_history_screen/presentation/bloc/scan_history_screen_bloc_bloc.dart';
+import 'package:powerocr/features/scan_history_screen/presentation/bloc/scan_history_screen_bloc.dart';
 import 'package:powerocr/features/scan_history_screen/presentation/scan_history_screen/widgets/scan_history_grid_card.dart';
 import 'dart:math' as math;
 
@@ -100,6 +100,9 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen>
 
             BlocBuilder<ScanHistoryScreenBlocBloc, ScanHistoryScreenBlocState>(
               builder: (context, state) {
+                if (state.status == ScanHistoryScreenBlocStatus.initial) {
+                  return const SizedBox();
+                }
                 return CustomScrollView(
                   controller: _scrollController,
                   physics: const BouncingScrollPhysics(

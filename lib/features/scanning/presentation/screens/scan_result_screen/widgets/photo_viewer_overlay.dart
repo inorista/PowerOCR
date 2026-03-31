@@ -23,9 +23,9 @@ class PhotoViewerOverlay extends StatefulWidget {
         barrierColor: Colors.transparent,
         transitionDuration: const Duration(milliseconds: 350),
         reverseTransitionDuration: const Duration(milliseconds: 280),
-        pageBuilder: (_, __, ___) =>
+        pageBuilder: (_, _, _) =>
             PhotoViewerOverlay(imagePath: imagePath, heroTag: heroTag),
-        transitionsBuilder: (_, animation, __, child) => FadeTransition(
+        transitionsBuilder: (_, animation, _, child) => FadeTransition(
           opacity: CurvedAnimation(
             parent: animation,
             curve: Curves.easeOut,
@@ -190,69 +190,71 @@ class _PhotoViewerOverlayState extends State<PhotoViewerOverlay>
   Widget build(BuildContext context) {
     final topPad = MediaQuery.paddingOf(context).top;
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light,
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: AnimatedOpacity(
-              opacity: _backgroundOpacity,
-              duration: Duration.zero,
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 0, sigmaY: 0),
-                child: Container(color: Colors.black.withValues(alpha: 0.92)),
+    return Material(
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.light,
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: AnimatedOpacity(
+                opacity: _backgroundOpacity,
+                duration: Duration.zero,
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 0, sigmaY: 0),
+                  child: Container(color: Colors.black.withValues(alpha: 0.92)),
+                ),
               ),
             ),
-          ),
 
-          Positioned.fill(
-            child: GestureDetector(
-              onVerticalDragStart: _startDismissDrag,
-              onVerticalDragUpdate: _updateDismissDrag,
-              onVerticalDragEnd: _endDismissDrag,
-              child: Transform.translate(
-                offset: Offset(0, _dragOffsetY),
-                child: _buildInteractiveViewer(context),
+            Positioned.fill(
+              child: GestureDetector(
+                onVerticalDragStart: _startDismissDrag,
+                onVerticalDragUpdate: _updateDismissDrag,
+                onVerticalDragEnd: _endDismissDrag,
+                child: Transform.translate(
+                  offset: Offset(0, _dragOffsetY),
+                  child: _buildInteractiveViewer(context),
+                ),
               ),
             ),
-          ),
 
-          Positioned(
-            top: topPad + 8,
-            left: 16,
-            right: 16,
-            child: AnimatedOpacity(
-              opacity: _isDraggingToDismiss ? 0.0 : 1.0,
-              duration: const Duration(milliseconds: 150),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _GlassIconButton(icon: Icons.close_rounded, onTap: _close),
-                  _buildZoomBadge(),
-                  _GlassIconButton(
-                    icon: Icons.fit_screen_rounded,
-                    onTap: () {
-                      _doubleTapAnimCtrl.stop();
-                      final anim =
-                          Matrix4Tween(
-                            begin: _transformCtrl.value,
-                            end: Matrix4.identity(),
-                          ).animate(
-                            CurvedAnimation(
-                              parent: _doubleTapAnimCtrl,
-                              curve: Curves.easeInOutCubicEmphasized,
-                            ),
-                          );
-                      _doubleTapAnim = anim;
-                      _doubleTapAnimCtrl.forward(from: 0);
-                      HapticFeedback.selectionClick();
-                    },
-                  ),
-                ],
+            Positioned(
+              top: topPad + 8,
+              left: 16,
+              right: 16,
+              child: AnimatedOpacity(
+                opacity: _isDraggingToDismiss ? 0.0 : 1.0,
+                duration: const Duration(milliseconds: 150),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _GlassIconButton(icon: Icons.close_rounded, onTap: _close),
+                    _buildZoomBadge(),
+                    _GlassIconButton(
+                      icon: Icons.fit_screen_rounded,
+                      onTap: () {
+                        _doubleTapAnimCtrl.stop();
+                        final anim =
+                            Matrix4Tween(
+                              begin: _transformCtrl.value,
+                              end: Matrix4.identity(),
+                            ).animate(
+                              CurvedAnimation(
+                                parent: _doubleTapAnimCtrl,
+                                curve: Curves.easeInOutCubicEmphasized,
+                              ),
+                            );
+                        _doubleTapAnim = anim;
+                        _doubleTapAnimCtrl.forward(from: 0);
+                        HapticFeedback.selectionClick();
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -261,7 +263,7 @@ class _PhotoViewerOverlayState extends State<PhotoViewerOverlay>
     final imageWidget = Image.file(
       File(widget.imagePath),
       fit: BoxFit.contain,
-      errorBuilder: (_, __, ___) => const Center(
+      errorBuilder: (_, _, _) => const Center(
         child: Icon(
           Icons.broken_image_rounded,
           color: Colors.white38,

@@ -199,6 +199,8 @@ class _ScanningScreenState extends State<ScanningScreen>
             builder: (context, state) {
               if (state.status == ScanningStatus.loading) {
                 return const LoadingView();
+              } else if (state.status == ScanningStatus.success) {
+                return const SizedBox.shrink();
               }
               final flashMode = state.flashMode;
               return Stack(
