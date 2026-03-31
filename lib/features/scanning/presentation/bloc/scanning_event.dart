@@ -25,3 +25,5 @@ class ToggleFlash extends ScanningEvent {}
 class CameraReady extends ScanningEvent {}
 
 class CameraNotReady extends ScanningEvent {}
+
+class FinishBatchScan extends ScanningEvent {}

@@ -152,6 +152,11 @@ class _ScanningScreenState extends State<ScanningScreen>
               AppRouter.scanResult,
               extra: {'imagePath': state.imagePath!, 'result': state.result!},
             );
+          } else if (state.status == ScanningStatus.batchFinished) {
+            context.replace(
+              AppRouter.batchResult,
+              extra: List<String>.from(state.batchImagePaths),
+            );
           } else if (state.status == ScanningStatus.failure) {
             ScaffoldMessenger.of(context)
               ..clearSnackBars()
@@ -316,6 +321,39 @@ class _ScanningScreenState extends State<ScanningScreen>
                     pulseScale: _pulseScale,
                     pulseOpacity: _pulseOpacity,
                   ),
+
+                  // Nút kết thúc Batch Scan hiển thị nếu ở chế độ batch scan
+                  if (widget.featureOption == FeatureOption.batchScan && state.batchImagePaths.isNotEmpty)
+                    Positioned(
+                      bottom: size.height * 0.18,
+                      right: 24,
+                      child: TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0.0, end: 1.0),
+                        duration: const Duration(milliseconds: 300),
+                        builder: (context, value, child) {
+                          return Transform.scale(
+                            scale: value,
+                            child: Opacity(
+                              opacity: value,
+                              child: child,
+                            ),
+                          );
+                        },
+                        child: FloatingActionButton.extended(
+                          heroTag: 'batch_finish_btn',
+                          onPressed: () {
+                            context.read<ScanningBloc>().add(FinishBatchScan());
+                          },
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                          icon: const Icon(Icons.check_circle_outline_rounded),
+                          label: Text(
+                            'Finish (${state.batchImagePaths.length})',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               );
             },

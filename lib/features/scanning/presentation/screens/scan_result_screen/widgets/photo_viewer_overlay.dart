@@ -23,9 +23,9 @@ class PhotoViewerOverlay extends StatefulWidget {
         barrierColor: Colors.transparent,
         transitionDuration: const Duration(milliseconds: 350),
         reverseTransitionDuration: const Duration(milliseconds: 280),
-        pageBuilder: (_, __, ___) =>
+        pageBuilder: (_, _, _) =>
             PhotoViewerOverlay(imagePath: imagePath, heroTag: heroTag),
-        transitionsBuilder: (_, animation, __, child) => FadeTransition(
+        transitionsBuilder: (_, animation, _, child) => FadeTransition(
           opacity: CurvedAnimation(
             parent: animation,
             curve: Curves.easeOut,
@@ -130,8 +130,13 @@ class _PhotoViewerOverlayState extends State<PhotoViewerOverlay>
       final focalPoint = details.localPosition;
       final scale = _doubleTapScale;
       target = Matrix4.identity()
-        ..translate(-focalPoint.dx * (scale - 1), -focalPoint.dy * (scale - 1))
-        ..scale(scale);
+        ..translateByDouble(
+          -focalPoint.dx * (scale - 1),
+          -focalPoint.dy * (scale - 1),
+          0.0,
+          1.0,
+        )
+        ..scaleByDouble(scale, scale, 1.0, 1.0);
     } else {
       target = Matrix4.identity();
     }
@@ -261,7 +266,7 @@ class _PhotoViewerOverlayState extends State<PhotoViewerOverlay>
     final imageWidget = Image.file(
       File(widget.imagePath),
       fit: BoxFit.contain,
-      errorBuilder: (_, __, ___) => const Center(
+      errorBuilder: (_, _, _) => const Center(
         child: Icon(
           Icons.broken_image_rounded,
           color: Colors.white38,
