@@ -35,16 +35,20 @@ class QuickActionsGrid extends StatelessWidget {
         },
       ),
       QuickAction(
-        icon: Icons.photo_library_rounded,
-        label: 'Gallery\nImport',
+        icon: Icons.document_scanner_rounded, // Batch Scan Icon
+        label: 'Batch\nScan',
         gradient: [const Color(0xFF95E1D3), const Color(0xFF5ABCAE)],
-        onTap: () {},
+        onTap: () {
+          context.push(AppRouter.scanning, extra: FeatureOption.batchScan);
+        },
       ),
       QuickAction(
-        icon: Icons.photo_library_rounded,
-        label: 'Gallery\nImport',
-        gradient: [const Color(0xFF95E1D3), const Color(0xFF5ABCAE)],
-        onTap: () {},
+        icon: Icons.badge_rounded, // Scan ID Icon
+        label: 'Scan ID\nCard',
+        gradient: [const Color(0xFFCBAACB), const Color(0xFF9F83A0)],
+        onTap: () {
+          context.push(AppRouter.scanning, extra: FeatureOption.scanId);
+        },
       ),
     ];
 

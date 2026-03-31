@@ -2,7 +2,7 @@ import 'package:camera/camera.dart';
 import 'package:equatable/equatable.dart';
 import 'package:powerocr/features/scanning/domain/entities/text_recognition_result.dart';
 
-enum ScanningStatus { initial, loading, success, failure }
+enum ScanningStatus { initial, loading, success, failure, batchAdded, batchFinished }
 
 class ScanningState extends Equatable {
   final ScanningStatus status;
@@ -12,6 +12,7 @@ class ScanningState extends Equatable {
   final FlashMode flashMode;
 
   final bool isCameraInitialized;
+  final List<String> batchImagePaths;
 
   const ScanningState({
     this.status = ScanningStatus.initial,
@@ -20,6 +21,7 @@ class ScanningState extends Equatable {
     this.errorMessage,
     this.flashMode = FlashMode.auto,
     this.isCameraInitialized = false,
+    this.batchImagePaths = const [],
   });
 
   ScanningState copyWith({
@@ -29,6 +31,7 @@ class ScanningState extends Equatable {
     String? errorMessage,
     FlashMode? flashMode,
     bool? isCameraInitialized,
+    List<String>? batchImagePaths,
   }) {
     return ScanningState(
       status: status ?? this.status,
@@ -37,10 +40,11 @@ class ScanningState extends Equatable {
       errorMessage: errorMessage ?? this.errorMessage,
       flashMode: flashMode ?? this.flashMode,
       isCameraInitialized: isCameraInitialized ?? this.isCameraInitialized,
+      batchImagePaths: batchImagePaths ?? this.batchImagePaths,
     );
   }
 
   @override
   List<Object?> get props =>
-      [status, result, imagePath, errorMessage, flashMode, isCameraInitialized];
+      [status, result, imagePath, errorMessage, flashMode, isCameraInitialized, batchImagePaths];
 }

@@ -24,6 +24,7 @@ class ScanningBloc extends Bloc<ScanningEvent, ScanningState> {
     on<ToggleFlash>(_onToggleFlash);
     on<CameraReady>(_onCameraReady);
     on<CameraNotReady>(_onCameraNotReady);
+    on<FinishBatchScan>(_onFinishBatchScan);
   }
 
   Future<void> _onScanImage(
@@ -32,8 +33,21 @@ class ScanningBloc extends Bloc<ScanningEvent, ScanningState> {
   ) async {
     emit(state.copyWith(status: ScanningStatus.loading));
     try {
+      if (event.featureOption == FeatureOption.batchScan) {
+        final newPaths = List<String>.from(state.batchImagePaths)
+          ..add(event.imagePath);
+        emit(
+          state.copyWith(
+            status: ScanningStatus.batchAdded,
+            batchImagePaths: newPaths,
+          ),
+        );
+        return;
+      }
+
       TextRecognitionResult result;
-      if (event.featureOption == FeatureOption.scanDocument) {
+      if (event.featureOption == FeatureOption.scanDocument ||
+          event.featureOption == FeatureOption.scanId) {
         result = await recognizeText(event.imagePath);
       } else {
         result = await recognizeQR(event.imagePath);
@@ -82,5 +96,14 @@ class ScanningBloc extends Bloc<ScanningEvent, ScanningState> {
 
   void _onCameraNotReady(CameraNotReady event, Emitter<ScanningState> emit) {
     emit(state.copyWith(isCameraInitialized: false));
+  }
+
+  void _onFinishBatchScan(
+    FinishBatchScan event,
+    Emitter<ScanningState> emit,
+  ) {
+    if (state.batchImagePaths.isNotEmpty) {
+      emit(state.copyWith(status: ScanningStatus.batchFinished));
+    }
   }
 }
