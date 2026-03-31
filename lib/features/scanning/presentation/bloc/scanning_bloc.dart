@@ -1,0 +1,109 @@
+import 'package:camera/camera.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:injectable/injectable.dart';
+import 'package:powerocr/core/constants/enum.dart';
+import 'package:powerocr/core/di/locator.dart';
+import 'package:powerocr/core/services/interfaces/iscan_history_service.dart'
+    show IScanHistoryService;
+import 'package:powerocr/features/scanning/domain/entities/text_recognition_result.dart';
+import 'package:powerocr/features/scanning/domain/repositories/scanning_repository.dart';
+import 'package:powerocr/features/scanning/domain/usecases/recognize_qr.dart';
+import 'package:powerocr/features/scanning/domain/usecases/recognize_text.dart';
+import 'package:powerocr/features/scanning/presentation/bloc/scanning_event.dart';
+import 'package:powerocr/features/scanning/presentation/bloc/scanning_state.dart';
+
+@injectable
+class ScanningBloc extends Bloc<ScanningEvent, ScanningState> {
+  final RecognizeText recognizeText = locator<RecognizeText>();
+  final RecognizeQR recognizeQR = locator<RecognizeQR>();
+  final scanHistoryService = locator<IScanHistoryService>();
+
+  ScanningBloc() : super(const ScanningState()) {
+    on<ScanImage>(_onScanImage);
+    on<ResetScan>(_onResetScan);
+    on<ToggleFlash>(_onToggleFlash);
+    on<CameraReady>(_onCameraReady);
+    on<CameraNotReady>(_onCameraNotReady);
+    on<FinishBatchScan>(_onFinishBatchScan);
+  }
+
+  Future<void> _onScanImage(
+    ScanImage event,
+    Emitter<ScanningState> emit,
+  ) async {
+    emit(state.copyWith(status: ScanningStatus.loading));
+    try {
+      if (event.featureOption == FeatureOption.batchScan) {
+        final newPaths = List<String>.from(state.batchImagePaths)
+          ..add(event.imagePath);
+        emit(
+          state.copyWith(
+            status: ScanningStatus.batchAdded,
+            batchImagePaths: newPaths,
+          ),
+        );
+        return;
+      }
+
+      TextRecognitionResult result;
+      if (event.featureOption == FeatureOption.scanDocument ||
+          event.featureOption == FeatureOption.scanId) {
+        result = await recognizeText(event.imagePath);
+      } else {
+        result = await recognizeQR(event.imagePath);
+      }
+      if (result.text.isNotEmpty) {
+        await locator<ScanningRepository>().saveScanHistory(result);
+      }
+      emit(
+        state.copyWith(
+          status: ScanningStatus.success,
+          result: result,
+          imagePath: event.imagePath,
+        ),
+      );
+    } catch (e) {
+      emit(
+        state.copyWith(
+          status: ScanningStatus.failure,
+          errorMessage: e.toString(),
+        ),
+      );
+    }
+  }
+
+  void _onResetScan(ResetScan event, Emitter<ScanningState> emit) {
+    emit(
+      ScanningState(
+        flashMode: state.flashMode,
+        isCameraInitialized: state.isCameraInitialized,
+      ),
+    );
+  }
+
+  void _onToggleFlash(ToggleFlash event, Emitter<ScanningState> emit) {
+    final next = switch (state.flashMode) {
+      FlashMode.auto => FlashMode.always,
+      FlashMode.always => FlashMode.off,
+      _ => FlashMode.auto,
+    };
+    emit(state.copyWith(flashMode: next));
+  }
+
+  void _onCameraReady(CameraReady event, Emitter<ScanningState> emit) {
+    emit(state.copyWith(isCameraInitialized: true));
+  }
+
+  void _onCameraNotReady(CameraNotReady event, Emitter<ScanningState> emit) {
+    emit(state.copyWith(isCameraInitialized: false));
+  }
+
+  void _onFinishBatchScan(
+    FinishBatchScan event,
+    Emitter<ScanningState> emit,
+  ) {
+    if (state.batchImagePaths.isNotEmpty) {
+      emit(state.copyWith(status: ScanningStatus.batchFinished));
+    }
+  }
+}
