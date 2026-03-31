@@ -130,8 +130,13 @@ class _PhotoViewerOverlayState extends State<PhotoViewerOverlay>
       final focalPoint = details.localPosition;
       final scale = _doubleTapScale;
       target = Matrix4.identity()
-        ..translate(-focalPoint.dx * (scale - 1), -focalPoint.dy * (scale - 1))
-        ..scale(scale);
+        ..translateByDouble(
+          -focalPoint.dx * (scale - 1),
+          -focalPoint.dy * (scale - 1),
+          0.0,
+          1.0,
+        )
+        ..scaleByDouble(scale, scale, 1.0, 1.0);
     } else {
       target = Matrix4.identity();
     }

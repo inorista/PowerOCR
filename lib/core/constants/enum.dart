@@ -9,6 +9,10 @@ enum FeatureOption {
   scanDocument,
   @JsonValue('scan_qr')
   scanQR,
+  @JsonValue('batch_scan')
+  batchScan,
+  @JsonValue('scan_id')
+  scanId,
 }
 
 @HiveType(typeId: HiveBoxNums.scanHistoryType)

@@ -5,6 +5,7 @@ import 'package:powerocr/features/home_screen/presentation/screens/home_screen.d
 import 'package:powerocr/features/scan_history_screen/presentation/scan_history_screen/scan_history_screen.dart';
 import 'package:powerocr/features/scanning/domain/entities/text_recognition_result.dart';
 import 'package:powerocr/features/scanning/presentation/screens/scan_result_screen/scan_result_screen.dart';
+import 'package:powerocr/features/scanning/presentation/screens/batch_result_screen/batch_result_screen.dart';
 import 'package:powerocr/features/scanning/presentation/screens/scanning_screen/scanning_screen.dart';
 import 'package:powerocr/features/splash_screen/presentation/screens/splash_screen.dart';
 
@@ -43,6 +44,13 @@ final GoRouter router = GoRouter(
       path: AppRouter.scanHistory,
       builder: (context, state) => const ScanHistoryScreen(),
     ),
+    GoRoute(
+      path: AppRouter.batchResult,
+      builder: (context, state) {
+        final imagePaths = state.extra as List<String>;
+        return BatchResultScreen(imagePaths: imagePaths);
+      },
+    ),
   ],
 );
 
@@ -54,4 +62,5 @@ class AppRouter {
   static const String scanning = '/scanning';
   static const String scanResult = '/scan-result';
   static const String scanHistory = '/scan-history';
+  static const String batchResult = '/batch-result';
 }
