@@ -3,16 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:camera/camera.dart';
+import 'package:powerocr/core/constants/enum.dart';
 import 'package:powerocr/core/router/app_router.dart';
 import 'package:powerocr/features/scanning/presentation/bloc/scanning_bloc.dart';
 import 'package:powerocr/features/scanning/presentation/bloc/scanning_event.dart';
 
 class ScannerTopBar extends StatelessWidget {
   final FlashMode flashMode;
+  final FeatureOption featureOption;
 
   const ScannerTopBar({
     super.key,
     required this.flashMode,
+    required this.featureOption,
   });
 
   @override
@@ -31,7 +34,7 @@ class ScannerTopBar extends StatelessWidget {
                 onTap: () => context.go(AppRouter.home),
               ),
               const Spacer(),
-              const _ScannerHint(),
+              _ScannerHint(featureOption: featureOption),
               const Spacer(),
               _FlashButton(
                 mode: flashMode,
@@ -46,10 +49,15 @@ class ScannerTopBar extends StatelessWidget {
 }
 
 class _ScannerHint extends StatelessWidget {
-  const _ScannerHint();
+  final FeatureOption featureOption;
+  const _ScannerHint({required this.featureOption});
 
   @override
   Widget build(BuildContext context) {
+    final (IconData icon, String label, Color accent) = _hintForMode(
+      featureOption,
+    );
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
       child: BackdropFilter(
@@ -57,24 +65,46 @@ class _ScannerHint extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
           decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.4),
+            color: Colors.black.withValues(alpha: 0.45),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+            border: Border.all(color: accent.withValues(alpha: 0.3), width: 1),
           ),
-          child: const Row(
+          child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.qr_code_scanner_rounded, color: Colors.white70, size: 14),
-              SizedBox(width: 6),
-              Text(
-                'Align document or QR code',
-                style: TextStyle(color: Colors.white70, fontSize: 12),
-              ),
+              Icon(icon, color: accent, size: 14),
+              const SizedBox(width: 6),
+              Text(label, style: TextStyle(color: accent, fontSize: 12)),
             ],
           ),
         ),
       ),
     );
+  }
+
+  static (IconData, String, Color) _hintForMode(FeatureOption mode) {
+    return switch (mode) {
+      FeatureOption.scanQR => (
+        Icons.qr_code_rounded,
+        'Point at QR / barcode',
+        const Color(0xFF06D6A0),
+      ),
+      FeatureOption.scanId => (
+        Icons.credit_card_rounded,
+        'Align ID or business card',
+        const Color(0xFFFFD166),
+      ),
+      FeatureOption.batchScan => (
+        Icons.layers_rounded,
+        'Scan pages one by one',
+        const Color(0xFF8B8FE3),
+      ),
+      FeatureOption.scanDocument => (
+        Icons.description_rounded,
+        'Align document in frame',
+        const Color(0xFF8B8FE3),
+      ),
+    };
   }
 }
 
@@ -116,22 +146,12 @@ class _FlashButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    IconData icon;
-    Color color;
-    switch (mode) {
-      case FlashMode.off:
-        icon = Icons.flash_off_rounded;
-        color = Colors.white60;
-      case FlashMode.auto:
-        icon = Icons.flash_auto_rounded;
-        color = const Color(0xFF95E1D3);
-      case FlashMode.always:
-        icon = Icons.flash_on_rounded;
-        color = const Color(0xFF8B8FE3);
-      case FlashMode.torch:
-        icon = Icons.flashlight_on_rounded;
-        color = const Color(0xFFF38181);
-    }
+    final (IconData icon, Color color) = switch (mode) {
+      FlashMode.off => (Icons.flash_off_rounded, Colors.white60),
+      FlashMode.auto => (Icons.flash_auto_rounded, const Color(0xFF95E1D3)),
+      FlashMode.always => (Icons.flash_on_rounded, const Color(0xFF8B8FE3)),
+      FlashMode.torch => (Icons.flashlight_on_rounded, const Color(0xFFF38181)),
+    };
 
     return GestureDetector(
       onTap: onTap,

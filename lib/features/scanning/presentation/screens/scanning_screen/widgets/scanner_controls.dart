@@ -1,18 +1,17 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:powerocr/core/constants/enum.dart';
 
 class ScannerControls extends StatelessWidget {
   final VoidCallback onGalleryTap;
   final VoidCallback onCaptureTap;
-  final Animation<double> pulseScale;
-  final Animation<double> pulseOpacity;
+  final FeatureOption featureOption;
 
   const ScannerControls({
     super.key,
     required this.onGalleryTap,
     required this.onCaptureTap,
-    required this.pulseScale,
-    required this.pulseOpacity,
+    required this.featureOption,
   });
 
   @override
@@ -44,13 +43,11 @@ class ScannerControls extends StatelessWidget {
                 const SizedBox(width: 8),
                 _CaptureButton(
                   onTap: onCaptureTap,
-                  pulseScale: pulseScale,
-                  pulseOpacity: pulseOpacity,
+                  featureOption: featureOption,
                 ),
                 const SizedBox(width: 8),
-                const SizedBox(
-                  width: 52,
-                ), // Placeholder to balance gallery button
+                // Balance the gallery button
+                const SizedBox(width: 52),
               ],
             ),
           ),
@@ -101,67 +98,81 @@ class _ControlButton extends StatelessWidget {
 
 class _CaptureButton extends StatelessWidget {
   final VoidCallback onTap;
-  final Animation<double> pulseScale;
-  final Animation<double> pulseOpacity;
+  final FeatureOption featureOption;
 
-  const _CaptureButton({
-    required this.onTap,
-    required this.pulseScale,
-    required this.pulseOpacity,
-  });
+  const _CaptureButton({required this.onTap, required this.featureOption});
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: pulseScale,
-      builder: (context, child) => GestureDetector(
-        onTap: onTap,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Transform.scale(
-              scale: pulseScale.value,
-              child: Container(
-                width: 84,
-                height: 84,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Colors.white.withValues(
-                      alpha: pulseOpacity.value * 0.5,
-                    ),
-                    width: 2,
-                  ),
-                ),
+    final (Color gradientA, Color gradientB, IconData icon) = _styleForMode(
+      featureOption,
+    );
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Outer ring — static, accent-coloured border
+          Container(
+            width: 84,
+            height: 84,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: gradientA.withValues(alpha: 0.4),
+                width: 2,
               ),
             ),
-            Container(
-              width: 70,
-              height: 70,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF8B8FE3), Color(0xFF55C7B5)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+          ),
+          // Inner button
+          Container(
+            width: 70,
+            height: 70,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                colors: [gradientA, gradientB],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: gradientA.withValues(alpha: 0.45),
+                  blurRadius: 18,
+                  spreadRadius: 2,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF8B8FE3).withValues(alpha: 0.5),
-                    blurRadius: 20,
-                    spreadRadius: 2,
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.camera_alt_rounded,
-                color: Colors.white,
-                size: 30,
-              ),
+              ],
             ),
-          ],
-        ),
+            child: Icon(icon, color: Colors.white, size: 30),
+          ),
+        ],
       ),
     );
+  }
+
+  static (Color, Color, IconData) _styleForMode(FeatureOption mode) {
+    return switch (mode) {
+      FeatureOption.scanQR => (
+        const Color(0xFF06D6A0),
+        const Color(0xFF118AB2),
+        Icons.qr_code_scanner_rounded,
+      ),
+      FeatureOption.scanId => (
+        const Color(0xFFFFD166),
+        const Color(0xFFEF8C4B),
+        Icons.credit_card_rounded,
+      ),
+      FeatureOption.batchScan => (
+        const Color(0xFF8B8FE3),
+        const Color(0xFF55C7B5),
+        Icons.add_photo_alternate_rounded,
+      ),
+      FeatureOption.scanDocument => (
+        const Color(0xFF8B8FE3),
+        const Color(0xFF55C7B5),
+        Icons.camera_alt_rounded,
+      ),
+    };
   }
 }

@@ -23,56 +23,48 @@ class ScanningScreen extends StatefulWidget {
 }
 
 class _ScanningScreenState extends State<ScanningScreen>
-    with TickerProviderStateMixin, WidgetsBindingObserver {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   CameraController? _controller;
+
   late AnimationController _scanLineCtrl;
   late Animation<double> _scanLinePos;
 
-  late AnimationController _beamCtrl;
-  late Animation<double> _beamFade;
-
-  late AnimationController _pulseCtrl;
-  late Animation<double> _pulseScale;
-  late Animation<double> _pulseOpacity;
   late ScanningBloc _bloc;
   final ImagePicker _picker = ImagePicker();
   bool _isInit = false;
+
+  _FrameConfig get _frameConfig {
+    final size = _cachedSize;
+    switch (widget.featureOption) {
+      case FeatureOption.scanQR:
+        final side = size.width * 0.72;
+        return _FrameConfig(width: side, height: side, cornerRadius: 20);
+      case FeatureOption.scanId:
+        final w = size.width * 0.88;
+        return _FrameConfig(width: w, height: w / 1.586, cornerRadius: 16);
+      case FeatureOption.scanDocument:
+      case FeatureOption.batchScan:
+        final w = size.width * 0.85;
+        return _FrameConfig(width: w, height: w * 1.35, cornerRadius: 24);
+    }
+  }
+
+  Size _cachedSize = Size.zero;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _bloc = locator<ScanningBloc>();
+
     _scanLineCtrl = AnimationController(
       duration: const Duration(seconds: 3),
       vsync: this,
     )..repeat(reverse: true);
     _scanLinePos = Tween(
-      begin: 0.1,
-      end: 0.9,
+      begin: 0.05,
+      end: 0.95,
     ).animate(CurvedAnimation(parent: _scanLineCtrl, curve: Curves.easeInOut));
-
-    _beamCtrl = AnimationController(
-      duration: const Duration(milliseconds: 1500),
-      vsync: this,
-    )..repeat(reverse: true);
-    _beamFade = Tween(
-      begin: 0.3,
-      end: 0.7,
-    ).animate(CurvedAnimation(parent: _beamCtrl, curve: Curves.easeInOut));
-
-    _pulseCtrl = AnimationController(
-      duration: const Duration(milliseconds: 1800),
-      vsync: this,
-    )..repeat();
-    _pulseScale = Tween(
-      begin: 1.0,
-      end: 1.4,
-    ).animate(CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeOutCubic));
-    _pulseOpacity = Tween(
-      begin: 1.0,
-      end: 0.0,
-    ).animate(CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeOutCubic));
 
     _initCamera();
   }
@@ -104,21 +96,15 @@ class _ScanningScreenState extends State<ScanningScreen>
     WidgetsBinding.instance.removeObserver(this);
     _controller?.dispose();
     _scanLineCtrl.dispose();
-    _beamCtrl.dispose();
-    _pulseCtrl.dispose();
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final CameraController? cameraController = _controller;
-
-    if (cameraController == null || !cameraController.value.isInitialized) {
-      return;
-    }
-
+    final cc = _controller;
+    if (cc == null || !cc.value.isInitialized) return;
     if (state == AppLifecycleState.inactive) {
-      cameraController.dispose();
+      cc.dispose();
     } else if (state == AppLifecycleState.resumed) {
       _initCamera();
     }
@@ -135,11 +121,8 @@ class _ScanningScreenState extends State<ScanningScreen>
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.sizeOf(context);
-
-    // Frame dims
-    final frameW = size.width * 0.85;
-    final frameH = frameW * 1.25;
+    _cachedSize = MediaQuery.sizeOf(context);
+    final size = _cachedSize;
 
     return BlocProvider<ScanningBloc>.value(
       value: _bloc,
@@ -197,9 +180,7 @@ class _ScanningScreenState extends State<ScanningScreen>
           body: BlocConsumer<ScanningBloc, ScanningState>(
             listenWhen: (prev, curr) => prev.flashMode != curr.flashMode,
             listener: (context, state) {
-              if (_isInit) {
-                _onFlashModeChanged(state.flashMode);
-              }
+              if (_isInit) _onFlashModeChanged(state.flashMode);
             },
             builder: (context, state) {
               if (state.status == ScanningStatus.loading) {
@@ -207,7 +188,7 @@ class _ScanningScreenState extends State<ScanningScreen>
               } else if (state.status == ScanningStatus.success) {
                 return const SizedBox.shrink();
               }
-              final flashMode = state.flashMode;
+
               return Stack(
                 children: [
                   if (_isInit && _controller != null)
@@ -217,10 +198,10 @@ class _ScanningScreenState extends State<ScanningScreen>
                         child: SizedBox(
                           width:
                               _controller!.value.previewSize?.height ??
-                              MediaQuery.sizeOf(context).width,
+                              size.width,
                           height:
                               _controller!.value.previewSize?.width ??
-                              MediaQuery.sizeOf(context).height,
+                              size.height,
                           child: CameraPreview(_controller!),
                         ),
                       ),
@@ -236,92 +217,23 @@ class _ScanningScreenState extends State<ScanningScreen>
                       ),
                     ),
 
-                  _buildCameraOverlay(context, size),
+                  _buildDimOverlay(size),
 
-                  if (_isInit)
-                    AnimatedBuilder(
-                      animation: _beamFade,
-                      builder: (context, child) {
-                        final beamY = (size.height - frameH) / 2 + (frameH / 2);
-                        return Positioned(
-                          top: beamY - 24,
-                          left: (size.width - frameW) / 2,
-                          width: frameW,
-                          height: 48,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors: [
-                                    Colors.transparent,
-                                    const Color(
-                                      0xFF8B8FE3,
-                                    ).withValues(alpha: 0.08),
-                                    const Color(
-                                      0xFF95E1D3,
-                                    ).withValues(alpha: 0.45),
-                                    const Color(
-                                      0xFF8B8FE3,
-                                    ).withValues(alpha: 0.08),
-                                    Colors.transparent,
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-
-                  if (_isInit)
+                  if (_isInit && _hasScanLine)
                     AnimatedBuilder(
                       animation: _scanLinePos,
-                      builder: (context, child) {
-                        final topOffset = (size.height - frameH) / 2;
-                        final lineY =
-                            topOffset +
-                            (_scanLinePos.value * frameH).clamp(0, frameH);
-                        return Positioned(
-                          top: lineY,
-                          left: (size.width - frameW) / 2 + 4,
-                          width: frameW - 8,
-                          height: 1.5,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [
-                                  Colors.transparent,
-                                  Color(0xFF95E1D3),
-                                  Color(0xFF8B8FE3),
-                                  Color(0xFF95E1D3),
-                                  Colors.transparent,
-                                ],
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(
-                                    0xFF8B8FE3,
-                                  ).withValues(alpha: 0.8),
-                                  blurRadius: 6,
-                                  spreadRadius: 1,
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
+                      builder: (context, _) => _buildScanLine(size),
                     ),
 
-                  ScannerTopBar(flashMode: flashMode),
+                  ScannerTopBar(
+                    flashMode: state.flashMode,
+                    featureOption: widget.featureOption,
+                  ),
 
                   ScannerControls(
                     onGalleryTap: () => _pickImage(context),
                     onCaptureTap: () => _takePicture(context),
-                    pulseScale: _pulseScale,
-                    pulseOpacity: _pulseOpacity,
+                    featureOption: widget.featureOption,
                   ),
 
                   if (widget.featureOption == FeatureOption.batchScan &&
@@ -329,31 +241,19 @@ class _ScanningScreenState extends State<ScanningScreen>
                     Positioned(
                       bottom: size.height * 0.18,
                       right: 24,
-                      child: TweenAnimationBuilder<double>(
-                        tween: Tween(begin: 0.0, end: 1.0),
-                        duration: const Duration(milliseconds: 300),
-                        builder: (context, value, child) {
-                          return Transform.scale(
-                            scale: value,
-                            child: Opacity(opacity: value, child: child),
-                          );
+                      child: FloatingActionButton.extended(
+                        heroTag: 'batch_finish_btn',
+                        onPressed: () {
+                          context.read<ScanningBloc>().add(FinishBatchScan());
                         },
-                        child: FloatingActionButton.extended(
-                          heroTag: 'batch_finish_btn',
-                          onPressed: () {
-                            context.read<ScanningBloc>().add(FinishBatchScan());
-                          },
-                          backgroundColor: Theme.of(
-                            context,
-                          ).colorScheme.primary,
-                          foregroundColor: Theme.of(
-                            context,
-                          ).colorScheme.onPrimary,
-                          icon: const Icon(Icons.check_circle_outline_rounded),
-                          label: Text(
-                            'Finish (${state.batchImagePaths.length})',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(
+                          context,
+                        ).colorScheme.onPrimary,
+                        icon: const Icon(Icons.check_circle_outline_rounded),
+                        label: Text(
+                          'Finish (${state.batchImagePaths.length})',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
@@ -366,13 +266,18 @@ class _ScanningScreenState extends State<ScanningScreen>
     );
   }
 
-  Widget _buildCameraOverlay(BuildContext context, Size size) {
-    final frameW = size.width * 0.82;
-    final frameH = frameW * 1.35;
+  bool get _hasScanLine {
+    return widget.featureOption == FeatureOption.scanDocument ||
+        widget.featureOption == FeatureOption.batchScan ||
+        widget.featureOption == FeatureOption.scanId;
+  }
 
+  // Punched-out viewport via srcOut blend
+  Widget _buildDimOverlay(Size size) {
+    final cfg = _frameConfig;
     return ColorFiltered(
       colorFilter: ColorFilter.mode(
-        Colors.black.withValues(alpha: 0.45),
+        Colors.black.withValues(alpha: 0.55),
         BlendMode.srcOut,
       ),
       child: Stack(
@@ -384,13 +289,15 @@ class _ScanningScreenState extends State<ScanningScreen>
             ),
           ),
           Align(
-            alignment: Alignment.center,
+            alignment: widget.featureOption == FeatureOption.scanId
+                ? const Alignment(0, -0.1) // slightly above centre for card
+                : Alignment.center,
             child: Container(
-              width: frameW,
-              height: frameH,
+              width: cfg.width,
+              height: cfg.height,
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(cfg.cornerRadius),
               ),
             ),
           ),
@@ -399,15 +306,57 @@ class _ScanningScreenState extends State<ScanningScreen>
     );
   }
 
+  Widget _buildScanLine(Size size) {
+    final cfg = _frameConfig;
+
+    final frameTop = widget.featureOption == FeatureOption.scanId
+        ? (size.height - cfg.height) / 2 - size.height * 0.05
+        : (size.height - cfg.height) / 2;
+
+    final lineY =
+        frameTop + (_scanLinePos.value * cfg.height).clamp(0.0, cfg.height);
+    final lineLeft = (size.width - cfg.width) / 2 + 4;
+
+    // Colour varies by mode
+    final Color lineColor = switch (widget.featureOption) {
+      FeatureOption.scanId => const Color(0xFFFFD166),
+      FeatureOption.scanQR => const Color(0xFF06D6A0),
+      _ => const Color(0xFF8B8FE3),
+    };
+
+    return Positioned(
+      top: lineY,
+      left: lineLeft,
+      width: cfg.width - 8,
+      height: 1.5,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.transparent,
+              lineColor,
+              lineColor.withValues(alpha: 0.6),
+              lineColor,
+              Colors.transparent,
+            ],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: lineColor.withValues(alpha: 0.7),
+              blurRadius: 6,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _takePicture(BuildContext context) async {
-    if (_controller == null || !_controller!.value.isInitialized) {
-      return;
-    }
+    if (_controller == null || !_controller!.value.isInitialized) return;
     try {
       final image = await _controller!.takePicture();
-      if (!context.mounted) {
-        return;
-      }
+      if (!context.mounted) return;
       context.read<ScanningBloc>().add(
         ScanImage(image.path, widget.featureOption),
       );
@@ -421,7 +370,6 @@ class _ScanningScreenState extends State<ScanningScreen>
       if (_controller != null && _controller!.value.isInitialized) {
         await _controller!.pausePreview();
       }
-
       final image = await _picker.pickImage(source: ImageSource.gallery);
       if (image != null && context.mounted) {
         context.read<ScanningBloc>().add(
@@ -439,4 +387,15 @@ class _ScanningScreenState extends State<ScanningScreen>
       }
     }
   }
+}
+
+class _FrameConfig {
+  final double width;
+  final double height;
+  final double cornerRadius;
+  const _FrameConfig({
+    required this.width,
+    required this.height,
+    required this.cornerRadius,
+  });
 }
