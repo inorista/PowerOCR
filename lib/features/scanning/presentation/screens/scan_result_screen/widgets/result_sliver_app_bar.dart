@@ -2,7 +2,9 @@ import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:powerocr/core/constants/enum.dart';
 import 'package:powerocr/core/router/app_router.dart';
+import 'package:powerocr/features/scanning/presentation/screens/scan_result_screen/widgets/bounding_box_overlay.dart';
 import 'package:powerocr/features/scanning/presentation/screens/scan_result_screen/widgets/glass_button.dart';
 import 'package:powerocr/features/scanning/presentation/screens/scan_result_screen/widgets/photo_viewer_overlay.dart';
 
@@ -10,15 +12,28 @@ class ResultSliverAppBar extends StatelessWidget {
   final String imagePath;
   final double expandedHeight;
   final bool isDark;
+  final List<List<double>>? boundingBoxes;
+  final int imageWidth;
+  final int imageHeight;
+  final ScanHistoryType? scanType;
 
   const ResultSliverAppBar({
     super.key,
     required this.imagePath,
     required this.expandedHeight,
     required this.isDark,
+    this.boundingBoxes,
+    this.imageWidth = 0,
+    this.imageHeight = 0,
+    this.scanType,
   });
 
   static const String _heroTag = 'scan_result_image';
+
+  bool get _isDocumentWithBoundingBoxes =>
+      scanType == ScanHistoryType.document &&
+      boundingBoxes != null &&
+      boundingBoxes!.isNotEmpty;
 
   @override
   Widget build(BuildContext context) {
@@ -34,34 +49,54 @@ class ResultSliverAppBar extends StatelessWidget {
             background: Stack(
               fit: StackFit.expand,
               children: [
-                GestureDetector(
-                  onTap: () => PhotoViewerOverlay.show(
-                    context,
-                    imagePath: imagePath,
-                    heroTag: _heroTag,
-                  ),
-                  child: Hero(
-                    tag: _heroTag,
-                    child: Image.file(File(imagePath), fit: BoxFit.cover),
-                  ),
-                ),
+                _isDocumentWithBoundingBoxes
+                    ? BoundingBoxOverlay(
+                        imagePath: imagePath,
+                        boundingBoxes: boundingBoxes ?? [],
+                        imageWidth: imageWidth,
+                        imageHeight: imageHeight,
+                        onImageTap: () => PhotoViewerOverlay.show(
+                          context,
+                          imagePath: imagePath,
+                          boundingBoxes: boundingBoxes ?? [],
+                          imageWidth: imageWidth,
+                          imageHeight: imageHeight,
+                          heroTag: _heroTag,
+                        ),
+                      )
+                    : GestureDetector(
+                        onTap: () => PhotoViewerOverlay.show(
+                          context,
+                          imagePath: imagePath,
+                          boundingBoxes: boundingBoxes ?? [],
+                          imageWidth: imageWidth,
+                          imageHeight: imageHeight,
+                          heroTag: _heroTag,
+                        ),
+                        child: Hero(
+                          tag: _heroTag,
+                          child: Image.file(File(imagePath), fit: BoxFit.cover),
+                        ),
+                      ),
 
                 Positioned(
                   bottom: 0,
                   left: 0,
                   right: 0,
                   height: 100,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          isDark
-                              ? const Color(0xFF1A1A26)
-                              : const Color(0xFFF2F3F8),
-                        ],
+                  child: IgnorePointer(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            isDark
+                                ? const Color(0xFF1A1A26)
+                                : const Color(0xFFF2F3F8),
+                          ],
+                        ),
                       ),
                     ),
                   ),

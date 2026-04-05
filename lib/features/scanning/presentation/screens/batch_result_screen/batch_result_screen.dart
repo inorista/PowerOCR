@@ -1,11 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:path_provider/path_provider.dart';
 import 'package:powerocr/core/di/locator.dart';
 import 'package:powerocr/core/services/interfaces/ipdf_service.dart';
-import 'package:share_plus/share_plus.dart';
 
 class BatchResultScreen extends StatefulWidget {
   final List<String> imagePaths;

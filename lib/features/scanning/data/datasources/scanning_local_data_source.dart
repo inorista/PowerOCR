@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'dart:ui' as ui;
+
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart'
     as ml;
 import 'package:injectable/injectable.dart';
@@ -50,6 +53,16 @@ class ScanningLocalDataSourceImpl implements ScanningLocalDataSource {
       script: ml.TextRecognitionScript.latin,
     );
 
+    int imageWidth = 0;
+    int imageHeight = 0;
+    try {
+      final bytes = await File(imagePath).readAsBytes();
+      final codec = await ui.instantiateImageCodec(bytes);
+      final frameInfo = await codec.getNextFrame();
+      imageWidth = frameInfo.image.width;
+      imageHeight = frameInfo.image.height;
+    } catch (_) {}
+
     try {
       final recognizedText = await textRecognizer.processImage(inputImage);
 
@@ -68,6 +81,8 @@ class ScanningLocalDataSourceImpl implements ScanningLocalDataSource {
       return TextRecognitionResult(
         text: recognizedText.text,
         blocks: blocks,
+        imageWidth: imageWidth,
+        imageHeight: imageHeight,
         createdAt: DateTime.now(),
         imagePath: imagePath,
         type: ScanHistoryType.document,
