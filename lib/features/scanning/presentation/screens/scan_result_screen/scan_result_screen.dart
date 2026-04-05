@@ -147,6 +147,12 @@ class _ScanResultScreenState extends State<ScanResultScreen>
                     imagePath: widget.imagePath,
                     expandedHeight: expandedImageHeight,
                     isDark: isDark,
+                    boundingBoxes: widget.result.blocks
+                        .map((block) => block.boundingBox)
+                        .toList(),
+                    imageWidth: widget.result.imageWidth,
+                    imageHeight: widget.result.imageHeight,
+                    scanType: widget.result.type,
                   ),
                   ResultHeaderSection(
                     wordCount: _wordCount,
