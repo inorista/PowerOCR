@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:powerocr/core/di/locator.dart';
 import 'package:powerocr/core/router/app_router.dart';
+import 'package:powerocr/core/services/interfaces/ilocal_notification_service.dart';
+import 'package:powerocr/core/services/interfaces/ipush_notification_service.dart';
 import 'package:powerocr/core/theme/app_theme.dart';
 import 'package:powerocr/core/theme/cubit/theme_cubit.dart';
 import 'package:powerocr/database/hive_database.dart';
@@ -13,6 +15,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await HiveDatabase().setupHiveDatabase();
   await configureDependencies();
+  await locator<ILocalNotificationService>().initialize();
+  await locator<ILocalNotificationService>().requestPermissions();
+  await locator<IPushNotificationService>().initialize();
   runApp(const MainApp());
 }
 

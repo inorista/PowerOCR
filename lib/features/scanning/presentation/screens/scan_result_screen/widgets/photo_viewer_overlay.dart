@@ -3,16 +3,30 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:powerocr/features/scanning/presentation/screens/scan_result_screen/widgets/bounding_box_painter.dart';
 
 class PhotoViewerOverlay extends StatefulWidget {
   final String imagePath;
-
+  final List<List<double>> boundingBoxes;
+  final int imageWidth;
+  final int imageHeight;
   final Object? heroTag;
 
-  const PhotoViewerOverlay({super.key, required this.imagePath, this.heroTag});
+  const PhotoViewerOverlay({
+    super.key,
+    required this.imagePath,
+    this.boundingBoxes = const [],
+    this.imageWidth = 0,
+    this.imageHeight = 0,
+    this.heroTag,
+  });
+
   static Future<void> show(
     BuildContext context, {
     required String imagePath,
+    List<List<double>> boundingBoxes = const [],
+    int imageWidth = 0,
+    int imageHeight = 0,
     Object? heroTag,
   }) {
     HapticFeedback.lightImpact();
@@ -23,8 +37,13 @@ class PhotoViewerOverlay extends StatefulWidget {
         barrierColor: Colors.transparent,
         transitionDuration: const Duration(milliseconds: 350),
         reverseTransitionDuration: const Duration(milliseconds: 280),
-        pageBuilder: (_, _, _) =>
-            PhotoViewerOverlay(imagePath: imagePath, heroTag: heroTag),
+        pageBuilder: (_, _, _) => PhotoViewerOverlay(
+          imagePath: imagePath,
+          boundingBoxes: boundingBoxes,
+          imageWidth: imageWidth,
+          imageHeight: imageHeight,
+          heroTag: heroTag,
+        ),
         transitionsBuilder: (_, animation, _, child) => FadeTransition(
           opacity: CurvedAnimation(
             parent: animation,
@@ -61,6 +80,8 @@ class _PhotoViewerOverlayState extends State<PhotoViewerOverlay>
   double _currentScale = 1.0;
   bool _showZoomBadge = false;
   late AnimationController _zoomBadgeCtrl;
+
+  bool _showBoundingBoxes = true;
 
   @override
   void initState() {
@@ -195,75 +216,147 @@ class _PhotoViewerOverlayState extends State<PhotoViewerOverlay>
   Widget build(BuildContext context) {
     final topPad = MediaQuery.paddingOf(context).top;
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light,
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: AnimatedOpacity(
-              opacity: _backgroundOpacity,
-              duration: Duration.zero,
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 0, sigmaY: 0),
-                child: Container(color: Colors.black.withValues(alpha: 0.92)),
+    return Material(
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.light,
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: AnimatedOpacity(
+                opacity: _backgroundOpacity,
+                duration: Duration.zero,
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 0, sigmaY: 0),
+                  child: Container(color: Colors.black.withValues(alpha: 0.92)),
+                ),
               ),
             ),
-          ),
 
-          Positioned.fill(
-            child: GestureDetector(
-              onVerticalDragStart: _startDismissDrag,
-              onVerticalDragUpdate: _updateDismissDrag,
-              onVerticalDragEnd: _endDismissDrag,
-              child: Transform.translate(
-                offset: Offset(0, _dragOffsetY),
-                child: _buildInteractiveViewer(context),
+            Positioned.fill(
+              child: GestureDetector(
+                onVerticalDragStart: _startDismissDrag,
+                onVerticalDragUpdate: _updateDismissDrag,
+                onVerticalDragEnd: _endDismissDrag,
+                child: Transform.translate(
+                  offset: Offset(0, _dragOffsetY),
+                  child: _buildInteractiveViewer(context),
+                ),
               ),
             ),
-          ),
 
-          Positioned(
-            top: topPad + 8,
-            left: 16,
-            right: 16,
-            child: AnimatedOpacity(
-              opacity: _isDraggingToDismiss ? 0.0 : 1.0,
-              duration: const Duration(milliseconds: 150),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _GlassIconButton(icon: Icons.close_rounded, onTap: _close),
-                  _buildZoomBadge(),
-                  _GlassIconButton(
-                    icon: Icons.fit_screen_rounded,
-                    onTap: () {
-                      _doubleTapAnimCtrl.stop();
-                      final anim =
-                          Matrix4Tween(
-                            begin: _transformCtrl.value,
-                            end: Matrix4.identity(),
-                          ).animate(
-                            CurvedAnimation(
-                              parent: _doubleTapAnimCtrl,
-                              curve: Curves.easeInOutCubicEmphasized,
-                            ),
+            Positioned(
+              top: topPad + 8,
+              left: 16,
+              right: 16,
+              child: AnimatedOpacity(
+                opacity: _isDraggingToDismiss ? 0.0 : 1.0,
+                duration: const Duration(milliseconds: 150),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _GlassIconButton(icon: Icons.close_rounded, onTap: _close),
+                    _buildZoomBadge(),
+                    _GlassIconButton(
+                      icon: Icons.fit_screen_rounded,
+                      onTap: () {
+                        _doubleTapAnimCtrl.stop();
+                        final anim =
+                            Matrix4Tween(
+                              begin: _transformCtrl.value,
+                              end: Matrix4.identity(),
+                            ).animate(
+                              CurvedAnimation(
+                                parent: _doubleTapAnimCtrl,
+                                curve: Curves.easeInOutCubicEmphasized,
+                              ),
+                            );
+                        _doubleTapAnim = anim;
+                        _doubleTapAnimCtrl.forward(from: 0);
+                        HapticFeedback.selectionClick();
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            if (widget.boundingBoxes.isNotEmpty)
+              Positioned(
+                bottom: MediaQuery.paddingOf(context).bottom + 24,
+                left: 0,
+                right: 0,
+                child: AnimatedOpacity(
+                  opacity: _isDraggingToDismiss ? 0.0 : 1.0,
+                  duration: const Duration(milliseconds: 150),
+                  child: Center(
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          setState(
+                            () => _showBoundingBoxes = !_showBoundingBoxes,
                           );
-                      _doubleTapAnim = anim;
-                      _doubleTapAnimCtrl.forward(from: 0);
-                      HapticFeedback.selectionClick();
-                    },
+                        },
+                        borderRadius: BorderRadius.circular(20),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 10,
+                              ),
+                              decoration: BoxDecoration(
+                                color: _showBoundingBoxes
+                                    ? Colors.cyan.withValues(alpha: 0.6)
+                                    : Colors.black.withValues(alpha: 0.4),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.18),
+                                  width: 0.5,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    _showBoundingBoxes
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
+                                    color: Colors.white,
+                                    size: 18,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    _showBoundingBoxes
+                                        ? 'Hide boxes'
+                                        : 'Show boxes',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                ],
+                ),
               ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildInteractiveViewer(BuildContext context) {
-    final imageWidget = Image.file(
+    Widget imageContent = Image.file(
       File(widget.imagePath),
       fit: BoxFit.contain,
       errorBuilder: (_, _, _) => const Center(
@@ -275,9 +368,31 @@ class _PhotoViewerOverlayState extends State<PhotoViewerOverlay>
       ),
     );
 
+    if (_showBoundingBoxes && widget.boundingBoxes.isNotEmpty) {
+      imageContent = Stack(
+        alignment: Alignment.center,
+        children: [
+          imageContent,
+          Positioned.fill(
+            child: CustomPaint(
+              painter: BoundingBoxPainter(
+                boundingBoxes: widget.boundingBoxes,
+                imageWidth: widget.imageWidth,
+                imageHeight: widget.imageHeight,
+                strokeColor: Colors.cyan,
+                strokeWidth: 2.0,
+                fillColor: const Color.fromARGB(20, 0, 255, 255),
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
     final child = widget.heroTag != null
-        ? Hero(tag: widget.heroTag!, child: imageWidget)
-        : imageWidget;
+        ? Hero(tag: widget.heroTag!, child: imageContent)
+        : imageContent;
 
     return InteractiveViewer(
       transformationController: _transformCtrl,

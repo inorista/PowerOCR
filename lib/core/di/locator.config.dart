@@ -15,14 +15,24 @@ import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 import 'package:powerocr/core/di/locator.dart' as _i537;
 import 'package:powerocr/core/network/rest_client.dart' as _i150;
+import 'package:powerocr/core/services/implements/local_notification_service.dart'
+    as _i803;
 import 'package:powerocr/core/services/implements/network_service.dart'
     as _i169;
+import 'package:powerocr/core/services/implements/pdf_service.dart' as _i810;
+import 'package:powerocr/core/services/implements/push_notification_service.dart'
+    as _i88;
 import 'package:powerocr/core/services/implements/scan_history_service.dart'
     as _i911;
 import 'package:powerocr/core/services/implements/theme_setting_service.dart'
     as _i1017;
+import 'package:powerocr/core/services/interfaces/ilocal_notification_service.dart'
+    as _i780;
 import 'package:powerocr/core/services/interfaces/inetwork_service.dart'
     as _i47;
+import 'package:powerocr/core/services/interfaces/ipdf_service.dart' as _i277;
+import 'package:powerocr/core/services/interfaces/ipush_notification_service.dart'
+    as _i455;
 import 'package:powerocr/core/services/interfaces/iscan_history_service.dart'
     as _i254;
 import 'package:powerocr/core/services/interfaces/itheme_setting_service.dart'
@@ -70,6 +80,9 @@ extension GetItInjectableX on _i174.GetIt {
     final registerModule = _$RegisterModule();
     gh.factory<_i320.ScanningBloc>(() => _i320.ScanningBloc());
     gh.lazySingleton<_i895.Connectivity>(() => registerModule.connectivity);
+    gh.lazySingleton<_i803.LocalNotificationService>(
+      () => _i803.LocalNotificationService(),
+    );
     gh.lazySingleton<_i812.ScanHistoryDao>(() => _i812.ScanHistoryDao());
     gh.lazySingleton<_i1031.ScanTextBlockHistoryDao>(
       () => _i1031.ScanTextBlockHistoryDao(),
@@ -98,9 +111,13 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i577.HomeLocalDataSourceImpl(gh<_i812.ScanHistoryDao>()),
     );
     gh.lazySingleton<_i47.INetworkService>(() => _i169.NetworkService());
+    gh.lazySingleton<_i277.IPdfService>(() => _i810.PdfService());
     gh.lazySingleton<_i361.Dio>(
       () => registerModule.provideVisionDio(),
       instanceName: 'VisionDio',
+    );
+    gh.lazySingleton<_i455.IPushNotificationService>(
+      () => _i88.PushNotificationService(gh<_i780.ILocalNotificationService>()),
     );
     gh.lazySingleton<_i150.RestClient>(
       () => registerModule.provideRestClient(

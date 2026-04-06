@@ -1,4 +1,4 @@
-part of 'scan_history_screen_bloc_bloc.dart';
+part of 'scan_history_screen_bloc.dart';
 
 enum ScanHistoryScreenBlocStatus { initial, loading, loaded, error }
 
