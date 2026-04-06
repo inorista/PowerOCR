@@ -82,6 +82,8 @@ class HistoryItem extends StatelessWidget {
                           ? Image.file(
                               File(item.imagePath),
                               fit: BoxFit.cover,
+                              cacheHeight: 250,
+                              cacheWidth: 200,
                               errorBuilder: (_, _, _) =>
                                   HistoryThumbnailPlaceholder(
                                     isDark: isDark,
