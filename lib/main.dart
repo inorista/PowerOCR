@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:powerocr/core/di/locator.dart';
@@ -13,6 +14,7 @@ import 'package:powerocr/features/home_screen/presentation/bloc/home_event.dart'
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   await HiveDatabase().setupHiveDatabase();
   await configureDependencies();
   await locator<ILocalNotificationService>().initialize();

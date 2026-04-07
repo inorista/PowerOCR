@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:injectable/injectable.dart';
+import 'package:powerocr/core/di/locator.dart';
 import 'package:powerocr/core/services/interfaces/ilocal_notification_service.dart';
 import 'package:powerocr/core/services/interfaces/ipush_notification_service.dart';
 
@@ -15,9 +16,8 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 @LazySingleton(as: IPushNotificationService)
 class PushNotificationService implements IPushNotificationService {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
-  final ILocalNotificationService _localNotificationService;
-
-  PushNotificationService(this._localNotificationService);
+  final ILocalNotificationService _localNotificationService =
+      locator<ILocalNotificationService>();
 
   @override
   Future<void> initialize() async {

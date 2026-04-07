@@ -89,6 +89,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i126.IThemeSettingService>(
       () => _i1017.ThemeSettingService(gh<_i406.ThemeSettingDao>()),
     );
+    gh.lazySingleton<_i455.IPushNotificationService>(
+      () => _i88.PushNotificationService(),
+    );
     gh.lazySingleton<_i217.ScanningLocalDataSource>(
       () => _i217.ScanningLocalDataSourceImpl(),
     );
@@ -115,9 +118,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i361.Dio>(
       () => registerModule.provideVisionDio(),
       instanceName: 'VisionDio',
-    );
-    gh.lazySingleton<_i455.IPushNotificationService>(
-      () => _i88.PushNotificationService(gh<_i780.ILocalNotificationService>()),
     );
     gh.lazySingleton<_i150.RestClient>(
       () => registerModule.provideRestClient(
