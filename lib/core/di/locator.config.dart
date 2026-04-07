@@ -80,9 +80,6 @@ extension GetItInjectableX on _i174.GetIt {
     final registerModule = _$RegisterModule();
     gh.factory<_i320.ScanningBloc>(() => _i320.ScanningBloc());
     gh.lazySingleton<_i895.Connectivity>(() => registerModule.connectivity);
-    gh.lazySingleton<_i803.LocalNotificationService>(
-      () => _i803.LocalNotificationService(),
-    );
     gh.lazySingleton<_i812.ScanHistoryDao>(() => _i812.ScanHistoryDao());
     gh.lazySingleton<_i1031.ScanTextBlockHistoryDao>(
       () => _i1031.ScanTextBlockHistoryDao(),
@@ -100,6 +97,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i445.GetScanHistory>(
       () => _i445.GetScanHistory(gh<_i729.HomeRepository>()),
+    );
+    gh.lazySingleton<_i780.ILocalNotificationService>(
+      () => _i803.LocalNotificationService(),
     );
     gh.lazySingleton<_i986.ScanHistoryScreenRepository>(
       () => _i51.ScanHistoryScreenRepositoryImpl(),
