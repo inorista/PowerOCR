@@ -26,6 +26,23 @@ class TextRecognitionResult extends Equatable {
   @override
   List<Object?> get props => [text, blocks, imageWidth, imageHeight];
 
+  static TextRecognitionResult fromScanHistory(
+    ScanHistoryEntity scanHistoryEntity,
+    List<ScanTextBlockHistoryEntity> textBlockEntities,
+  ) {
+    return TextRecognitionResult(
+      imagePath: scanHistoryEntity.imagePath,
+      imageHeight: scanHistoryEntity.imageHeight ?? 0,
+      imageWidth: scanHistoryEntity.imageWidth ?? 0,
+      text: scanHistoryEntity.text,
+      createdAt: scanHistoryEntity.createdAt,
+      type: scanHistoryEntity.type ?? ScanHistoryType.document,
+      blocks: textBlockEntities.map((e) {
+        return TextBlock(text: e.text, boundingBox: e.boundingBox);
+      }).toList(),
+    );
+  }
+
   static ScanHistoryEntity toScanHistoryEntity(TextRecognitionResult result) {
     return ScanHistoryEntity(
       imagePath: result.imagePath,

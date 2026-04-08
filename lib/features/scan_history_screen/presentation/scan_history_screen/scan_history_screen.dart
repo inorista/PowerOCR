@@ -1,10 +1,17 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:powerocr/core/di/locator.dart';
 import 'package:powerocr/core/domain/entities/scan_history.dart';
+import 'package:powerocr/core/router/app_router.dart' show AppRouter;
+import 'package:powerocr/core/services/interfaces/iscan_history_service.dart';
 import 'package:powerocr/features/scan_history_screen/presentation/bloc/scan_history_screen_bloc.dart';
 import 'package:powerocr/features/scan_history_screen/presentation/scan_history_screen/widgets/scan_history_grid_card.dart';
 import 'dart:math' as math;
+
+import 'package:powerocr/features/scanning/domain/entities/text_recognition_result.dart'
+    show TextRecognitionResult;
 
 class ScanHistoryScreen extends StatefulWidget {
   const ScanHistoryScreen({super.key});
@@ -155,7 +162,7 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen>
                                 item: item,
                                 theme: theme,
                                 isDark: isDark,
-                                onTap: () => _onItemTap(context, item),
+                                onTap: () => onTapHistoryItem(item),
                               );
                             },
                           ),
@@ -208,8 +215,7 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen>
                                       color: theme.colorScheme.onSurface,
                                       size: 20,
                                     ),
-                                    onPressed: () =>
-                                        Navigator.of(context).maybePop(),
+                                    onPressed: () => context.pop(),
                                   ),
                                   const SizedBox(width: 8),
                                   Expanded(
@@ -260,7 +266,28 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen>
     );
   }
 
-  void _onItemTap(BuildContext context, ScanHistory item) {}
+  Future<void> onTapHistoryItem(ScanHistory item) async {
+    final scanHistory = await locator<IScanHistoryService>().getScanHistoryById(
+      item.id,
+    );
+    if (scanHistory != null) {
+      final scanHistoryTextBlocks = await locator<IScanHistoryService>()
+          .getScanTextBlockHistoryByScanId(scanHistory.id);
+      final textRecognitionResult = TextRecognitionResult.fromScanHistory(
+        scanHistory,
+        scanHistoryTextBlocks,
+      );
+      if (mounted) {
+        context.push(
+          AppRouter.scanResult,
+          extra: {
+            'imagePath': textRecognitionResult.imagePath,
+            'result': textRecognitionResult,
+          },
+        );
+      }
+    }
+  }
 }
 
 class _LoadingIndicator extends StatelessWidget {

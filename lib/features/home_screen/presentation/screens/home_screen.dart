@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:powerocr/core/constants/enum.dart';
+import 'package:powerocr/core/di/locator.dart';
 
 import 'package:powerocr/core/router/app_router.dart';
 import 'package:powerocr/core/domain/entities/scan_history.dart';
+import 'package:powerocr/core/services/interfaces/iscan_history_service.dart';
 import 'package:powerocr/features/home_screen/presentation/bloc/home_bloc.dart';
 
 import 'package:powerocr/features/home_screen/presentation/bloc/home_state.dart';
@@ -16,6 +18,8 @@ import 'package:powerocr/features/home_screen/presentation/screens/widgets/home_
 import 'package:powerocr/features/home_screen/presentation/screens/widgets/home_stats_row.dart';
 import 'package:powerocr/features/home_screen/presentation/screens/widgets/quick_actions_grid.dart';
 import 'dart:math' as math;
+
+import 'package:powerocr/features/scanning/domain/entities/text_recognition_result.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -127,6 +131,29 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _orbCtrl.dispose();
     _statCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> onTapHistoryItem(ScanHistory item) async {
+    final scanHistory = await locator<IScanHistoryService>().getScanHistoryById(
+      item.id,
+    );
+    if (scanHistory != null) {
+      final scanHistoryTextBlocks = await locator<IScanHistoryService>()
+          .getScanTextBlockHistoryByScanId(scanHistory.id);
+      final textRecognitionResult = TextRecognitionResult.fromScanHistory(
+        scanHistory,
+        scanHistoryTextBlocks,
+      );
+      if (mounted) {
+        context.push(
+          AppRouter.scanResult,
+          extra: {
+            'imagePath': textRecognitionResult.imagePath,
+            'result': textRecognitionResult,
+          },
+        );
+      }
+    }
   }
 
   @override
@@ -277,7 +304,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               theme: theme,
                               isDark: isDark,
                               item: item,
-                              onTap: () {},
+                              onTap: () async {
+                                await onTapHistoryItem(item);
+                              },
                             ),
                           ),
                         );
