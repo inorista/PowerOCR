@@ -12,7 +12,7 @@ class ScanHistoryService implements IScanHistoryService {
   final scanTextBlockHistoryDao = locator<ScanTextBlockHistoryDao>();
   @override
   Future<void> addScanHistory(ScanHistoryEntity scanHistoryEntity) async {
-    await scanHistoryDao.add(scanHistoryEntity);
+    await scanHistoryDao.update(scanHistoryEntity.id, scanHistoryEntity);
   }
 
   @override
@@ -22,9 +22,11 @@ class ScanHistoryService implements IScanHistoryService {
 
   @override
   Future<List<ScanTextBlockHistoryEntity>> getScanTextBlockHistoryByScanId(
-      String scanId) async {
-    return await scanTextBlockHistoryDao
-        .getScanTextBlockHistoryByScanId(scanId);
+    String scanId,
+  ) async {
+    return await scanTextBlockHistoryDao.getScanTextBlockHistoryByScanId(
+      scanId,
+    );
   }
 
   @override
@@ -34,7 +36,8 @@ class ScanHistoryService implements IScanHistoryService {
 
   @override
   Future<void> addScanTextBlockHistory(
-      List<ScanTextBlockHistoryEntity> scanTextBlockHistoryEntities) async {
+    List<ScanTextBlockHistoryEntity> scanTextBlockHistoryEntities,
+  ) async {
     await scanTextBlockHistoryDao.addAll(scanTextBlockHistoryEntities);
   }
 
