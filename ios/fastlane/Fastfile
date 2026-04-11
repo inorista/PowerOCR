@@ -3,11 +3,8 @@ default_platform(:ios)
 platform :ios do
   desc "Push a new release build to the TestFlight / App Store"
   lane :release do
-    #setup_ci
-
-    # 1. Xác thực tới App Store Connect dựa trên API Key truyền qua Environment
-    # Yêu cầu cài đặt các biến này ở Github Actions Secrets
-    # (Reference: https://docs.fastlane.tools/app-store-connect-api/)
+   
+    # 1. Lấy API Key cho App Store Connect
     app_store_connect_api_key(
       key_id: ENV["ASC_KEY_ID"],
       issuer_id: ENV["ASC_ISSUER_ID"],
@@ -15,31 +12,36 @@ platform :ios do
       is_key_content_base64: true,
       in_house: false
     )
-
-    ipa_absolute_path = nil
+    
+    # 2. Tự động cập nhật Build Number từ GitHub Actions
+    if options[:build_number]
+      increment_build_number(
+        build_number: options[:build_number],
+        xcodeproj: "Runner.xcodeproj"
+      )
+    end
+    
+    # 3. Chạy các lệnh Flutter (Dùng Dir.chdir để quản lý path sạch sẽ)
     Dir.chdir("../..") do
       sh("flutter clean")
       sh("flutter pub get")
       sh("dart run build_runner build --delete-conflicting-outputs")
-      sh("flutter build ipa --release --export-options-plist=ios/ExportOptions.plist --obfuscate --split-debug-info=build/app/outputs/symbols")
-
-      found_ipa = Dir["build/ios/ipa/*.ipa"].first
-      ipa_absolute_path = File.expand_path(found_ipa) if found_ipa
+      
+      # Build IPA dùng CLI Flutter - Tận dụng flag để không cần sửa file project.pbxproj bằng tay
+      sh("flutter build ipa --release " \
+         "--build-number=#{options[:build_number]} " \
+         "--export-options-plist=ios/ExportOptions.plist " \
+         "--obfuscate --split-debug-info=build/app/outputs/symbols")
     end
-
-    # 3. Kiểm tra xem đã lấy được đường dẫn chưa
-    unless ipa_absolute_path
-      UI.user_error!("Không tìm thấy file IPA trong thư mục build của Flutter.")
-    end
-
-    # 4. Đẩy file IPA lên App Store / Testflight
-    upload_to_app_store(
-      ipa: ipa_absolute_path,
-      submit_for_review: false, # Rất quan trọng: Không mở Review tự động (Nằm chờ ở Testflight)
-      force: true,              # Bỏ qua cửa sổ xác nhận metadata HTML report
-      skip_metadata: true,      # Chỉ push IPA, ko push metadata văn bản
-      skip_screenshots: true,   # Bỏ qua bước update screenshots
-      run_precheck_before_submit: false  
+    
+    # 4. Upload lên TestFlight
+    upload_to_testflight(
+      ipa: "../build/ios/ipa/*.ipa",
+      skip_waiting_for_build_processing: true,
+      skip_metadata: true,
+      skip_screenshots: true,
+      submit_for_review: false,
+      un_precheck_before_submit: false
     )
   end
 end
