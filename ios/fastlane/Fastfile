@@ -46,9 +46,7 @@ platform :ios do
     # 4. Upload lên TestFlight với đường dẫn tuyệt đối
     upload_to_testflight(
       ipa: ipa_absolute_path,
-      skip_waiting_for_build_processing: true,
-      skip_metadata: true,
-      skip_screenshots: true
+      skip_waiting_for_build_processing: true
     )
   end
 end
