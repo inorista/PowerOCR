@@ -2,7 +2,7 @@ default_platform(:ios)
 
 platform :ios do
   desc "Push a new release build to the TestFlight / App Store"
-  lane :release do
+  lane :release do |options|
    
     # 1. Lấy API Key cho App Store Connect
     app_store_connect_api_key(
