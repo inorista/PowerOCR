@@ -8,7 +8,7 @@ on:
 jobs:
   deploy_ios:
     name: Build & Deploy iOS
-    runs-on: macos-latest
+    runs-on: macos-26
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     
@@ -52,4 +52,4 @@ jobs:
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           ASC_KEY_CONTENT: ${{ secrets.ASC_KEY_CONTENT }}
         # Truyền github.run_number trực tiếp vào Fastlane
-        run: bundle exec fastlane release build_number:${{ github.run_number }}
+        run: bundle exec fastlane release build_number:${{ github.run_number }} --verbose
