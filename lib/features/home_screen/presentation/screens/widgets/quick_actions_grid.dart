@@ -35,19 +35,11 @@ class QuickActionsGrid extends StatelessWidget {
         },
       ),
       QuickAction(
-        icon: Icons.document_scanner_rounded, // Batch Scan Icon
-        label: 'Batch\nScan',
+        icon: Icons.picture_as_pdf, // Batch Scan Icon
+        label: 'Scan\n& Export',
         gradient: [const Color(0xFF95E1D3), const Color(0xFF5ABCAE)],
         onTap: () {
           context.push(AppRouter.scanning, extra: FeatureOption.batchScan);
-        },
-      ),
-      QuickAction(
-        icon: Icons.badge_rounded, // Scan ID Icon
-        label: 'Scan ID\nCard',
-        gradient: [const Color(0xFFCBAACB), const Color(0xFF9F83A0)],
-        onTap: () {
-          context.push(AppRouter.scanning, extra: FeatureOption.scanId);
         },
       ),
     ];
@@ -58,7 +50,7 @@ class QuickActionsGrid extends StatelessWidget {
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4,
+          crossAxisCount: 3,
           mainAxisSpacing: 12,
           crossAxisSpacing: 12,
           mainAxisExtent: 100,

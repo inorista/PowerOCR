@@ -6,12 +6,15 @@ class ScannerControls extends StatelessWidget {
   final VoidCallback onGalleryTap;
   final VoidCallback onCaptureTap;
   final FeatureOption featureOption;
+  /// When [true] the capture button is hidden — scanning happens automatically.
+  final bool isAutoScan;
 
   const ScannerControls({
     super.key,
     required this.onGalleryTap,
     required this.onCaptureTap,
     required this.featureOption,
+    this.isAutoScan = false,
   });
 
   @override
@@ -41,10 +44,14 @@ class ScannerControls extends StatelessWidget {
                   onTap: onGalleryTap,
                 ),
                 const SizedBox(width: 8),
-                _CaptureButton(
-                  onTap: onCaptureTap,
-                  featureOption: featureOption,
-                ),
+                if (!isAutoScan)
+                  _CaptureButton(
+                    onTap: onCaptureTap,
+                    featureOption: featureOption,
+                  )
+                else
+                  // Keep layout balanced when capture button is hidden.
+                  const SizedBox(width: 84),
                 const SizedBox(width: 8),
                 // Balance the gallery button
                 const SizedBox(width: 52),

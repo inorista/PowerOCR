@@ -32,11 +32,9 @@ jobs:
       - name: Generate .env File
         run: echo "API-KEY=${{ secrets.ENV_API_KEY }}" > .env
 
-      # Inject GoogleService-Info.plist từ GitHub Secret (không commit file này vào git)
       - name: Inject GoogleService-Info.plist
         run: |
           echo -n "${{ secrets.GOOGLE_SERVICE_INFO_PLIST_BASE64 }}" | base64 --decode > ios/Runner/GoogleService-Info.plist
-          echo "✅ GoogleService-Info.plist đã được tạo thành công"
 
       # Tối ưu: Dùng Action chuyên dụng để cài Certificate
       - name: Install Apple Certificate
