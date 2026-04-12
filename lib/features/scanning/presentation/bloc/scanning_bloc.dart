@@ -20,11 +20,47 @@ class ScanningBloc extends Bloc<ScanningEvent, ScanningState> {
 
   ScanningBloc() : super(const ScanningState()) {
     on<ScanImage>(_onScanImage);
+    on<QrStreamDetected>(_onQrStreamDetected);
     on<ResetScan>(_onResetScan);
     on<ToggleFlash>(_onToggleFlash);
     on<CameraReady>(_onCameraReady);
     on<CameraNotReady>(_onCameraNotReady);
     on<FinishBatchScan>(_onFinishBatchScan);
+  }
+
+  Future<void> _onQrStreamDetected(
+    QrStreamDetected event,
+    Emitter<ScanningState> emit,
+  ) async {
+    emit(state.copyWith(status: ScanningStatus.loading));
+    try {
+      final result = TextRecognitionResult(
+        text: event.detectedText,
+        blocks: const [],
+        imageWidth: 0,
+        imageHeight: 0,
+        imagePath: event.imagePath,
+        createdAt: DateTime.now(),
+        type: ScanHistoryType.qr,
+      );
+      if (result.text.isNotEmpty) {
+        await locator<ScanningRepository>().saveScanHistory(result);
+      }
+      emit(
+        state.copyWith(
+          status: ScanningStatus.success,
+          result: result,
+          imagePath: event.imagePath,
+        ),
+      );
+    } catch (e) {
+      emit(
+        state.copyWith(
+          status: ScanningStatus.failure,
+          errorMessage: e.toString(),
+        ),
+      );
+    }
   }
 
   Future<void> _onScanImage(
@@ -98,10 +134,7 @@ class ScanningBloc extends Bloc<ScanningEvent, ScanningState> {
     emit(state.copyWith(isCameraInitialized: false));
   }
 
-  void _onFinishBatchScan(
-    FinishBatchScan event,
-    Emitter<ScanningState> emit,
-  ) {
+  void _onFinishBatchScan(FinishBatchScan event, Emitter<ScanningState> emit) {
     if (state.batchImagePaths.isNotEmpty) {
       emit(state.copyWith(status: ScanningStatus.batchFinished));
     }

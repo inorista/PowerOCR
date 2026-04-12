@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:powerocr/core/constants/enum.dart';
 import 'package:powerocr/features/home_screen/presentation/bloc/home_bloc.dart';
 import 'package:powerocr/features/home_screen/presentation/bloc/home_state.dart';
 import 'package:powerocr/features/home_screen/presentation/screens/widgets/stat_card.dart';
@@ -28,7 +29,7 @@ class HomeStatsRow extends StatelessWidget {
               selector: (state) => state.history.length,
               builder: (context, historyCount) {
                 return StatCard(
-                  label: 'Scanned',
+                  label: 'Documents Scanned',
                   value: historyCount,
                   icon: Icons.document_scanner_rounded,
                   isDark: isDark,
@@ -41,18 +42,15 @@ class HomeStatsRow extends StatelessWidget {
           Expanded(
             child: BlocSelector<HomeBloc, HomeState, int>(
               selector: (state) {
-                return state.history.fold(
-                  0,
-                  (previousValue, element) =>
-                      previousValue +
-                      element.text.split(' ').where((w) => w.isNotEmpty).length,
-                );
+                return state.history
+                    .where((element) => element.type == ScanHistoryType.qr)
+                    .length;
               },
-              builder: (context, wordCount) {
+              builder: (context, qrCount) {
                 return StatCard(
-                  label: 'Words Extracted',
-                  value: wordCount,
-                  icon: Icons.text_snippet_rounded,
+                  label: 'QR Extracted',
+                  value: qrCount,
+                  icon: Icons.qr_code_2_rounded,
                   isDark: isDark,
                   theme: theme,
                   controller: statCtrl,

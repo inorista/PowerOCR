@@ -1,7 +1,9 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:powerocr/core/constants/enum.dart';
 import 'package:powerocr/core/di/locator.dart';
@@ -32,6 +34,12 @@ class _ScanningScreenState extends State<ScanningScreen>
   late ScanningBloc _bloc;
   final ImagePicker _picker = ImagePicker();
   bool _isInit = false;
+
+  final BarcodeScanner _barcodeScanner = BarcodeScanner(
+    formats: [BarcodeFormat.all],
+  );
+  bool _isQrScanning = false;
+  bool _qrDetected = false;
 
   _FrameConfig get _frameConfig {
     final size = _cachedSize;
@@ -75,9 +83,9 @@ class _ScanningScreenState extends State<ScanningScreen>
 
     _controller = CameraController(
       cameras.first,
-      ResolutionPreset.max,
+      ResolutionPreset.high,
       enableAudio: false,
-      imageFormatGroup: ImageFormatGroup.jpeg,
+      imageFormatGroup: ImageFormatGroup.yuv420,
     );
 
     try {
@@ -85,16 +93,109 @@ class _ScanningScreenState extends State<ScanningScreen>
       if (mounted) {
         setState(() => _isInit = true);
         _bloc.add(CameraReady());
+        if (widget.featureOption == FeatureOption.scanQR) {
+          _startQrImageStream();
+        }
       }
     } catch (e) {
       debugPrint('Camera init error: $e');
     }
   }
 
+  void _startQrImageStream() {
+    if (_controller == null || !_controller!.value.isInitialized) return;
+    if (_isQrScanning) return;
+    _isQrScanning = true;
+    _controller!.startImageStream(_onCameraImage);
+  }
+
+  Future<void> _stopQrImageStream() async {
+    if (!_isQrScanning) return;
+    _isQrScanning = false;
+    try {
+      await _controller?.stopImageStream();
+    } catch (_) {}
+    await _barcodeScanner.close();
+  }
+
+  Future<void> _onCameraImage(CameraImage image) async {
+    if (_qrDetected || !_isQrScanning) return;
+
+    final WriteBuffer allBytes = WriteBuffer();
+    for (final Plane plane in image.planes) {
+      allBytes.putUint8List(plane.bytes);
+    }
+    final bytes = allBytes.done().buffer.asUint8List();
+
+    final Size imageSize = Size(
+      image.width.toDouble(),
+      image.height.toDouble(),
+    );
+
+    final inputImageFormat =
+        InputImageFormatValue.fromRawValue(image.format.raw) ??
+        InputImageFormat.nv21;
+
+    final inputImageData = InputImageMetadata(
+      size: imageSize,
+      rotation: _rotationFromDeviceOrientation(),
+      format: inputImageFormat,
+      bytesPerRow: image.planes.first.bytesPerRow,
+    );
+
+    final inputImage = InputImage.fromBytes(
+      bytes: bytes,
+      metadata: inputImageData,
+    );
+
+    try {
+      final barcodes = await _barcodeScanner.processImage(inputImage);
+      if (barcodes.isNotEmpty && !_qrDetected && mounted) {
+        _qrDetected = true;
+
+        final detectedText = barcodes
+            .map((b) => b.displayValue ?? b.rawValue ?? '')
+            .where((s) => s.isNotEmpty)
+            .join('\n');
+
+        await _stopQrImageStream();
+
+        if (!mounted) return;
+        final imagePath = await _takePictureAndGetPath();
+
+        if (!mounted) return;
+        _bloc.add(
+          QrStreamDetected(detectedText: detectedText, imagePath: imagePath),
+        );
+      }
+    } catch (e) {
+      debugPrint('QR stream scan error: $e');
+    }
+  }
+
+  InputImageRotation _rotationFromDeviceOrientation() {
+    return switch (_controller?.value.deviceOrientation) {
+      DeviceOrientation.portraitUp => InputImageRotation.rotation0deg,
+      DeviceOrientation.landscapeLeft => InputImageRotation.rotation90deg,
+      DeviceOrientation.portraitDown => InputImageRotation.rotation180deg,
+      DeviceOrientation.landscapeRight => InputImageRotation.rotation270deg,
+      _ => InputImageRotation.rotation0deg,
+    };
+  }
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _controller?.dispose();
+    if (_isQrScanning) {
+      _isQrScanning = false;
+      try {
+        _controller?.stopImageStream();
+      } catch (_) {}
+    }
+    _barcodeScanner.close();
+    if (_controller != null && _controller!.value.isInitialized) {
+      _controller?.dispose();
+    }
     _scanLineCtrl.dispose();
     super.dispose();
   }
@@ -104,8 +205,15 @@ class _ScanningScreenState extends State<ScanningScreen>
     final cc = _controller;
     if (cc == null || !cc.value.isInitialized) return;
     if (state == AppLifecycleState.inactive) {
+      if (_isQrScanning) {
+        _isQrScanning = false;
+        try {
+          cc.stopImageStream();
+        } catch (_) {}
+      }
       cc.dispose();
     } else if (state == AppLifecycleState.resumed) {
+      _qrDetected = false;
       _initCamera();
     }
   }
@@ -141,6 +249,10 @@ class _ScanningScreenState extends State<ScanningScreen>
               extra: List<String>.from(state.batchImagePaths),
             );
           } else if (state.status == ScanningStatus.failure) {
+            if (widget.featureOption == FeatureOption.scanQR) {
+              _qrDetected = false;
+              _startQrImageStream();
+            }
             ScaffoldMessenger.of(context)
               ..clearSnackBars()
               ..showSnackBar(
@@ -234,6 +346,7 @@ class _ScanningScreenState extends State<ScanningScreen>
                     onGalleryTap: () => _pickImage(context),
                     onCaptureTap: () => _takePicture(context),
                     featureOption: widget.featureOption,
+                    isAutoScan: widget.featureOption == FeatureOption.scanQR,
                   ),
 
                   if (widget.featureOption == FeatureOption.batchScan &&
@@ -244,7 +357,7 @@ class _ScanningScreenState extends State<ScanningScreen>
                       child: FloatingActionButton.extended(
                         heroTag: 'batch_finish_btn',
                         onPressed: () {
-                          context.read<ScanningBloc>().add(FinishBatchScan());
+                          _bloc.add(FinishBatchScan());
                         },
                         backgroundColor: Theme.of(context).colorScheme.primary,
                         foregroundColor: Theme.of(
@@ -352,40 +465,116 @@ class _ScanningScreenState extends State<ScanningScreen>
     );
   }
 
-  Future<void> _takePicture(BuildContext context) async {
-    if (_controller == null || !_controller!.value.isInitialized) return;
+  /// Takes a still photo and returns its file path.
+  /// Stops the QR stream first if it's still running.
+  Future<String> _takePictureAndGetPath() async {
+    if (_controller == null || !_controller!.value.isInitialized) return '';
+    if (_isQrScanning) {
+      _isQrScanning = false;
+      try {
+        await _controller!.stopImageStream();
+      } catch (_) {}
+    }
     try {
       final image = await _controller!.takePicture();
-      if (!context.mounted) return;
-      context.read<ScanningBloc>().add(
-        ScanImage(image.path, widget.featureOption),
-      );
+      return image.path;
     } catch (e) {
       debugPrint('Capture error: $e');
+      return '';
     }
+  }
+
+  Future<void> _takePicture(BuildContext context) async {
+    final path = await _takePictureAndGetPath();
+    if (path.isEmpty || !mounted) return;
+    _bloc.add(ScanImage(path, widget.featureOption));
   }
 
   Future<void> _pickImage(BuildContext context) async {
     try {
-      if (_controller != null && _controller!.value.isInitialized) {
+      if (_isQrScanning) {
+        await _stopQrImageStream();
+      } else if (_controller != null && _controller!.value.isInitialized) {
         await _controller!.pausePreview();
       }
       final image = await _picker.pickImage(source: ImageSource.gallery);
       if (image != null && context.mounted) {
-        context.read<ScanningBloc>().add(
-          ScanImage(image.path, widget.featureOption),
-        );
+        _bloc.add(ScanImage(image.path, widget.featureOption));
       } else {
-        if (_controller != null && _controller!.value.isInitialized) {
+        // User cancelled — resume the live stream.
+        if (widget.featureOption == FeatureOption.scanQR) {
+          _qrDetected = false;
+          _startQrImageStream();
+        } else if (_controller != null && _controller!.value.isInitialized) {
           await _controller!.resumePreview();
         }
       }
     } catch (e) {
       debugPrint('Gallery error: $e');
-      if (_controller != null && _controller!.value.isInitialized) {
+      if (widget.featureOption == FeatureOption.scanQR) {
+        _qrDetected = false;
+        _startQrImageStream();
+      } else if (_controller != null && _controller!.value.isInitialized) {
         await _controller!.resumePreview();
       }
     }
+  }
+
+  /// Animated badge shown below the QR frame in auto-scan mode.
+  Widget _buildQrAutoScanBadge(Size size) {
+    return Positioned(
+      bottom: size.height * 0.22,
+      left: 0,
+      right: 0,
+      child: Center(
+        child: AnimatedBuilder(
+          animation: _scanLineCtrl,
+          builder: (_, __) {
+            // Pulse between 0.6 and 1.0 opacity in sync with the scan-line.
+            final t =
+                (_scanLinePos.value < 0.5
+                    ? _scanLinePos.value
+                    : 1 - _scanLinePos.value) *
+                2;
+            return Opacity(
+              opacity: 0.6 + 0.4 * t,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF06D6A0).withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(
+                    color: const Color(0xFF06D6A0).withValues(alpha: 0.5),
+                  ),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.qr_code_scanner_rounded,
+                      color: Color(0xFF06D6A0),
+                      size: 18,
+                    ),
+                    SizedBox(width: 8),
+                    Text(
+                      'Đang quét tự động…',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
   }
 }
 

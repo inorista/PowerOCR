@@ -2,13 +2,10 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 
-import 'package:powerocr/core/router/app_router.dart';
 import 'package:powerocr/features/home_screen/presentation/bloc/home_bloc.dart';
 import 'package:powerocr/features/home_screen/presentation/bloc/home_event.dart';
 import 'package:powerocr/features/scanning/domain/entities/text_recognition_result.dart';
-import 'package:powerocr/features/scanning/presentation/screens/scan_result_screen/widgets/outline_action_button.dart';
 import 'package:powerocr/features/scanning/presentation/screens/scan_result_screen/widgets/primary_action_button.dart';
 import 'package:powerocr/features/scanning/presentation/screens/scan_result_screen/widgets/result_sliver_app_bar.dart';
 import 'package:powerocr/features/scanning/presentation/screens/scan_result_screen/widgets/result_header_section.dart';
@@ -212,16 +209,6 @@ class _ScanResultScreenState extends State<ScanResultScreen>
                 padding: EdgeInsets.fromLTRB(20, 12, 20, bottomPad + 12),
                 child: Row(
                   children: [
-                    Expanded(
-                      child: OutlineActionButton(
-                        icon: Icons.camera_alt_rounded,
-                        label: 'Re-scan',
-                        theme: theme,
-                        isDark: isDark,
-                        onTap: () => context.go(AppRouter.scanning),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
                     Expanded(
                       flex: 2,
                       child: PrimaryActionButton(
