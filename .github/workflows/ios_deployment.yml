@@ -8,7 +8,7 @@ on:
 jobs:
   deploy_ios:
     name: Build & Deploy iOS
-    runs-on: macos-latest
+    runs-on: macos-26
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     
@@ -32,6 +32,12 @@ jobs:
       - name: Generate .env File
         run: echo "API-KEY=${{ secrets.ENV_API_KEY }}" > .env
 
+      # Inject GoogleService-Info.plist từ GitHub Secret (không commit file này vào git)
+      - name: Inject GoogleService-Info.plist
+        run: |
+          echo -n "${{ secrets.GOOGLE_SERVICE_INFO_PLIST_BASE64 }}" | base64 --decode > ios/Runner/GoogleService-Info.plist
+          echo "✅ GoogleService-Info.plist đã được tạo thành công"
+
       # Tối ưu: Dùng Action chuyên dụng để cài Certificate
       - name: Install Apple Certificate
         uses: apple-actions/import-codesign-certs@v3
@@ -52,4 +58,4 @@ jobs:
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           ASC_KEY_CONTENT: ${{ secrets.ASC_KEY_CONTENT }}
         # Truyền github.run_number trực tiếp vào Fastlane
-        run: bundle exec fastlane release build_number:${{ github.run_number }}
+        run: bundle exec fastlane release build_number:${{ github.run_number }} --verbose
