@@ -57,8 +57,8 @@ class ResultHeaderSection extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Extracted Text',
-                            style: theme.textTheme.titleLarge?.copyWith(
+                            'Văn bản trích xuất',
+                            style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w800,
                               letterSpacing: -0.3,
                               color: theme.colorScheme.onSurface,
@@ -66,9 +66,11 @@ class ResultHeaderSection extends StatelessWidget {
                           ),
                           const SizedBox(height: 3),
                           Text(
-                            '$wordCount words · $charCount characters',
+                            '$wordCount từ · $charCount ký tự',
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
+                              color: theme.colorScheme.onSurface.withValues(
+                                alpha: 0.45,
+                              ),
                             ),
                           ),
                         ],
@@ -80,7 +82,10 @@ class ResultHeaderSection extends StatelessWidget {
               ),
               // Divider
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 14,
+                ),
                 child: Divider(
                   height: 1,
                   color: isDark
@@ -103,13 +108,13 @@ class ResultHeaderSection extends StatelessWidget {
                   child: Row(
                     children: [
                       _SegmentButton(
-                        label: 'Pure Text',
+                        label: 'Văn bản thuần',
                         selected: !showAlignedFormat,
                         theme: theme,
                         onTap: () => onToggleFormat(false),
                       ),
                       _SegmentButton(
-                        label: 'Visual Layout',
+                        label: 'Bố cục trực quan',
                         selected: showAlignedFormat,
                         theme: theme,
                         onTap: () => onToggleFormat(true),
@@ -142,10 +147,14 @@ class _AIScannedBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.auto_awesome_rounded, size: 13, color: theme.colorScheme.primary),
+          Icon(
+            Icons.auto_awesome_rounded,
+            size: 13,
+            color: theme.colorScheme.primary,
+          ),
           const SizedBox(width: 4),
           Text(
-            'AI scanned',
+            'AI quét',
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,

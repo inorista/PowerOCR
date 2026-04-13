@@ -86,22 +86,22 @@ class _ScannerHint extends StatelessWidget {
     return switch (mode) {
       FeatureOption.scanQR => (
         Icons.qr_code_rounded,
-        'Point at QR / barcode',
+        'Hướng vào mã QR / barcode',
         const Color(0xFF06D6A0),
       ),
       FeatureOption.scanId => (
         Icons.credit_card_rounded,
-        'Align ID or business card',
+        'Căn chỉnh thẻ căn cước / CCCD',
         const Color(0xFFFFD166),
       ),
       FeatureOption.batchScan => (
         Icons.layers_rounded,
-        'Scan pages one by one',
+        'Quét từng trang một',
         const Color(0xFF8B8FE3),
       ),
       FeatureOption.scanDocument => (
         Icons.description_rounded,
-        'Align document in frame',
+        'Căn tài liệu vào khung',
         const Color(0xFF8B8FE3),
       ),
     };

@@ -257,6 +257,12 @@ class _ScanningScreenState extends State<ScanningScreen>
               ..clearSnackBars()
               ..showSnackBar(
                 SnackBar(
+                  margin: EdgeInsets.only(
+                    left: 16,
+                    right: 16,
+                    bottom: MediaQuery.paddingOf(context).bottom + 92,
+                  ),
+                  behavior: SnackBarBehavior.floating,
                   content: Row(
                     children: [
                       Icon(
@@ -267,7 +273,7 @@ class _ScanningScreenState extends State<ScanningScreen>
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
-                          state.errorMessage ?? 'Scan failed',
+                          state.errorMessage ?? 'Quét thất bại',
                           style: TextStyle(
                             fontWeight: FontWeight.w500,
                             color: Theme.of(context).colorScheme.error,
@@ -277,11 +283,9 @@ class _ScanningScreenState extends State<ScanningScreen>
                     ],
                   ),
                   backgroundColor: const Color(0xFFE57373),
-                  behavior: SnackBarBehavior.floating,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 ),
               );
           }
@@ -365,7 +369,7 @@ class _ScanningScreenState extends State<ScanningScreen>
                         ).colorScheme.onPrimary,
                         icon: const Icon(Icons.check_circle_outline_rounded),
                         label: Text(
-                          'Finish (${state.batchImagePaths.length})',
+                          'Xong (${state.batchImagePaths.length})',
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
