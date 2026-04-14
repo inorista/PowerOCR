@@ -4,6 +4,7 @@ import 'package:powerocr/core/constants/enum.dart';
 import 'package:powerocr/features/home_screen/presentation/bloc/home_bloc.dart';
 import 'package:powerocr/features/home_screen/presentation/bloc/home_state.dart';
 import 'package:powerocr/features/home_screen/presentation/screens/widgets/stat_card.dart';
+import 'package:powerocr/l10n/app_localizations.dart';
 
 class HomeStatsRow extends StatelessWidget {
   final ThemeData theme;
@@ -19,6 +20,7 @@ class HomeStatsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
       child: Row(
@@ -29,7 +31,7 @@ class HomeStatsRow extends StatelessWidget {
               selector: (state) => state.history.length,
               builder: (context, historyCount) {
                 return StatCard(
-                  label: 'Tài liệu đã quét',
+                  label: l10n.homeStatsScannedDocs,
                   value: historyCount,
                   icon: Icons.document_scanner_rounded,
                   isDark: isDark,
@@ -48,7 +50,7 @@ class HomeStatsRow extends StatelessWidget {
               },
               builder: (context, qrCount) {
                 return StatCard(
-                  label: 'Mã QR đã quét',
+                  label: l10n.homeStatsScannedQr,
                   value: qrCount,
                   icon: Icons.qr_code_2_rounded,
                   isDark: isDark,
@@ -63,7 +65,7 @@ class HomeStatsRow extends StatelessWidget {
               selector: (state) => state.history.length,
               builder: (context, savedCount) {
                 return StatCard(
-                  label: 'Đã lưu',
+                  label: l10n.homeStatsSaved,
                   value: savedCount,
                   icon: Icons.bookmark_rounded,
                   isDark: isDark,

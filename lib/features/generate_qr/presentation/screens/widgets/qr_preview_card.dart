@@ -5,6 +5,7 @@ import 'package:powerocr/features/generate_qr/presentation/bloc/generate_qr_bloc
 import 'package:powerocr/features/generate_qr/presentation/bloc/generate_qr_state.dart'
     show GenerateQrState;
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:powerocr/l10n/app_localizations.dart';
 
 class QrPreviewCard extends StatelessWidget {
   final GlobalKey boundaryKey;
@@ -78,7 +79,7 @@ class QrPreviewCard extends StatelessWidget {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'Nhập nội dung để\ntạo mã QR',
+                            AppLocalizations.of(context)!.generateQrPlaceholder,
                             textAlign: TextAlign.center,
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: state

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:powerocr/l10n/app_localizations.dart';
+
 class ResultHeaderSection extends StatelessWidget {
   final int wordCount;
   final int charCount;
@@ -21,6 +23,7 @@ class ResultHeaderSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return SliverToBoxAdapter(
       child: FadeTransition(
         opacity: contentFade,
@@ -57,7 +60,7 @@ class ResultHeaderSection extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Văn bản trích xuất',
+                            l10n.scanResultExtractedText,
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w800,
                               letterSpacing: -0.3,
@@ -66,7 +69,7 @@ class ResultHeaderSection extends StatelessWidget {
                           ),
                           const SizedBox(height: 3),
                           Text(
-                            '$wordCount từ · $charCount ký tự',
+                            l10n.scanResultWordCharCount(wordCount, charCount),
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: theme.colorScheme.onSurface.withValues(
                                 alpha: 0.45,
@@ -76,7 +79,7 @@ class ResultHeaderSection extends StatelessWidget {
                         ],
                       ),
                     ),
-                    _AIScannedBadge(theme: theme),
+                    _AIScannedBadge(theme: theme, label: l10n.scanResultAiScan),
                   ],
                 ),
               ),
@@ -108,13 +111,13 @@ class ResultHeaderSection extends StatelessWidget {
                   child: Row(
                     children: [
                       _SegmentButton(
-                        label: 'Văn bản thuần',
+                        label: l10n.scanResultPlainText,
                         selected: !showAlignedFormat,
                         theme: theme,
                         onTap: () => onToggleFormat(false),
                       ),
                       _SegmentButton(
-                        label: 'Bố cục trực quan',
+                        label: l10n.scanResultVisualLayout,
                         selected: showAlignedFormat,
                         theme: theme,
                         onTap: () => onToggleFormat(true),
@@ -134,7 +137,8 @@ class ResultHeaderSection extends StatelessWidget {
 
 class _AIScannedBadge extends StatelessWidget {
   final ThemeData theme;
-  const _AIScannedBadge({required this.theme});
+  final String label;
+  const _AIScannedBadge({required this.theme, required this.label});
 
   @override
   Widget build(BuildContext context) {
@@ -154,7 +158,7 @@ class _AIScannedBadge extends StatelessWidget {
           ),
           const SizedBox(width: 4),
           Text(
-            'AI quét',
+            label,
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,

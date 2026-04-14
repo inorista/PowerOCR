@@ -53,11 +53,11 @@ class _SplashScreenState extends State<SplashScreen>
 
     _textSlideAnimation =
         Tween<Offset>(begin: const Offset(0, 0.4), end: Offset.zero).animate(
-      CurvedAnimation(
-        parent: _entryController,
-        curve: const Interval(0.4, 0.8, curve: Curves.easeOutCubic),
-      ),
-    );
+          CurvedAnimation(
+            parent: _entryController,
+            curve: const Interval(0.4, 0.8, curve: Curves.easeOutCubic),
+          ),
+        );
 
     _textOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
@@ -67,15 +67,12 @@ class _SplashScreenState extends State<SplashScreen>
     );
 
     _glowAnimation = Tween<double>(begin: 0.8, end: 1.3).animate(
-      CurvedAnimation(
-        parent: _pulseController,
-        curve: Curves.easeInOutSine,
-      ),
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOutSine),
     );
 
     _entryController.forward().then((_) {
       Future.delayed(const Duration(milliseconds: 1000), () {
-        if (mounted) context.go(AppRouter.home);
+        if (mounted) context.go(AppRouter.main);
       });
     });
   }
@@ -141,17 +138,9 @@ class _SplashScreenState extends State<SplashScreen>
                     );
                   },
                   child: Container(
-                    width: 104,
-                    height: 104,
+                    width: 135,
+                    height: 135,
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Color(0xFF0EA5E9), // Sky blue
-                          Color(0xFF2563EB), // Royal blue
-                        ],
-                      ),
                       borderRadius: BorderRadius.circular(32),
                       boxShadow: [
                         BoxShadow(
@@ -166,66 +155,11 @@ class _SplashScreenState extends State<SplashScreen>
                           spreadRadius: -1,
                         ),
                       ],
-                    ),
-                    child: const Center(
-                      child: Icon(
-                        Icons
-                            .document_scanner_rounded, // Use rounded for elegance
-                        size: 52,
-                        color: Colors.white,
+                      image: const DecorationImage(
+                        image: AssetImage('assets/images/app_icon.png'),
+                        fit: BoxFit.cover,
                       ),
                     ),
-                  ),
-                ),
-
-                const SizedBox(height: 48),
-
-                // Typography
-                AnimatedBuilder(
-                  animation: _entryController,
-                  builder: (context, child) {
-                    return Opacity(
-                      opacity: _textOpacityAnimation.value,
-                      child: SlideTransition(
-                        position: _textSlideAnimation,
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: Column(
-                    children: [
-                      const Text(
-                        'PowerOCR',
-                        style: TextStyle(
-                          fontSize: 40,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 1.0,
-                          color: Color(0xFF0F172A), // Slate 900
-                          height: 1.0,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF1F5F9), // Slate 100
-                          borderRadius: BorderRadius.circular(100),
-                          border: Border.all(
-                            color: const Color(0xFFE2E8F0), // Slate 200
-                          ),
-                        ),
-                        child: const Text(
-                          'AI VISION ENGINE',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 2.5,
-                            color: Color(0xFF3B82F6), // Blue 500
-                          ),
-                        ),
-                      ),
-                    ],
                   ),
                 ),
               ],

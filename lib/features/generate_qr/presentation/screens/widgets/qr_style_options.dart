@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+import 'package:powerocr/l10n/app_localizations.dart';
+
 class ColorOption {
   final Color color;
-  final String label;
+  final String labelKey;
 
-  const ColorOption(this.color, this.label);
+  const ColorOption(this.color, this.labelKey);
 }
 
 const List<ColorOption> defaultColors = [
-  ColorOption(Colors.black, 'Khói'),
+  ColorOption(Colors.black, 'Khói'), // Actually we can just do l10n.generateQrColorSmoke below
   ColorOption(Color(0xFF2B3A67), 'Navy'),
   ColorOption(Color(0xFF5ABCAE), 'Mint'),
   ColorOption(Color(0xFFCBAACB), 'Lilac'),
@@ -41,13 +43,14 @@ class QrStyleOptions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: _buildSectionTitle(theme, 'Màu sắc'),
+          child: _buildSectionTitle(theme, l10n.generateQrColor),
         ),
         const SizedBox(height: 12),
         SizedBox(
@@ -104,7 +107,7 @@ class QrStyleOptions extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildSectionTitle(theme, 'Kiểu mắt'),
+                    _buildSectionTitle(theme, l10n.generateQrEyeShape),
                     const SizedBox(height: 12),
                     _buildToggle(
                       context: context,
@@ -113,8 +116,8 @@ class QrStyleOptions extends StatelessWidget {
                       valueRight: QrEyeShape.circle,
                       groupValue: selectedEyeShape,
                       onChanged: onEyeShapeChanged,
-                      labelLeft: 'Vuông',
-                      labelRight: 'Tròn',
+                      labelLeft: l10n.generateQrShapeSquare,
+                      labelRight: l10n.generateQrShapeCircle,
                       iconLeft: Icons.square_outlined,
                       iconRight: Icons.circle_outlined,
                     ),
@@ -127,7 +130,7 @@ class QrStyleOptions extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    _buildSectionTitle(theme, 'Hoạ tiết'),
+                    _buildSectionTitle(theme, l10n.generateQrPattern),
                     const SizedBox(height: 12),
                     _buildToggle(
                       context: context,
@@ -136,8 +139,8 @@ class QrStyleOptions extends StatelessWidget {
                       valueRight: QrDataModuleShape.circle,
                       groupValue: selectedDataShape,
                       onChanged: onDataShapeChanged,
-                      labelLeft: 'Vuông',
-                      labelRight: 'Tròn',
+                      labelLeft: l10n.generateQrShapeSquare,
+                      labelRight: l10n.generateQrShapeCircle,
                       iconLeft: Icons.grid_on_rounded,
                       iconRight: Icons.blur_on_rounded,
                     ),
@@ -153,7 +156,7 @@ class QrStyleOptions extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildSectionTitle(theme, 'Nền mã QR'),
+              _buildSectionTitle(theme, l10n.generateQrBackground),
               const SizedBox(height: 12),
               _buildToggle(
                 context: context,
@@ -162,8 +165,8 @@ class QrStyleOptions extends StatelessWidget {
                 valueRight: true,
                 groupValue: isDarkBackground,
                 onChanged: onBackgroundChanged,
-                labelLeft: 'Nền trắng',
-                labelRight: 'Nền tối',
+                labelLeft: l10n.generateQrBgWhite,
+                labelRight: l10n.generateQrBgDark,
                 iconLeft: Icons.light_mode_outlined,
                 iconRight: Icons.dark_mode_outlined,
               ),

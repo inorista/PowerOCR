@@ -1,0 +1,135 @@
+{
+  "@@locale": "en",
+
+  "generateQrTitle": "Generate QR",
+  "generateQrPlaceholder": "Enter content to\ngenerate QR",
+  "generateQrInputHint": "Enter text, link, phone number...",
+  "generateQrColor": "Color",
+  "generateQrEyeShape": "Eye Shape",
+  "generateQrPattern": "Pattern",
+  "generateQrBackground": "Background",
+  "generateQrShapeSquare": "Square",
+  "generateQrShapeCircle": "Circle",
+  "generateQrBgWhite": "Light",
+  "generateQrBgDark": "Dark",
+  "generateQrColorSmoke": "Smoke",
+  "generateQrBtnShare": "Save & share QR Code",
+  "generateQrShareTitle": "My QR Code",
+  "generateQrShareError": "Error sharing QR: {error}",
+  "@generateQrShareError": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "scanHistoryTitle": "Scan History",
+  "scanHistoryLoading": "Loading history...",
+  "scanHistoryEmptyTitle": "No History Yet",
+  "scanHistoryEmptySubtitle": "Scanned documents will appear\nhere when you start scanning.",
+  "scanHistoryErrorTitle": "Load Failed",
+  "scanHistoryErrorMsg": "An error occurred",
+  "scanHistoryRetryBtn": "Retry",
+
+  "timeJustNow": "Just now",
+  "timeMinutesAgo": "{minutes}m ago",
+  "@timeMinutesAgo": {
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+  "timeHoursAgo": "{hours}h ago",
+  "@timeHoursAgo": {
+    "placeholders": {
+      "hours": { "type": "int" }
+    }
+  },
+  "timeYesterday": "Yesterday",
+  "timeDaysAgo": "{days}d ago",
+  "@timeDaysAgo": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+
+  "historyNoTextExtracted": "No text extracted",
+  "historyTypeDocument": "Document",
+  "historyTypeQr": "QR Code",
+  "historyWordCount": "{words} words",
+  "@historyWordCount": {
+    "placeholders": {
+      "words": { "type": "int" }
+    }
+  },
+  "historySeeAll": "See All",
+
+  "scanFailed": "Scan Failed",
+  "exportPdfFailed": "Failed to export PDF: {error}",
+  "@exportPdfFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "batchResultPageCount": "{count} pages scanned",
+  "@batchResultPageCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "batchResultExportPdfBtn": "Export & Share PDF",
+
+  "scanResultCopied": "Copied!",
+  "scanResultCopyText": "Copy Text",
+  "scanResultTapToZoom": "Tap to zoom",
+  "scanResultExtractedText": "Extracted Text",
+  "scanResultWordCharCount": "{words} words · {chars} chars",
+  "@scanResultWordCharCount": {
+    "placeholders": {
+      "words": { "type": "int" },
+      "chars": { "type": "int" }
+    }
+  },
+  "scanResultPlainText": "Plain Text",
+  "scanResultVisualLayout": "Visual Layout",
+  "scanResultAiScan": "AI Scan",
+  "scanResultHideBoxes": "Hide",
+  "scanResultShowBoxes": "Show",
+  "scanResultNoTextFound": "No text detected",
+  "scanResultTryClearerImage": "Try scanning a clearer image",
+
+  "scannerGalleryBtn": "Gallery",
+  "scannerInstructionQr": "Point at QR / Barcode",
+  "scannerInstructionId": "Align ID card",
+  "scannerInstructionBatch": "Scan pages one by one",
+  "scannerInstructionDoc": "Align document in bounds",
+
+  "homeGreetingMorning": "Good morning ☀️",
+  "homeGreetingAfternoon": "Good afternoon 🌤️",
+  "homeGreetingEvening": "Good evening 🌙",
+  "homeTotalScans": "Total Scans",
+  "homeThisWeekScans": "Scans this week",
+  "homeWordsExtracted": "Words extracted",
+  "homeQuickActions": "Quick Actions",
+  "homeQuickScanDoc": "Scan\nDocument",
+  "homeQuickScanDocDesc": "Extract from image",
+  "homeQuickScanId": "Scan\nQR Code",
+  "homeQuickScanIdDesc": "Extract card info",
+  "homeQuickScanBatch": "Scan\n& Export",
+  "homeQuickScanBatchDesc": "Create PDF",
+  "homeQuickGenerateQr": "My\nQR Code",
+  "homeQuickGenerateQrDesc": "Create and share",
+  "homeRecentHistory": "Recent Scans",
+  "homeEmptyStateTitle": "No scans yet",
+  "homeEmptyStateSubtitle": "Your scanned documents will appear here.\nTap Scan to start!",
+  "homeHeroBtn": "Start Scanning",
+  "homeHeroDesc": "Digitize documents instantly with AI",
+  "homeStatsScannedDocs": "Documents scanned",
+  "homeStatsScannedQr": "QR Codes scanned",
+  "homeStatsSaved": "Saved",
+  "homeTabHome": "Home",
+  "homeTabSetting": "Setting",
+  "homeTabQr": "QR Library",
+  "visibilityMode": "Appearance",
+  "language": "Language",
+  "vietnamese": "Vietnamese",
+  "english": "English"
+}

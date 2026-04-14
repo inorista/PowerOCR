@@ -26,6 +26,8 @@ import 'package:powerocr/core/services/implements/scan_history_service.dart'
     as _i911;
 import 'package:powerocr/core/services/implements/theme_setting_service.dart'
     as _i1017;
+import 'package:powerocr/core/services/implements/user_qr_service.dart'
+    as _i964;
 import 'package:powerocr/core/services/interfaces/ilocal_notification_service.dart'
     as _i780;
 import 'package:powerocr/core/services/interfaces/inetwork_service.dart'
@@ -37,10 +39,13 @@ import 'package:powerocr/core/services/interfaces/iscan_history_service.dart'
     as _i254;
 import 'package:powerocr/core/services/interfaces/itheme_setting_service.dart'
     as _i126;
+import 'package:powerocr/core/services/interfaces/iuser_qr_service.dart'
+    as _i973;
 import 'package:powerocr/database/hive_daos/scan_history_dao.dart' as _i812;
 import 'package:powerocr/database/hive_daos/scan_text_block_history_dao.dart'
     as _i1031;
 import 'package:powerocr/database/hive_daos/theme_setting_dao.dart' as _i406;
+import 'package:powerocr/database/hive_daos/user_qr_dao.dart' as _i118;
 import 'package:powerocr/features/home_screen/data/datasources/home_local_data_source.dart'
     as _i577;
 import 'package:powerocr/features/home_screen/data/repositories/home_repository_impl.dart'
@@ -85,6 +90,7 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i1031.ScanTextBlockHistoryDao(),
     );
     gh.lazySingleton<_i406.ThemeSettingDao>(() => _i406.ThemeSettingDao());
+    gh.lazySingleton<_i118.UserQrDao>(() => _i118.UserQrDao());
     gh.lazySingleton<_i729.HomeRepository>(() => _i576.HomeRepositoryImpl());
     gh.lazySingleton<_i126.IThemeSettingService>(
       () => _i1017.ThemeSettingService(gh<_i406.ThemeSettingDao>()),
@@ -109,6 +115,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i254.IScanHistoryService>(
       () => _i911.ScanHistoryService(),
+    );
+    gh.lazySingleton<_i973.IUserQrService>(
+      () => _i964.UserQrService(gh<_i118.UserQrDao>()),
     );
     gh.lazySingleton<_i577.HomeLocalDataSource>(
       () => _i577.HomeLocalDataSourceImpl(gh<_i812.ScanHistoryDao>()),

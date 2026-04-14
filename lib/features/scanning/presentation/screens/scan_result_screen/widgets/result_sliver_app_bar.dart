@@ -7,6 +7,7 @@ import 'package:powerocr/core/router/app_router.dart';
 import 'package:powerocr/features/scanning/presentation/screens/scan_result_screen/widgets/bounding_box_overlay.dart';
 import 'package:powerocr/features/scanning/presentation/screens/scan_result_screen/widgets/glass_button.dart';
 import 'package:powerocr/features/scanning/presentation/screens/scan_result_screen/widgets/photo_viewer_overlay.dart';
+import 'package:powerocr/l10n/app_localizations.dart';
 
 class ResultSliverAppBar extends StatelessWidget {
   final String imagePath;
@@ -123,18 +124,20 @@ class ResultSliverAppBar extends StatelessWidget {
                               width: 0.5,
                             ),
                           ),
-                          child: const Row(
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.zoom_out_map_rounded,
                                 color: Colors.white,
                                 size: 13,
                               ),
-                              SizedBox(width: 4),
+                              const SizedBox(width: 4),
                               Text(
-                                'Tap để phóng to',
-                                style: TextStyle(
+                                AppLocalizations.of(
+                                  context,
+                                )!.scanResultTapToZoom,
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 11,
                                   fontWeight: FontWeight.w500,

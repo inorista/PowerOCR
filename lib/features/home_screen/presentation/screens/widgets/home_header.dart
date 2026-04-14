@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:powerocr/core/theme/cubit/theme_cubit.dart';
+import 'package:powerocr/l10n/app_localizations.dart';
 
 class HomeHeader extends StatelessWidget {
   final bool isDark;
@@ -19,7 +20,7 @@ class HomeHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  _greeting(),
+                  _greeting(context),
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
                     letterSpacing: 0.2,
@@ -44,26 +45,17 @@ class HomeHeader extends StatelessWidget {
               ],
             ),
           ),
-          HeaderIconButton(
-            isDark: isDark,
-            icon: isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
-            onTap: () {
-              context.read<ThemeCubit>().setTheme(
-                isDark ? ThemeMode.light : ThemeMode.dark,
-              );
-            },
-            theme: theme,
-          ),
         ],
       ),
     );
   }
 
-  String _greeting() {
+  String _greeting(BuildContext context) {
     final hour = DateTime.now().hour;
-    if (hour < 12) return 'Chào buổi sáng ☀️';
-    if (hour < 17) return 'Chào buổi chiều 🌤️';
-    return 'Chào buổi tối 🌙';
+    final l10n = AppLocalizations.of(context)!;
+    if (hour < 12) return l10n.homeGreetingMorning;
+    if (hour < 17) return l10n.homeGreetingAfternoon;
+    return l10n.homeGreetingEvening;
   }
 }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:powerocr/l10n/app_localizations.dart';
 
 class EmptyStateView extends StatelessWidget {
   final ThemeData theme;
@@ -12,6 +13,7 @@ class EmptyStateView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final cardColor = isDark
         ? const Color(0xFF2E2E3E).withValues(alpha: 0.7)
         : Colors.white.withValues(alpha: 0.8);
@@ -46,7 +48,7 @@ class EmptyStateView extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Chưa có lượt quét nào',
+              l10n.homeEmptyStateTitle,
               style: theme.textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
@@ -54,7 +56,7 @@ class EmptyStateView extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              'Tài liệu đã quét của bạn sẽ hiển thị tại đây.\nNhấn Quét để bắt đầu!',
+              l10n.homeEmptyStateSubtitle,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.45),

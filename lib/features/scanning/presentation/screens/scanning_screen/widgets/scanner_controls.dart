@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:powerocr/core/constants/enum.dart';
+import 'package:powerocr/l10n/app_localizations.dart';
 
 class ScannerControls extends StatelessWidget {
   final VoidCallback onGalleryTap;
@@ -40,7 +41,7 @@ class ScannerControls extends StatelessWidget {
               children: [
                 _ControlButton(
                   icon: Icons.photo_library_rounded,
-                  label: 'Thư viện',
+                  label: AppLocalizations.of(context)!.scannerGalleryBtn,
                   onTap: onGalleryTap,
                 ),
                 const SizedBox(width: 8),

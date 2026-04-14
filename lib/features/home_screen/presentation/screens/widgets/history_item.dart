@@ -4,7 +4,7 @@ import 'package:powerocr/core/constants/enum.dart';
 import 'package:powerocr/core/utils/extension.dart';
 import 'package:powerocr/core/domain/entities/scan_history.dart';
 import 'package:powerocr/features/home_screen/presentation/screens/widgets/history_thumbnail_place_holder.dart';
-
+import 'package:powerocr/l10n/app_localizations.dart';
 class HistoryItem extends StatelessWidget {
   final ThemeData theme;
   final bool isDark;
@@ -33,17 +33,18 @@ class HistoryItem extends StatelessWidget {
 
     final now = DateTime.now();
     final diff = now.difference(item.createdAt);
+    final l10n = AppLocalizations.of(context)!;
     final String timeLabel;
     if (diff.inMinutes < 1) {
-      timeLabel = 'Vừa xong';
+      timeLabel = l10n.timeJustNow;
     } else if (diff.inHours < 1) {
-      timeLabel = '${diff.inMinutes} phút trước';
+      timeLabel = l10n.timeMinutesAgo(diff.inMinutes);
     } else if (diff.inDays < 1) {
-      timeLabel = '${diff.inHours} giờ trước';
+      timeLabel = l10n.timeHoursAgo(diff.inHours);
     } else if (diff.inDays == 1) {
-      timeLabel = 'Hôm qua';
+      timeLabel = l10n.timeYesterday;
     } else {
-      timeLabel = '${diff.inDays} ngày trước';
+      timeLabel = l10n.timeDaysAgo(diff.inDays);
     }
 
     return Padding(
@@ -105,7 +106,7 @@ class HistoryItem extends StatelessWidget {
                         Text(
                           item.text.isNotEmpty
                               ? item.text.plainText
-                              : 'Không có văn bản được trích xuất',
+                              : l10n.historyNoTextExtracted,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.bodyMedium?.copyWith(
@@ -134,7 +135,7 @@ class HistoryItem extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              " • ${item.type == ScanHistoryType.document ? 'Tài liệu' : 'Mã QR'}",
+                              " • ${item.type == ScanHistoryType.document ? l10n.historyTypeDocument : l10n.historyTypeQr}",
                               style: theme.textTheme.labelSmall?.copyWith(
                                 color: subtitleColor,
                                 fontWeight: FontWeight.w500,
@@ -149,7 +150,7 @@ class HistoryItem extends StatelessWidget {
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
-                                '${item.text.split(' ').where((w) => w.isNotEmpty).length} từ',
+                                l10n.historyWordCount(item.text.split(' ').where((w) => w.isNotEmpty).length),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: theme.textTheme.labelSmall?.copyWith(
