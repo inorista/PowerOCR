@@ -133,7 +133,7 @@ class ResultSliverAppBar extends StatelessWidget {
                               ),
                               SizedBox(width: 4),
                               Text(
-                                'Tap to expand',
+                                'Tap để phóng to',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 11,

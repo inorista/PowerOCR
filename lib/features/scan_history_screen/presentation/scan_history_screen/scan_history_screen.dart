@@ -129,7 +129,7 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen>
                       SliverFillRemaining(
                         hasScrollBody: false,
                         child: _ErrorView(
-                          message: state.errorMessage ?? 'Something went wrong',
+                          message: state.errorMessage ?? 'Đã xảy ra lỗi',
                           theme: theme,
                           isDark: isDark,
                           onRetry: () => context
@@ -220,7 +220,7 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen>
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
-                                      'Scan History',
+                                      'Lịch sử quét',
                                       style: theme.textTheme.titleLarge
                                           ?.copyWith(
                                             fontWeight: FontWeight.w800,
@@ -309,7 +309,7 @@ class _LoadingIndicator extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         Text(
-          'Loading history...',
+          'Đang tải lịch sử...',
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
           ),
@@ -348,7 +348,7 @@ class _EmptyView extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Text(
-              'No history yet',
+              'Chưa có lịch sử',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w700,
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
@@ -356,7 +356,7 @@ class _EmptyView extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Scanned documents will appear\nhere once you start scanning.',
+              'Tài liệu đã quét sẽ xuất hiện\nở đây khi bạn bắt đầu quét.',
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.42),
@@ -398,7 +398,7 @@ class _ErrorView extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Failed to load',
+              'Tải thất bại',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
@@ -416,7 +416,7 @@ class _ErrorView extends StatelessWidget {
             FilledButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: const Text('Retry'),
+              label: const Text('Thử lại'),
               style: FilledButton.styleFrom(
                 backgroundColor: theme.colorScheme.primary,
                 shape: RoundedRectangleBorder(

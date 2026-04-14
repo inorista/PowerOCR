@@ -91,7 +91,7 @@ class _BoundingBoxOverlayState extends State<BoundingBoxOverlay> {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        _showBoundingBoxes ? 'Hide boxes' : 'Show boxes',
+                        _showBoundingBoxes ? 'Ẩn' : 'Hiện',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
@@ -101,39 +101,6 @@ class _BoundingBoxOverlayState extends State<BoundingBoxOverlay> {
                     ],
                   ),
                 ),
-              ),
-            ),
-          ),
-
-        // Counter badge
-        if (widget.boundingBoxes.isNotEmpty)
-          Positioned(
-            bottom: 16,
-            right: 16,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.6),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: Colors.cyan.withValues(alpha: 0.5),
-                  width: 1,
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.text_fields, color: Colors.cyan, size: 14),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${widget.boundingBoxes.length} paragraph${widget.boundingBoxes.length > 1 ? 's' : ''}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
               ),
             ),
           ),

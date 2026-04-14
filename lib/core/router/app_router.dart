@@ -8,6 +8,7 @@ import 'package:powerocr/features/scanning/presentation/screens/scan_result_scre
 import 'package:powerocr/features/scanning/presentation/screens/batch_result_screen/batch_result_screen.dart';
 import 'package:powerocr/features/scanning/presentation/screens/scanning_screen/scanning_screen.dart';
 import 'package:powerocr/features/splash_screen/presentation/screens/splash_screen.dart';
+import 'package:powerocr/features/generate_qr/presentation/screens/generate_qr_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -51,6 +52,12 @@ final GoRouter router = GoRouter(
         return BatchResultScreen(imagePaths: imagePaths);
       },
     ),
+    GoRoute(
+      path: AppRouter.generateQr,
+      builder: (context, state) {
+        return GenerateQrScreen();
+      },
+    ),
   ],
 );
 
@@ -63,4 +70,5 @@ class AppRouter {
   static const String scanResult = '/scan-result';
   static const String scanHistory = '/scan-history';
   static const String batchResult = '/batch-result';
+  static const String generateQr = '/generate-qr';
 }

@@ -46,7 +46,7 @@ class EmptyStateView extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'No scans yet',
+              'Chưa có lượt quét nào',
               style: theme.textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
@@ -54,7 +54,7 @@ class EmptyStateView extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              'Your scanned documents will appear here.\nTap Scan to get started!',
+              'Tài liệu đã quét của bạn sẽ hiển thị tại đây.\nNhấn Quét để bắt đầu!',
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.45),

@@ -177,7 +177,7 @@ class _AnimatedHeroCardState extends State<AnimatedHeroCard>
                                 ),
                                 const Spacer(),
                                 const Text(
-                                  'Start Scanning',
+                                  'Bắt đầu Quét',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 22,
@@ -188,7 +188,7 @@ class _AnimatedHeroCardState extends State<AnimatedHeroCard>
                                 ),
                                 const SizedBox(height: 5),
                                 Text(
-                                  'Digitize any document instantly with AI',
+                                  'Số hóa tài liệu ngay lập tức với AI',
                                   style: TextStyle(
                                     color: Colors.white.withValues(alpha: 0.75),
                                     fontSize: 12.5,

@@ -20,7 +20,7 @@ class QuickActionsGrid extends StatelessWidget {
     final actions = [
       QuickAction(
         icon: Icons.camera_alt_rounded,
-        label: 'Scan\nDocument',
+        label: 'Quét\nTài liệu',
         gradient: [const Color(0xFF8B8FE3), const Color(0xFF6B6FCC)],
         onTap: () {
           context.push(AppRouter.scanning, extra: FeatureOption.scanDocument);
@@ -28,7 +28,7 @@ class QuickActionsGrid extends StatelessWidget {
       ),
       QuickAction(
         icon: Icons.qr_code_scanner_rounded,
-        label: 'Scan\nQR Code',
+        label: 'Quét\nMã QR',
         gradient: [const Color(0xFFFFB7A3), const Color(0xFFE8896E)],
         onTap: () {
           context.push(AppRouter.scanning, extra: FeatureOption.scanQR);
@@ -36,10 +36,18 @@ class QuickActionsGrid extends StatelessWidget {
       ),
       QuickAction(
         icon: Icons.picture_as_pdf, // Batch Scan Icon
-        label: 'Scan\n& Export',
+        label: 'Quét\n& Xuất file',
         gradient: [const Color(0xFF95E1D3), const Color(0xFF5ABCAE)],
         onTap: () {
           context.push(AppRouter.scanning, extra: FeatureOption.batchScan);
+        },
+      ),
+      QuickAction(
+        icon: Icons.qr_code_outlined, // Scan ID Icon
+        label: 'Tạo mã\nQR cá nhân',
+        gradient: [const Color(0xFFCBAACB), const Color(0xFF9F83A0)],
+        onTap: () {
+          context.push(AppRouter.generateQr);
         },
       ),
     ];
@@ -50,7 +58,7 @@ class QuickActionsGrid extends StatelessWidget {
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
+          crossAxisCount: 4,
           mainAxisSpacing: 12,
           crossAxisSpacing: 12,
           mainAxisExtent: 100,

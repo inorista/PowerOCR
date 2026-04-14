@@ -29,7 +29,7 @@ class HomeStatsRow extends StatelessWidget {
               selector: (state) => state.history.length,
               builder: (context, historyCount) {
                 return StatCard(
-                  label: 'Documents Scanned',
+                  label: 'Tài liệu đã quét',
                   value: historyCount,
                   icon: Icons.document_scanner_rounded,
                   isDark: isDark,
@@ -48,7 +48,7 @@ class HomeStatsRow extends StatelessWidget {
               },
               builder: (context, qrCount) {
                 return StatCard(
-                  label: 'QR Extracted',
+                  label: 'Mã QR đã quét',
                   value: qrCount,
                   icon: Icons.qr_code_2_rounded,
                   isDark: isDark,
@@ -63,7 +63,7 @@ class HomeStatsRow extends StatelessWidget {
               selector: (state) => state.history.length,
               builder: (context, savedCount) {
                 return StatCard(
-                  label: 'Saved',
+                  label: 'Đã lưu',
                   value: savedCount,
                   icon: Icons.bookmark_rounded,
                   isDark: isDark,

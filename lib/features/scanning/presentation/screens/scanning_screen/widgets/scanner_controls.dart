@@ -40,7 +40,7 @@ class ScannerControls extends StatelessWidget {
               children: [
                 _ControlButton(
                   icon: Icons.photo_library_rounded,
-                  label: 'Gallery',
+                  label: 'Thư viện',
                   onTap: onGalleryTap,
                 ),
                 const SizedBox(width: 8),

@@ -35,15 +35,15 @@ class HistoryItem extends StatelessWidget {
     final diff = now.difference(item.createdAt);
     final String timeLabel;
     if (diff.inMinutes < 1) {
-      timeLabel = 'Just now';
+      timeLabel = 'Vừa xong';
     } else if (diff.inHours < 1) {
-      timeLabel = '${diff.inMinutes}m ago';
+      timeLabel = '${diff.inMinutes} phút trước';
     } else if (diff.inDays < 1) {
-      timeLabel = '${diff.inHours}h ago';
+      timeLabel = '${diff.inHours} giờ trước';
     } else if (diff.inDays == 1) {
-      timeLabel = 'Yesterday';
+      timeLabel = 'Hôm qua';
     } else {
-      timeLabel = '${diff.inDays}d ago';
+      timeLabel = '${diff.inDays} ngày trước';
     }
 
     return Padding(
@@ -105,7 +105,7 @@ class HistoryItem extends StatelessWidget {
                         Text(
                           item.text.isNotEmpty
                               ? item.text.plainText
-                              : 'No text extracted',
+                              : 'Không có văn bản được trích xuất',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.bodyMedium?.copyWith(
@@ -134,7 +134,7 @@ class HistoryItem extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              " • ${item.type == ScanHistoryType.document ? 'Document' : 'QR'}",
+                              " • ${item.type == ScanHistoryType.document ? 'Tài liệu' : 'Mã QR'}",
                               style: theme.textTheme.labelSmall?.copyWith(
                                 color: subtitleColor,
                                 fontWeight: FontWeight.w500,
@@ -149,7 +149,7 @@ class HistoryItem extends StatelessWidget {
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
-                                '${item.text.split(' ').where((w) => w.isNotEmpty).length} words',
+                                '${item.text.split(' ').where((w) => w.isNotEmpty).length} từ',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: theme.textTheme.labelSmall?.copyWith(

@@ -56,14 +56,14 @@ class ResultTextSection extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Text(
-          'No text detected',
+          'Không phát hiện văn bản',
           style: theme.textTheme.bodyLarge?.copyWith(
             color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
           ),
         ),
         const SizedBox(height: 6),
         Text(
-          'Try scanning a clearer image',
+          'Thử quét ảnh rõ hơn',
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
           ),

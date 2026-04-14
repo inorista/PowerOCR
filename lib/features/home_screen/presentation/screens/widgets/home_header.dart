@@ -19,7 +19,7 @@ class HomeHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Good ${_greeting()},',
+                  _greeting(),
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
                     letterSpacing: 0.2,
@@ -61,9 +61,9 @@ class HomeHeader extends StatelessWidget {
 
   String _greeting() {
     final hour = DateTime.now().hour;
-    if (hour < 12) return 'morning';
-    if (hour < 17) return 'afternoon';
-    return 'evening';
+    if (hour < 12) return 'Chào buổi sáng ☀️';
+    if (hour < 17) return 'Chào buổi chiều 🌤️';
+    return 'Chào buổi tối 🌙';
   }
 }
 

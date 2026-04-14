@@ -83,34 +83,6 @@ class _ScanResultScreenState extends State<ScanResultScreen>
   Future<void> _copyText() async {
     await Clipboard.setData(ClipboardData(text: _extractedText));
     setState(() => _isCopied = true);
-    if (mounted) {
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(
-          SnackBar(
-            content: const Row(
-              children: [
-                Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
-                SizedBox(width: 10),
-                Text(
-                  'Copied to clipboard',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: const Color(0xFF2D2D3F),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-            duration: const Duration(seconds: 2),
-          ),
-        );
-    }
     await Future.delayed(const Duration(seconds: 2));
     if (mounted) setState(() => _isCopied = false);
   }
@@ -215,7 +187,7 @@ class _ScanResultScreenState extends State<ScanResultScreen>
                         icon: _isCopied
                             ? Icons.check_rounded
                             : Icons.copy_rounded,
-                        label: _isCopied ? 'Copied!' : 'Copy Text',
+                        label: _isCopied ? 'Đã sao chép!' : 'Sao chép văn bản',
                         onTap: _copyText,
                         isCopied: _isCopied,
                       ),
