@@ -149,7 +149,7 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
                                   QrDataChanged(val),
                                 );
                               },
-                              maxLines: 3,
+                              maxLines: 1,
                               minLines: 1,
                               decoration: InputDecoration(
                                 hintText:
@@ -166,7 +166,7 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
                                   borderRadius: BorderRadius.circular(16),
                                   borderSide: BorderSide.none,
                                 ),
-                                contentPadding: const EdgeInsets.all(16),
+                                contentPadding: const EdgeInsets.all(14),
                                 prefixIcon: Icon(
                                   Icons.text_fields_rounded,
                                   color: theme.colorScheme.onSurface
@@ -199,9 +199,8 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
                     ),
                   ),
 
-                  // Bottom Share Button
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                    padding: const EdgeInsets.all(16),
                     child: ElevatedButton(
                       onPressed: state.qrData.trim().isEmpty || state.isSharing
                           ? null
@@ -209,9 +208,9 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: theme.colorScheme.primary,
                         foregroundColor: theme.colorScheme.onPrimary,
-                        minimumSize: const Size(double.infinity, 56),
+                        minimumSize: const Size(double.infinity, 50),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(14),
                         ),
                         elevation: 0,
                       ),
@@ -225,10 +224,10 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
                               ),
                             )
                           : const Row(
+                              spacing: 8.0,
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(Icons.share_rounded, size: 20),
-                                SizedBox(width: 8),
                                 Text(
                                   'Chia sẻ mã QR',
                                   style: TextStyle(

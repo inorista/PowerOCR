@@ -41,11 +41,14 @@ class QrStyleOptions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionTitle(theme, 'Màu sắc'),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: _buildSectionTitle(theme, 'Màu sắc'),
+        ),
         const SizedBox(height: 12),
         SizedBox(
           height: 48,
@@ -67,7 +70,9 @@ class QrStyleOptions extends StatelessWidget {
                     color: option.color,
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: isSelected ? theme.colorScheme.primary : Colors.transparent,
+                      color: isSelected
+                          ? theme.colorScheme.primary
+                          : Colors.transparent,
                       width: 2,
                     ),
                     boxShadow: isSelected
@@ -76,7 +81,7 @@ class QrStyleOptions extends StatelessWidget {
                               color: option.color.withOpacity(0.4),
                               blurRadius: 8,
                               offset: const Offset(0, 4),
-                            )
+                            ),
                           ]
                         : null,
                   ),
@@ -88,9 +93,9 @@ class QrStyleOptions extends StatelessWidget {
             },
           ),
         ),
-        
+
         const SizedBox(height: 24),
-        
+
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Row(
@@ -99,7 +104,7 @@ class QrStyleOptions extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildSectionTitle(theme, 'Kiểu mắt (Eye)'),
+                    _buildSectionTitle(theme, 'Kiểu mắt'),
                     const SizedBox(height: 12),
                     _buildToggle(
                       context: context,
@@ -120,8 +125,9 @@ class QrStyleOptions extends StatelessWidget {
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    _buildSectionTitle(theme, 'Hoạ tiết (Data)'),
+                    _buildSectionTitle(theme, 'Hoạ tiết'),
                     const SizedBox(height: 12),
                     _buildToggle(
                       context: context,
@@ -169,15 +175,12 @@ class QrStyleOptions extends StatelessWidget {
   }
 
   Widget _buildSectionTitle(ThemeData theme, String title) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 20),
-      child: Text(
-        title.toUpperCase(),
-        style: theme.textTheme.labelSmall?.copyWith(
-          fontWeight: FontWeight.w700,
-          letterSpacing: 1.2,
-          color: theme.colorScheme.onSurface.withOpacity(0.5),
-        ),
+    return Text(
+      title.toUpperCase(),
+      style: theme.textTheme.labelSmall?.copyWith(
+        fontWeight: FontWeight.w700,
+        letterSpacing: 1.2,
+        color: theme.colorScheme.onSurface.withOpacity(0.5),
       ),
     );
   }
@@ -196,7 +199,7 @@ class QrStyleOptions extends StatelessWidget {
   }) {
     final isDark = theme.brightness == Brightness.dark;
     final bgColor = isDark ? const Color(0xFF1A1A26) : const Color(0xFFE5E6EE);
-    
+
     return Container(
       height: 44,
       decoration: BoxDecoration(
@@ -261,7 +264,7 @@ class _ToggleItem extends StatelessWidget {
                     color: theme.colorScheme.primary.withOpacity(0.3),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
-                  )
+                  ),
                 ]
               : null,
         ),
@@ -272,14 +275,18 @@ class _ToggleItem extends StatelessWidget {
               Icon(
                 icon,
                 size: 16,
-                color: isSelected ? Colors.white : theme.colorScheme.onSurface.withOpacity(0.5),
+                color: isSelected
+                    ? Colors.white
+                    : theme.colorScheme.onSurface.withOpacity(0.5),
               ),
               const SizedBox(width: 6),
               Text(
                 label,
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                  color: isSelected ? Colors.white : theme.colorScheme.onSurface.withOpacity(0.5),
+                  color: isSelected
+                      ? Colors.white
+                      : theme.colorScheme.onSurface.withOpacity(0.5),
                 ),
               ),
             ],

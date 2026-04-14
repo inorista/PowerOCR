@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart' show BlocSelector;
+import 'package:powerocr/features/generate_qr/presentation/bloc/generate_qr_bloc.dart'
+    show GenerateQrBloc;
+import 'package:powerocr/features/generate_qr/presentation/bloc/generate_qr_state.dart'
+    show GenerateQrState;
 import 'package:qr_flutter/qr_flutter.dart';
 
 class QrPreviewCard extends StatelessWidget {
@@ -28,10 +33,6 @@ class QrPreviewCard extends StatelessWidget {
         ? (isDark ? const Color(0xFF1A1A26) : const Color(0xFF2D2D3F))
         : Colors.white;
 
-    // Check if the foreground color has good contrast with white background,
-    // if not and dark is selected, we should ensure the QR is visible.
-    // For simplicity, we just use the selected color and background.
-    
     return RepaintBoundary(
       key: boundaryKey,
       child: Container(
@@ -60,24 +61,35 @@ class QrPreviewCard extends StatelessWidget {
             ? Center(
                 child: Padding(
                   padding: const EdgeInsets.all(32.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.qr_code_2_rounded,
-                        size: 64,
-                        color: theme.colorScheme.onSurface.withOpacity(0.1),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Nhập nội dung để\ntạo mã QR',
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurface.withOpacity(0.3),
-                          height: 1.5,
-                        ),
-                      ),
-                    ],
+                  child: BlocSelector<GenerateQrBloc, GenerateQrState, bool>(
+                    selector: (state) {
+                      return state.isDarkBackground;
+                    },
+                    builder: (context, state) {
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.qr_code_2_rounded,
+                            size: 64,
+                            color: state
+                                ? const Color(0xFFE0E0E0)
+                                : Colors.black87,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Nhập nội dung để\ntạo mã QR',
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: state
+                                  ? const Color(0xFFE0E0E0)
+                                  : Colors.black87,
+                              height: 1.5,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ),
               )
@@ -85,7 +97,7 @@ class QrPreviewCard extends StatelessWidget {
                 data: data,
                 version: QrVersions.auto,
                 size: 200,
-                backgroundColor: Colors.transparent, // background is dictated by container
+                backgroundColor: Colors.transparent,
                 eyeStyle: QrEyeStyle(
                   eyeShape: eyeShape,
                   color: foregroundColor,

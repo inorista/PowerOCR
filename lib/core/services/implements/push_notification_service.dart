@@ -68,20 +68,30 @@ class PushNotificationService implements IPushNotificationService {
       }
     });
 
-    if (Platform.isIOS || Platform.isMacOS) {
-      final apnsToken = await _firebaseMessaging.getAPNSToken();
-      log('APNS Token: $apnsToken');
-      if (apnsToken != null) {
+    try {
+      if (Platform.isIOS || Platform.isMacOS) {
+        final apnsToken = await _firebaseMessaging.getAPNSToken();
+        log('APNS Token: $apnsToken');
+        if (apnsToken != null) {
+          final fcmToken = await _firebaseMessaging.getToken();
+          log('FCM Token (iOS): $fcmToken');
+        }
+      } else {
         final fcmToken = await _firebaseMessaging.getToken();
-        log('FCM Token (iOS): $fcmToken');
+        log('FCM Token (Android): $fcmToken');
       }
-    } else {
-      final fcmToken = await _firebaseMessaging.getToken();
-      log('FCM Token (Android): $fcmToken');
+    } catch (e, stackTrace) {
+      log('Failed to get FCM token: $e', error: e, stackTrace: stackTrace);
     }
 
-    _firebaseMessaging.onTokenRefresh.listen((fcmToken) {
-      log('FCM Token Refreshed: $fcmToken');
-    });
+    try {
+      _firebaseMessaging.onTokenRefresh.listen((fcmToken) {
+        log('FCM Token Refreshed: $fcmToken');
+      }).onError((error) {
+        log('Error on FCM Token Refresh: $error');
+      });
+    } catch (e) {
+      log('Failed to listen to FCM token refresh: $e');
+    }
   }
 }

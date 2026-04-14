@@ -523,63 +523,6 @@ class _ScanningScreenState extends State<ScanningScreen>
       }
     }
   }
-
-  /// Animated badge shown below the QR frame in auto-scan mode.
-  Widget _buildQrAutoScanBadge(Size size) {
-    return Positioned(
-      bottom: size.height * 0.22,
-      left: 0,
-      right: 0,
-      child: Center(
-        child: AnimatedBuilder(
-          animation: _scanLineCtrl,
-          builder: (_, __) {
-            // Pulse between 0.6 and 1.0 opacity in sync with the scan-line.
-            final t =
-                (_scanLinePos.value < 0.5
-                    ? _scanLinePos.value
-                    : 1 - _scanLinePos.value) *
-                2;
-            return Opacity(
-              opacity: 0.6 + 0.4 * t,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 10,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF06D6A0).withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(30),
-                  border: Border.all(
-                    color: const Color(0xFF06D6A0).withValues(alpha: 0.5),
-                  ),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.qr_code_scanner_rounded,
-                      color: Color(0xFF06D6A0),
-                      size: 18,
-                    ),
-                    SizedBox(width: 8),
-                    Text(
-                      'Đang quét tự động…',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
 }
 
 class _FrameConfig {

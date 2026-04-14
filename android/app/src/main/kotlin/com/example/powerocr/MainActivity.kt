@@ -1,4 +1,4 @@
-package com.example.powerocr
+package com.dev.powerocr
 
 import io.flutter.embedding.android.FlutterActivity
 
