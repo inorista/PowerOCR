@@ -22,9 +22,7 @@ class GenerateQrState extends Equatable {
   });
 
   factory GenerateQrState.initial() {
-    return GenerateQrState(
-      selectedColor: defaultColors[0].color,
-    );
+    return GenerateQrState(selectedColor: defaultColors[0].color);
   }
 
   GenerateQrState copyWith({
@@ -47,11 +45,11 @@ class GenerateQrState extends Equatable {
 
   @override
   List<Object?> get props => [
-        qrData,
-        selectedColor,
-        eyeShape,
-        dataShape,
-        isDarkBackground,
-        isSharing,
-      ];
+    qrData,
+    selectedColor,
+    eyeShape,
+    dataShape,
+    isDarkBackground,
+    isSharing,
+  ];
 }

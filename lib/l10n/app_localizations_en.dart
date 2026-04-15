@@ -274,4 +274,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get english => 'English';
+
+  @override
+  String get generateQrReminderName => 'Reminder Name';
+
+  @override
+  String get generateQrReminderNameHint => 'E.g.: Facebook, Phone number...';
+
+  @override
+  String get generateQrContent => 'Content';
+
+  @override
+  String get qrLibraryNoQrCodesSavedYet => 'No QR codes saved yet.';
+
+  @override
+  String get untitledQr => 'Untitled QR';
+
+  @override
+  String get deleteQrCode => 'Delete QR Code';
+
+  @override
+  String get deleteQrCodeConfirm =>
+      'Are you sure you want to delete this QR code?';
+
+  @override
+  String get deleteQrCodeCancel => 'Cancel';
+
+  @override
+  String get deleteQrCodeDelete => 'Delete';
 }

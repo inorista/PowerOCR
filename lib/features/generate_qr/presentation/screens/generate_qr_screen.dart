@@ -39,11 +39,13 @@ class _GenerateQrScreenView extends StatefulWidget {
 
 class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
   final TextEditingController _textController = TextEditingController();
+  final TextEditingController _titleController = TextEditingController();
   final GlobalKey _qrKey = GlobalKey();
 
   @override
   void dispose() {
     _textController.dispose();
+    _titleController.dispose();
     super.dispose();
   }
 
@@ -60,7 +62,7 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
           _qrKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
       if (boundary == null) return;
 
-      final image = await boundary.toImage(pixelRatio: 3.0);
+      final image = await boundary.toImage(pixelRatio: 5.0);
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       final pngBytes = byteData?.buffer.asUint8List();
 
@@ -72,7 +74,11 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
         await file.writeAsBytes(pngBytes);
 
         userQrService.saveUserQr(
-          UserQrEntity(content: state.qrData, imagePath: fileName),
+          UserQrEntity(
+            content: state.qrData,
+            imagePath: fileName,
+            title: _titleController.text.trim(),
+          ),
         );
 
         if (mounted) {
@@ -153,39 +159,99 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
                           ),
                           const SizedBox(height: 32),
 
-                          // Input Field
+                          // Title Input Field
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: TextField(
-                              controller: _textController,
-                              onChanged: (val) {
-                                context.read<GenerateQrBloc>().add(
-                                  QrDataChanged(val),
-                                );
-                              },
-                              maxLines: 1,
-                              minLines: 1,
-                              decoration: InputDecoration(
-                                hintText: l10n.generateQrInputHint,
-                                hintStyle: TextStyle(
-                                  color: theme.colorScheme.onSurface
-                                      .withOpacity(0.3),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.generateQrReminderName,
+                                  style: theme.textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color: theme.colorScheme.onSurface,
+                                  ),
                                 ),
-                                filled: true,
-                                fillColor: isDark
-                                    ? const Color(0xFF1A1A26)
-                                    : const Color(0xFFF5F6FA),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  borderSide: BorderSide.none,
+                                const SizedBox(height: 12),
+                                TextField(
+                                  controller: _titleController,
+                                  maxLines: 1,
+                                  decoration: InputDecoration(
+                                    hintText: l10n.generateQrReminderNameHint,
+                                    hintStyle: TextStyle(
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.3),
+                                    ),
+                                    filled: true,
+                                    fillColor: isDark
+                                        ? const Color(0xFF1A1A26)
+                                        : const Color(0xFFF5F6FA),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                    contentPadding: const EdgeInsets.all(14),
+                                    prefixIcon: Icon(
+                                      Icons.label_important_outline_rounded,
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.4),
+                                    ),
+                                  ),
                                 ),
-                                contentPadding: const EdgeInsets.all(14),
-                                prefixIcon: Icon(
-                                  Icons.text_fields_rounded,
-                                  color: theme.colorScheme.onSurface
-                                      .withOpacity(0.4),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+
+                          // Content Input Field
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.generateQrContent,
+                                  style: theme.textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color: theme.colorScheme.onSurface,
+                                  ),
                                 ),
-                              ),
+                                const SizedBox(height: 12),
+                                TextField(
+                                  controller: _textController,
+                                  onChanged: (val) {
+                                    context.read<GenerateQrBloc>().add(
+                                      QrDataChanged(val),
+                                    );
+                                  },
+                                  maxLines: 3,
+                                  minLines: 1,
+                                  decoration: InputDecoration(
+                                    hintText: l10n.generateQrInputHint,
+                                    hintStyle: TextStyle(
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.3),
+                                    ),
+                                    filled: true,
+                                    fillColor: isDark
+                                        ? const Color(0xFF1A1A26)
+                                        : const Color(0xFFF5F6FA),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 14.0,
+                                      vertical: 20.0,
+                                    ),
+                                    prefixIcon: Icon(
+                                      Icons.text_fields_rounded,
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.4),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           const SizedBox(height: 32),

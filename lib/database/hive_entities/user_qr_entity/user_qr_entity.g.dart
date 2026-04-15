@@ -19,19 +19,22 @@ class UserQrEntityAdapter extends TypeAdapter<UserQrEntity> {
     return UserQrEntity(
       content: fields[1] as String,
       imagePath: fields[2] as String,
+      title: fields[3] as String?,
     )..id = fields[0] as String;
   }
 
   @override
   void write(BinaryWriter writer, UserQrEntity obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(4)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
       ..write(obj.content)
       ..writeByte(2)
-      ..write(obj.imagePath);
+      ..write(obj.imagePath)
+      ..writeByte(3)
+      ..write(obj.title);
   }
 
   @override

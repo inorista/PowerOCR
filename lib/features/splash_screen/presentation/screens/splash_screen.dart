@@ -17,8 +17,6 @@ class _SplashScreenState extends State<SplashScreen>
 
   late Animation<double> _logoScaleAnimation;
   late Animation<double> _logoOpacityAnimation;
-  late Animation<Offset> _textSlideAnimation;
-  late Animation<double> _textOpacityAnimation;
   late Animation<double> _glowAnimation;
 
   @override
@@ -51,21 +49,6 @@ class _SplashScreenState extends State<SplashScreen>
       ),
     );
 
-    _textSlideAnimation =
-        Tween<Offset>(begin: const Offset(0, 0.4), end: Offset.zero).animate(
-          CurvedAnimation(
-            parent: _entryController,
-            curve: const Interval(0.4, 0.8, curve: Curves.easeOutCubic),
-          ),
-        );
-
-    _textOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _entryController,
-        curve: const Interval(0.4, 0.8, curve: Curves.easeIn),
-      ),
-    );
-
     _glowAnimation = Tween<double>(begin: 0.8, end: 1.3).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOutSine),
     );
@@ -90,7 +73,6 @@ class _SplashScreenState extends State<SplashScreen>
       backgroundColor: const Color(0xFFF8FAFC), // Modern slate ultra-light
       body: Stack(
         children: [
-          // Animated Glowing Orb in the background
           Positioned.fill(
             child: Center(
               child: AnimatedBuilder(

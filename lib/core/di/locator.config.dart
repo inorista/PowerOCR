@@ -54,6 +54,18 @@ import 'package:powerocr/features/home_screen/domain/repositories/home_repositor
     as _i729;
 import 'package:powerocr/features/home_screen/domain/usecases/get_scan_history.dart'
     as _i445;
+import 'package:powerocr/features/qr_library/data/datasource/qr_library_local_datasource.dart'
+    as _i326;
+import 'package:powerocr/features/qr_library/data/repositories/qr_library_repository_impl.dart'
+    as _i977;
+import 'package:powerocr/features/qr_library/domain/repositories/qr_library_repository.dart'
+    as _i554;
+import 'package:powerocr/features/qr_library/domain/usecases/delete_user_qr.dart'
+    as _i968;
+import 'package:powerocr/features/qr_library/domain/usecases/get_user_qrs.dart'
+    as _i33;
+import 'package:powerocr/features/qr_library/domain/usecases/save_user_qr.dart'
+    as _i461;
 import 'package:powerocr/features/scan_history_screen/data/datasource/scan_history_screen_data_source.dart'
     as _i290;
 import 'package:powerocr/features/scan_history_screen/data/repositories/scan_history_screen_repository_impl.dart'
@@ -123,10 +135,27 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i577.HomeLocalDataSourceImpl(gh<_i812.ScanHistoryDao>()),
     );
     gh.lazySingleton<_i47.INetworkService>(() => _i169.NetworkService());
+    gh.lazySingleton<_i326.QrLibraryLocalDataSource>(
+      () => _i326.QrLibraryLocalDataSourceImpl(),
+    );
     gh.lazySingleton<_i277.IPdfService>(() => _i810.PdfService());
     gh.lazySingleton<_i361.Dio>(
       () => registerModule.provideVisionDio(),
       instanceName: 'VisionDio',
+    );
+    gh.lazySingleton<_i554.QrLibraryRepository>(
+      () => _i977.QrLibraryRepositoryImpl(
+        localDataSource: gh<_i326.QrLibraryLocalDataSource>(),
+      ),
+    );
+    gh.lazySingleton<_i968.DeleteUserQr>(
+      () => _i968.DeleteUserQr(gh<_i554.QrLibraryRepository>()),
+    );
+    gh.lazySingleton<_i33.GetUserQrs>(
+      () => _i33.GetUserQrs(gh<_i554.QrLibraryRepository>()),
+    );
+    gh.lazySingleton<_i461.SaveUserQr>(
+      () => _i461.SaveUserQr(gh<_i554.QrLibraryRepository>()),
     );
     gh.lazySingleton<_i150.RestClient>(
       () => registerModule.provideRestClient(

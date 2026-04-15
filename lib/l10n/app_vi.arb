@@ -131,5 +131,14 @@
   "visibilityMode": "Chế độ hiển thị",
   "language": "Ngôn ngữ",
   "vietnamese": "Tiếng Việt",
-  "english": "Tiếng Anh"
+  "english": "Tiếng Anh",
+  "generateQrReminderName": "Tên gợi nhớ",
+  "generateQrReminderNameHint": "VD: Facebook cá nhân, Số điện thoại...",
+  "generateQrContent": "Nội dung",
+  "qrLibraryNoQrCodesSavedYet": "Chưa có mã QR nào được lưu.",
+  "untitledQr": "QR chưa đặt tên",
+  "deleteQrCode": "Xóa mã QR",
+  "deleteQrCodeConfirm": "Bạn có chắc chắn muốn xóa mã QR này?",
+  "deleteQrCodeCancel": "Hủy",
+  "deleteQrCodeDelete": "Xóa"
 }

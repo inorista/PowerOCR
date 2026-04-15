@@ -165,7 +165,7 @@ class ResultSliverAppBar extends StatelessWidget {
                         children: [
                           GlassButton(
                             icon: Icons.arrow_back_ios_new_rounded,
-                            onTap: () => context.go(AppRouter.home),
+                            onTap: () => context.go(AppRouter.main),
                           ),
                           GlassButton(icon: Icons.share_rounded, onTap: () {}),
                         ],

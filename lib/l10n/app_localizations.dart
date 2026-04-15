@@ -595,6 +595,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'English'**
   String get english;
+
+  /// No description provided for @generateQrReminderName.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder Name'**
+  String get generateQrReminderName;
+
+  /// No description provided for @generateQrReminderNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g.: Facebook, Phone number...'**
+  String get generateQrReminderNameHint;
+
+  /// No description provided for @generateQrContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Content'**
+  String get generateQrContent;
+
+  /// No description provided for @qrLibraryNoQrCodesSavedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No QR codes saved yet.'**
+  String get qrLibraryNoQrCodesSavedYet;
+
+  /// No description provided for @untitledQr.
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled QR'**
+  String get untitledQr;
+
+  /// No description provided for @deleteQrCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete QR Code'**
+  String get deleteQrCode;
+
+  /// No description provided for @deleteQrCodeConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this QR code?'**
+  String get deleteQrCodeConfirm;
+
+  /// No description provided for @deleteQrCodeCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get deleteQrCodeCancel;
+
+  /// No description provided for @deleteQrCodeDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get deleteQrCodeDelete;
 }
 
 class _AppLocalizationsDelegate

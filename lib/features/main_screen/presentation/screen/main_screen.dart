@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:powerocr/features/home_screen/presentation/screens/home_screen.dart';
 import 'package:powerocr/features/main_screen/presentation/cubit/main_screen_cubit.dart';
 import 'package:powerocr/features/main_screen/presentation/screen/widgets/bottom_navigation_item.dart';
+import 'package:powerocr/features/qr_library/presentation/qr_library_screen/qr_library_screen.dart';
 import 'package:powerocr/features/settings/presentation/settings_screen.dart';
 import 'package:powerocr/l10n/app_localizations.dart';
 
@@ -24,7 +25,7 @@ class MainScreen extends StatelessWidget {
               index: state.screenIndex,
               children: const [
                 HomeScreen(),
-                SettingsScreen(),
+                QrLibraryScreen(),
                 SettingsScreen(),
               ],
             );

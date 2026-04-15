@@ -32,7 +32,7 @@ class ScannerTopBar extends StatelessWidget {
             children: [
               _TopBarButton(
                 icon: Icons.close_rounded,
-                onTap: () => context.go(AppRouter.home),
+                onTap: () => context.go(AppRouter.main),
               ),
               const Spacer(),
               _ScannerHint(featureOption: featureOption),
@@ -85,7 +85,10 @@ class _ScannerHint extends StatelessWidget {
     );
   }
 
-  static (IconData, String, Color) _hintForMode(FeatureOption mode, AppLocalizations l10n) {
+  static (IconData, String, Color) _hintForMode(
+    FeatureOption mode,
+    AppLocalizations l10n,
+  ) {
     return switch (mode) {
       FeatureOption.scanQR => (
         Icons.qr_code_rounded,

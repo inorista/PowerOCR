@@ -7,10 +7,13 @@ part 'user_qr_entity.g.dart';
 @HiveType(typeId: HiveBoxNums.userQrEntity)
 class UserQrEntity extends BaseEntity {
   @HiveField(1)
-  final String content;
+  String content;
 
   @HiveField(2)
-  final String imagePath;
+  String imagePath;
 
-  UserQrEntity({required this.content, required this.imagePath});
+  @HiveField(3)
+  String? title;
+
+  UserQrEntity({required this.content, required this.imagePath, this.title});
 }

@@ -11,7 +11,10 @@ class ColorOption {
 }
 
 const List<ColorOption> defaultColors = [
-  ColorOption(Colors.black, 'Khói'), // Actually we can just do l10n.generateQrColorSmoke below
+  ColorOption(
+    Colors.black,
+    'Khói',
+  ), // Actually we can just do l10n.generateQrColorSmoke below
   ColorOption(Color(0xFF2B3A67), 'Navy'),
   ColorOption(Color(0xFF5ABCAE), 'Mint'),
   ColorOption(Color(0xFFCBAACB), 'Lilac'),
@@ -94,83 +97,6 @@ class QrStyleOptions extends StatelessWidget {
                 ),
               );
             },
-          ),
-        ),
-
-        const SizedBox(height: 24),
-
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildSectionTitle(theme, l10n.generateQrEyeShape),
-                    const SizedBox(height: 12),
-                    _buildToggle(
-                      context: context,
-                      theme: theme,
-                      valueLeft: QrEyeShape.square,
-                      valueRight: QrEyeShape.circle,
-                      groupValue: selectedEyeShape,
-                      onChanged: onEyeShapeChanged,
-                      labelLeft: l10n.generateQrShapeSquare,
-                      labelRight: l10n.generateQrShapeCircle,
-                      iconLeft: Icons.square_outlined,
-                      iconRight: Icons.circle_outlined,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    _buildSectionTitle(theme, l10n.generateQrPattern),
-                    const SizedBox(height: 12),
-                    _buildToggle(
-                      context: context,
-                      theme: theme,
-                      valueLeft: QrDataModuleShape.square,
-                      valueRight: QrDataModuleShape.circle,
-                      groupValue: selectedDataShape,
-                      onChanged: onDataShapeChanged,
-                      labelLeft: l10n.generateQrShapeSquare,
-                      labelRight: l10n.generateQrShapeCircle,
-                      iconLeft: Icons.grid_on_rounded,
-                      iconRight: Icons.blur_on_rounded,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 24),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSectionTitle(theme, l10n.generateQrBackground),
-              const SizedBox(height: 12),
-              _buildToggle(
-                context: context,
-                theme: theme,
-                valueLeft: false,
-                valueRight: true,
-                groupValue: isDarkBackground,
-                onChanged: onBackgroundChanged,
-                labelLeft: l10n.generateQrBgWhite,
-                labelRight: l10n.generateQrBgDark,
-                iconLeft: Icons.light_mode_outlined,
-                iconRight: Icons.dark_mode_outlined,
-              ),
-            ],
           ),
         ),
       ],

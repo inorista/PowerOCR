@@ -274,4 +274,32 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get english => 'Tiếng Anh';
+
+  @override
+  String get generateQrReminderName => 'Tên gợi nhớ';
+
+  @override
+  String get generateQrReminderNameHint =>
+      'VD: Facebook cá nhân, Số điện thoại...';
+
+  @override
+  String get generateQrContent => 'Nội dung';
+
+  @override
+  String get qrLibraryNoQrCodesSavedYet => 'Chưa có mã QR nào được lưu.';
+
+  @override
+  String get untitledQr => 'QR chưa đặt tên';
+
+  @override
+  String get deleteQrCode => 'Xóa mã QR';
+
+  @override
+  String get deleteQrCodeConfirm => 'Bạn có chắc chắn muốn xóa mã QR này?';
+
+  @override
+  String get deleteQrCodeCancel => 'Hủy';
+
+  @override
+  String get deleteQrCodeDelete => 'Xóa';
 }
