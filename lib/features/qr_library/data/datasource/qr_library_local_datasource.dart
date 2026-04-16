@@ -2,7 +2,6 @@ import 'package:injectable/injectable.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:powerocr/core/di/locator.dart';
 import 'package:powerocr/database/hive_daos/user_qr_dao.dart';
-import 'package:powerocr/database/hive_entities/user_qr_entity/user_qr_entity.dart';
 import 'package:powerocr/features/qr_library/data/models/user_qr_model.dart';
 
 abstract class QrLibraryLocalDataSource {

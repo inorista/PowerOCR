@@ -8,7 +8,7 @@ class RecognizeText {
 
   RecognizeText(this.repository);
 
-  Future<TextRecognitionResult> call(String imagePath) {
-    return repository.recognizeText(imagePath);
+  Future<TextRecognitionResult> call(String imagePath) async {
+    return await repository.recognizeText(imagePath);
   }
 }

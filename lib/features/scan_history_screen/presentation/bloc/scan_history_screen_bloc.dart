@@ -7,11 +7,11 @@ import 'package:powerocr/features/scan_history_screen/domain/repositories/scan_h
 part 'scan_history_screen_bloc_event.dart';
 part 'scan_history_screen_bloc_state.dart';
 
-class ScanHistoryScreenBlocBloc
+class ScanHistoryScreenBloc
     extends Bloc<ScanHistoryScreenBlocEvent, ScanHistoryScreenBlocState> {
   final ScanHistoryScreenRepository _scanHistoryScreenRepository =
       locator<ScanHistoryScreenRepository>();
-  ScanHistoryScreenBlocBloc() : super(const ScanHistoryScreenBlocState()) {
+  ScanHistoryScreenBloc() : super(const ScanHistoryScreenBlocState()) {
     on<LoadScanHistory>(_onLoadScanHistory);
   }
 

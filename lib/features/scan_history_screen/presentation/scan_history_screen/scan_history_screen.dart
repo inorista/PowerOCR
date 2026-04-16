@@ -87,9 +87,8 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen>
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      body: BlocProvider<ScanHistoryScreenBlocBloc>(
-        create: (context) =>
-            ScanHistoryScreenBlocBloc()..add(LoadScanHistory()),
+      body: BlocProvider<ScanHistoryScreenBloc>(
+        create: (context) => ScanHistoryScreenBloc()..add(LoadScanHistory()),
         child: Stack(
           children: [
             RepaintBoundary(
@@ -106,7 +105,7 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen>
               ),
             ),
 
-            BlocBuilder<ScanHistoryScreenBlocBloc, ScanHistoryScreenBlocState>(
+            BlocBuilder<ScanHistoryScreenBloc, ScanHistoryScreenBlocState>(
               builder: (context, state) {
                 if (state.status == ScanHistoryScreenBlocStatus.initial) {
                   return const SizedBox();
@@ -130,19 +129,25 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen>
                       SliverFillRemaining(
                         hasScrollBody: false,
                         child: _ErrorView(
-                          message: state.errorMessage ?? AppLocalizations.of(context)!.scanHistoryErrorMsg,
+                          message:
+                              state.errorMessage ??
+                              AppLocalizations.of(context)!.scanHistoryErrorMsg,
                           theme: theme,
                           isDark: isDark,
                           l10n: AppLocalizations.of(context)!,
                           onRetry: () => context
-                              .read<ScanHistoryScreenBlocBloc>()
+                              .read<ScanHistoryScreenBloc>()
                               .add(LoadScanHistory()),
                         ),
                       )
                     else if (state.scanHistory.isEmpty)
                       SliverFillRemaining(
                         hasScrollBody: false,
-                        child: _EmptyView(theme: theme, isDark: isDark, l10n: AppLocalizations.of(context)!),
+                        child: _EmptyView(
+                          theme: theme,
+                          isDark: isDark,
+                          l10n: AppLocalizations.of(context)!,
+                        ),
                       )
                     else ...[
                       SliverFadeTransition(
@@ -205,7 +210,7 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen>
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       child:
                           BlocBuilder<
-                            ScanHistoryScreenBlocBloc,
+                            ScanHistoryScreenBloc,
                             ScanHistoryScreenBlocState
                           >(
                             builder: (context, state) {
@@ -222,7 +227,9 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen>
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
-                                      AppLocalizations.of(context)!.scanHistoryTitle,
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.scanHistoryTitle,
                                       style: theme.textTheme.titleLarge
                                           ?.copyWith(
                                             fontWeight: FontWeight.w800,
@@ -327,7 +334,11 @@ class _EmptyView extends StatelessWidget {
   final bool isDark;
   final AppLocalizations l10n;
 
-  const _EmptyView({required this.theme, required this.isDark, required this.l10n});
+  const _EmptyView({
+    required this.theme,
+    required this.isDark,
+    required this.l10n,
+  });
 
   @override
   Widget build(BuildContext context) {

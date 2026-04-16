@@ -12,7 +12,6 @@ import 'package:powerocr/features/home_screen/domain/usecases/get_scan_history.d
 import 'package:powerocr/features/home_screen/presentation/bloc/home_bloc.dart';
 import 'package:powerocr/features/home_screen/presentation/bloc/home_event.dart';
 import 'package:powerocr/core/localization/cubit/locale_cubit.dart';
-import 'package:powerocr/features/home_screen/presentation/bloc/home_event.dart';
 import 'package:powerocr/l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
@@ -64,9 +63,9 @@ class MainApp extends StatelessWidget {
                 routerConfig: router,
                 themeAnimationStyle: const AnimationStyle(
                   curve: Curves.easeOut,
-              duration: Duration(milliseconds: 400),
-            ),
-          );
+                  duration: Duration(milliseconds: 400),
+                ),
+              );
             },
           );
         },
