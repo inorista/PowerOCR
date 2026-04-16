@@ -10,6 +10,8 @@ class HistoryItem extends StatelessWidget {
   final bool isDark;
   final ScanHistory item;
   final VoidCallback? onTap;
+  /// When true, uses tighter padding suitable for the 2-col home grid on tablet.
+  final bool isCompact;
 
   const HistoryItem({
     super.key,
@@ -17,6 +19,7 @@ class HistoryItem extends StatelessWidget {
     required this.isDark,
     required this.item,
     this.onTap,
+    this.isCompact = false,
   });
 
   @override
@@ -48,7 +51,9 @@ class HistoryItem extends StatelessWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 10),
+      padding: isCompact
+          ? EdgeInsets.zero
+          : const EdgeInsets.fromLTRB(24, 0, 24, 10),
       child: Material(
         color: Colors.transparent,
         child: InkWell(

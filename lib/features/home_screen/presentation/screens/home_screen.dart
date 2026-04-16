@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:powerocr/core/constants/enum.dart';
 import 'package:powerocr/core/di/locator.dart';
+import 'package:powerocr/core/utils/responsive.dart';
 
 import 'package:powerocr/core/router/app_router.dart';
 import 'package:powerocr/core/domain/entities/scan_history.dart';
@@ -163,6 +164,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final isDark = theme.brightness == Brightness.dark;
     final primary = theme.colorScheme.primary;
     final size = MediaQuery.sizeOf(context);
+    final isTablet = AppBreakpoints.isTablet(context);
+    final hPad = AppBreakpoints.horizontalPadding(context);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -180,7 +183,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ),
           SafeArea(
-            child: CustomScrollView(
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxWidth: AppBreakpoints.maxContentWidth,
+                ),
+                child: CustomScrollView(
               physics: const BouncingScrollPhysics(
                 parent: AlwaysScrollableScrollPhysics(),
               ),
@@ -225,7 +234,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   child: FadeTransition(
                     opacity: _actionsFade,
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 28, 24, 12),
+                      padding: EdgeInsets.fromLTRB(hPad, 28, hPad, 12),
                       child: Text(
                         AppLocalizations.of(context)!.homeQuickActions,
                         style: theme.textTheme.titleMedium?.copyWith(
@@ -249,7 +258,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   child: FadeTransition(
                     opacity: _actionsFade,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                      padding: EdgeInsets.symmetric(horizontal: hPad),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -295,8 +304,44 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         ),
                       );
                     }
+                    final displayCount =
+                        history.length > 5 ? 5 : history.length;
+                    // Tablet: 2-column grid; phone: single-column list
+                    if (isTablet) {
+                      return SliverPadding(
+                        padding: EdgeInsets.symmetric(horizontal: hPad),
+                        sliver: SliverGrid.builder(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                crossAxisSpacing: 12,
+                                mainAxisSpacing: 12,
+                                mainAxisExtent: 90,
+                              ),
+                          itemCount: displayCount,
+                          itemBuilder: (context, index) {
+                            final item = history[index];
+                            return FadeTransition(
+                              opacity: _actionsFade,
+                              child: SlideTransition(
+                                position: _actionsSlide,
+                                child: HistoryItem(
+                                  theme: theme,
+                                  isDark: isDark,
+                                  item: item,
+                                  isCompact: true,
+                                  onTap: () async {
+                                    await onTapHistoryItem(item);
+                                  },
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    }
                     return SliverList.builder(
-                      itemCount: history.length > 5 ? 5 : history.length,
+                      itemCount: displayCount,
                       itemBuilder: (context, index) {
                         final item = history[index];
                         return FadeTransition(
@@ -320,6 +365,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ],
             ),
           ),
+              ),
+            ),
         ],
       ),
     );

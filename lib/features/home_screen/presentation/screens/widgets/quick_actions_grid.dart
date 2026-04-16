@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:powerocr/core/constants/enum.dart';
 import 'package:powerocr/core/router/app_router.dart';
+import 'package:powerocr/core/utils/responsive.dart';
 import 'package:powerocr/features/home_screen/presentation/screens/widgets/quick_action.dart';
 import 'package:powerocr/features/home_screen/presentation/screens/widgets/quick_action_title.dart';
 import 'package:powerocr/l10n/app_localizations.dart';
@@ -54,16 +55,19 @@ class QuickActionsGrid extends StatelessWidget {
       ),
     ];
 
+    final isTablet = AppBreakpoints.isTablet(context);
+    final hPad = AppBreakpoints.horizontalPadding(context);
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: EdgeInsets.symmetric(horizontal: hPad),
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 4,
           mainAxisSpacing: 12,
           crossAxisSpacing: 12,
-          mainAxisExtent: 100,
+          mainAxisExtent: isTablet ? 116 : 100,
         ),
         itemCount: actions.length,
         itemBuilder: (context, index) {
