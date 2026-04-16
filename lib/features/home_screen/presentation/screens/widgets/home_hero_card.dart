@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:powerocr/core/utils/responsive.dart';
 import 'package:powerocr/l10n/app_localizations.dart' show AppLocalizations;
 
 class HomeHeroCard extends StatelessWidget {
@@ -17,8 +18,9 @@ class HomeHeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hPad = AppBreakpoints.horizontalPadding(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+      padding: EdgeInsets.fromLTRB(hPad, 20, hPad, 0),
       child: AnimatedHeroCard(
         shimmerPos: shimmerPos,
         isDark: isDark,
@@ -86,7 +88,7 @@ class _AnimatedHeroCardState extends State<AnimatedHeroCard>
           child: Transform.scale(
             scale: _pressScale.value,
             child: Container(
-              height: 164,
+              height: AppBreakpoints.isTablet(context) ? 200 : 164,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(24),
                 gradient: const LinearGradient(

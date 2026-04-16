@@ -6,6 +6,7 @@ import 'package:powerocr/core/di/locator.dart';
 import 'package:powerocr/core/domain/entities/scan_history.dart';
 import 'package:powerocr/core/router/app_router.dart' show AppRouter;
 import 'package:powerocr/core/services/interfaces/iscan_history_service.dart';
+import 'package:powerocr/core/utils/responsive.dart';
 import 'package:powerocr/features/scan_history_screen/presentation/bloc/scan_history_screen_bloc.dart';
 import 'package:powerocr/features/scan_history_screen/presentation/scan_history_screen/widgets/scan_history_grid_card.dart';
 import 'dart:math' as math;
@@ -84,6 +85,7 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen>
     final primary = theme.colorScheme.primary;
     final size = MediaQuery.sizeOf(context);
     final topPadding = MediaQuery.paddingOf(context).top;
+    final isTablet = AppBreakpoints.isTablet(context);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -153,11 +155,16 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen>
                       SliverFadeTransition(
                         opacity: _gridFade,
                         sliver: SliverPadding(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+                          padding: EdgeInsets.fromLTRB(
+                            isTablet ? 24 : 16,
+                            0,
+                            isTablet ? 24 : 16,
+                            100,
+                          ),
                           sliver: SliverGrid.builder(
                             gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: isTablet ? 4 : 2,
                                   crossAxisSpacing: 12,
                                   mainAxisSpacing: 12,
                                   childAspectRatio: 0.78,

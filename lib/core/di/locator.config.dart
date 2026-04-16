@@ -44,7 +44,6 @@ import 'package:powerocr/core/services/interfaces/iuser_qr_service.dart'
 import 'package:powerocr/database/hive_daos/scan_history_dao.dart' as _i812;
 import 'package:powerocr/database/hive_daos/scan_text_block_history_dao.dart'
     as _i1031;
-import 'package:powerocr/database/hive_daos/theme_setting_dao.dart' as _i406;
 import 'package:powerocr/database/hive_daos/user_qr_dao.dart' as _i118;
 import 'package:powerocr/features/home_screen/data/datasources/home_local_data_source.dart'
     as _i577;
@@ -101,11 +100,10 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i1031.ScanTextBlockHistoryDao>(
       () => _i1031.ScanTextBlockHistoryDao(),
     );
-    gh.lazySingleton<_i406.ThemeSettingDao>(() => _i406.ThemeSettingDao());
     gh.lazySingleton<_i118.UserQrDao>(() => _i118.UserQrDao());
     gh.lazySingleton<_i729.HomeRepository>(() => _i576.HomeRepositoryImpl());
     gh.lazySingleton<_i126.IThemeSettingService>(
-      () => _i1017.ThemeSettingService(gh<_i406.ThemeSettingDao>()),
+      () => _i1017.ThemeSettingService(),
     );
     gh.lazySingleton<_i455.IPushNotificationService>(
       () => _i88.PushNotificationService(),

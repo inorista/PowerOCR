@@ -5,11 +5,15 @@ import 'package:powerocr/core/utils/extension.dart';
 import 'package:powerocr/core/domain/entities/scan_history.dart';
 import 'package:powerocr/features/home_screen/presentation/screens/widgets/history_thumbnail_place_holder.dart';
 import 'package:powerocr/l10n/app_localizations.dart';
+
 class HistoryItem extends StatelessWidget {
   final ThemeData theme;
   final bool isDark;
   final ScanHistory item;
   final VoidCallback? onTap;
+
+  /// When true, uses tighter padding suitable for the 2-col home grid on tablet.
+  final bool isCompact;
 
   const HistoryItem({
     super.key,
@@ -17,6 +21,7 @@ class HistoryItem extends StatelessWidget {
     required this.isDark,
     required this.item,
     this.onTap,
+    this.isCompact = false,
   });
 
   @override
@@ -48,7 +53,9 @@ class HistoryItem extends StatelessWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 10),
+      padding: isCompact
+          ? EdgeInsets.zero
+          : const EdgeInsets.fromLTRB(24, 0, 24, 10),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -83,7 +90,7 @@ class HistoryItem extends StatelessWidget {
                           ? Image.file(
                               File(item.imagePath),
                               fit: BoxFit.cover,
-                              cacheHeight: 250,
+                              cacheHeight: 350,
                               cacheWidth: 200,
                               errorBuilder: (_, _, _) =>
                                   HistoryThumbnailPlaceholder(
@@ -135,7 +142,7 @@ class HistoryItem extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              " • ${item.type == ScanHistoryType.document ? l10n.historyTypeDocument : l10n.historyTypeQr}",
+                              ' • ${item.type == ScanHistoryType.document ? l10n.historyTypeDocument : l10n.historyTypeQr}',
                               style: theme.textTheme.labelSmall?.copyWith(
                                 color: subtitleColor,
                                 fontWeight: FontWeight.w500,
@@ -150,7 +157,12 @@ class HistoryItem extends StatelessWidget {
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
-                                l10n.historyWordCount(item.text.split(' ').where((w) => w.isNotEmpty).length),
+                                l10n.historyWordCount(
+                                  item.text
+                                      .split(' ')
+                                      .where((w) => w.isNotEmpty)
+                                      .length,
+                                ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: theme.textTheme.labelSmall?.copyWith(

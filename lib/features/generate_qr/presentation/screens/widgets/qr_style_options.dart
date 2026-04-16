@@ -51,16 +51,12 @@ class QrStyleOptions extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: _buildSectionTitle(theme, l10n.generateQrColor),
-        ),
+        _buildSectionTitle(theme, l10n.generateQrColor),
         const SizedBox(height: 12),
         SizedBox(
           height: 48,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
             itemCount: defaultColors.length,
             separatorBuilder: (context, index) => const SizedBox(width: 12),
             itemBuilder: (context, index) {

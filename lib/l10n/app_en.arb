@@ -128,6 +128,7 @@
   "homeTabHome": "Home",
   "homeTabSetting": "Setting",
   "homeTabQr": "QR Library",
+  "settingsTitle": "Settings",
   "visibilityMode": "Appearance",
   "language": "Language",
   "vietnamese": "Vietnamese",
@@ -140,5 +141,13 @@
   "deleteQrCode": "Delete QR Code",
   "deleteQrCodeConfirm": "Are you sure you want to delete this QR code?",
   "deleteQrCodeCancel": "Cancel",
-  "deleteQrCodeDelete": "Delete"
+  "deleteQrCodeDelete": "Delete",
+
+  "qrDetailId": "ID: {id}",
+  "@qrDetailId": {
+    "placeholders": {
+      "id": { "type": "String" }
+    }
+  },
+  "qrDetailContentLabel": "Content"
 }

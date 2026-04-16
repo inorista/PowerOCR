@@ -128,6 +128,7 @@
   "homeTabHome": "Trang chủ",
   "homeTabSetting": "Cài đặt",
   "homeTabQr": "Kho QR",
+  "settingsTitle": "Cài đặt",
   "visibilityMode": "Chế độ hiển thị",
   "language": "Ngôn ngữ",
   "vietnamese": "Tiếng Việt",
@@ -140,5 +141,13 @@
   "deleteQrCode": "Xóa mã QR",
   "deleteQrCodeConfirm": "Bạn có chắc chắn muốn xóa mã QR này?",
   "deleteQrCodeCancel": "Hủy",
-  "deleteQrCodeDelete": "Xóa"
+  "deleteQrCodeDelete": "Xóa",
+
+  "qrDetailId": "ID: {id}",
+  "@qrDetailId": {
+    "placeholders": {
+      "id": { "type": "String" }
+    }
+  },
+  "qrDetailContentLabel": "Nội dung"
 }

@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:powerocr/core/di/locator.dart';
 import 'package:powerocr/core/services/interfaces/iuser_qr_service.dart';
+import 'package:powerocr/core/utils/responsive.dart';
 import 'package:powerocr/database/hive_entities/user_qr_entity/user_qr_entity.dart'
     show UserQrEntity;
 import 'package:share_plus/share_plus.dart';
@@ -110,6 +111,8 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context)!;
+    final isTablet = AppBreakpoints.isTablet(context);
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -130,200 +133,284 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
           ),
           onPressed: () => context.pop(),
         ),
-        actions: const [
-          
-        ]
+        actions: const [],
       ),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: BlocBuilder<GenerateQrBloc, GenerateQrState>(
           builder: (context, state) {
-            return SafeArea(
-              child: Column(
-                children: [
-                  Expanded(
-                    child: SingleChildScrollView(
-                      physics: const BouncingScrollPhysics(),
-                      padding: const EdgeInsets.fromLTRB(0, 16, 0, 40),
-                      child: Column(
-                        children: [
-                          Center(
-                            child: QrPreviewCard(
-                              boundaryKey: _qrKey,
-                              data: state.qrData,
-                              foregroundColor: state.selectedColor,
-                              isDarkBackground: state.isDarkBackground,
-                              eyeShape: state.eyeShape,
-                              dataModuleShape: state.dataShape,
-                            ),
-                          ),
-                          const SizedBox(height: 32),
-
-                          // Title Input Field
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  l10n.generateQrReminderName,
-                                  style: theme.textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                    color: theme.colorScheme.onSurface,
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                TextField(
-                                  controller: _titleController,
-                                  maxLines: 1,
-                                  decoration: InputDecoration(
-                                    hintText: l10n.generateQrReminderNameHint,
-                                    hintStyle: TextStyle(
-                                      color: theme.colorScheme.onSurface
-                                          .withOpacity(0.3),
-                                    ),
-                                    filled: true,
-                                    fillColor: isDark
-                                        ? const Color(0xFF1A1A26)
-                                        : const Color(0xFFF5F6FA),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      borderSide: BorderSide.none,
-                                    ),
-                                    contentPadding: const EdgeInsets.all(14),
-                                    prefixIcon: Icon(
-                                      Icons.label_important_outline_rounded,
-                                      color: theme.colorScheme.onSurface
-                                          .withOpacity(0.4),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-
-                          // Content Input Field
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  l10n.generateQrContent,
-                                  style: theme.textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                    color: theme.colorScheme.onSurface,
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                TextField(
-                                  controller: _textController,
-                                  onChanged: (val) {
-                                    context.read<GenerateQrBloc>().add(
-                                      QrDataChanged(val),
-                                    );
-                                  },
-                                  maxLines: 3,
-                                  minLines: 1,
-                                  decoration: InputDecoration(
-                                    hintText: l10n.generateQrInputHint,
-                                    hintStyle: TextStyle(
-                                      color: theme.colorScheme.onSurface
-                                          .withOpacity(0.3),
-                                    ),
-                                    filled: true,
-                                    fillColor: isDark
-                                        ? const Color(0xFF1A1A26)
-                                        : const Color(0xFFF5F6FA),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      borderSide: BorderSide.none,
-                                    ),
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 14.0,
-                                      vertical: 20.0,
-                                    ),
-                                    prefixIcon: Icon(
-                                      Icons.text_fields_rounded,
-                                      color: theme.colorScheme.onSurface
-                                          .withOpacity(0.4),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 32),
-                          QrStyleOptions(
-                            selectedColor: state.selectedColor,
-                            onColorChanged: (c) => context
-                                .read<GenerateQrBloc>()
-                                .add(QrColorChanged(c)),
-                            selectedEyeShape: state.eyeShape,
-                            onEyeShapeChanged: (s) => context
-                                .read<GenerateQrBloc>()
-                                .add(QrEyeShapeChanged(s)),
-                            selectedDataShape: state.dataShape,
-                            onDataShapeChanged: (s) => context
-                                .read<GenerateQrBloc>()
-                                .add(QrDataShapeChanged(s)),
-                            isDarkBackground: state.isDarkBackground,
-                            onBackgroundChanged: (b) => context
-                                .read<GenerateQrBloc>()
-                                .add(QrBackgroundChanged(b)),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: ElevatedButton(
-                      onPressed: state.qrData.trim().isEmpty || state.isSharing
-                          ? null
-                          : () => _shareQrCode(state),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: theme.colorScheme.primary,
-                        foregroundColor: theme.colorScheme.onPrimary,
-                        minimumSize: const Size(double.infinity, 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: state.isSharing
-                          ? const SizedBox(
-                              height: 24,
-                              width: 24,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2.5,
-                              ),
-                            )
-                          : Row(
-                              spacing: 8.0,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(Icons.share_rounded, size: 20),
-                                Text(
-                                  l10n.generateQrBtnShare,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ],
-                            ),
-                    ),
-                  ),
-                ],
-              ),
-            );
+            return isTablet
+                ? _buildTabletLayout(context, state, theme, isDark, l10n)
+                : _buildPhoneLayout(context, state, theme, isDark, l10n);
           },
         ),
       ),
+    );
+  }
+
+  // ─── Phone layout (original) ──────────────────────────────────────────────
+
+  Widget _buildPhoneLayout(
+    BuildContext context,
+    GenerateQrState state,
+    ThemeData theme,
+    bool isDark,
+    AppLocalizations l10n,
+  ) {
+    return SafeArea(
+      child: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(
+                parent: AlwaysScrollableScrollPhysics(),
+              ),
+              padding: const EdgeInsets.fromLTRB(0, 16, 0, 40),
+              child: Column(
+                children: [
+                  Center(
+                    child: QrPreviewCard(
+                      boundaryKey: _qrKey,
+                      data: state.qrData,
+                      foregroundColor: state.selectedColor,
+                      isDarkBackground: state.isDarkBackground,
+                      eyeShape: state.eyeShape,
+                      dataModuleShape: state.dataShape,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  _buildFormFields(context, state, theme, isDark, l10n),
+                ],
+              ),
+            ),
+          ),
+          _buildShareButton(context, state, theme, l10n),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabletLayout(
+    BuildContext context,
+    GenerateQrState state,
+    ThemeData theme,
+    bool isDark,
+    AppLocalizations l10n,
+  ) {
+    return SafeArea(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Left pane — QR preview (45%)
+          Expanded(
+            flex: 45,
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: QrPreviewCard(
+                  boundaryKey: _qrKey,
+                  data: state.qrData,
+                  foregroundColor: state.selectedColor,
+                  isDarkBackground: state.isDarkBackground,
+                  eyeShape: state.eyeShape,
+                  dataModuleShape: state.dataShape,
+                ),
+              ),
+            ),
+          ),
+          // Divider
+          VerticalDivider(
+            width: 1,
+            color: theme.dividerColor.withValues(alpha: 0.4),
+          ),
+          // Right pane — form + share button (55%)
+          Expanded(
+            flex: 55,
+            child: Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),
+                    child: _buildFormFields(
+                      context,
+                      state,
+                      theme,
+                      isDark,
+                      l10n,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+                  child: _buildShareButtonChild(context, state, theme, l10n),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFormFields(
+    BuildContext context,
+    GenerateQrState state,
+    ThemeData theme,
+    bool isDark,
+    AppLocalizations l10n,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.generateQrReminderName,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _titleController,
+            maxLines: 1,
+            decoration: InputDecoration(
+              hintText: l10n.generateQrReminderNameHint,
+              hintStyle: TextStyle(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+              ),
+              filled: true,
+              fillColor: isDark
+                  ? const Color(0xFF1A1A26)
+                  : const Color(0xFFF5F6FA),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding: const EdgeInsets.all(14),
+              prefixIcon: Icon(
+                Icons.label_important_outline_rounded,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Content Input Field
+          Text(
+            l10n.generateQrContent,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _textController,
+            onChanged: (val) {
+              context.read<GenerateQrBloc>().add(QrDataChanged(val));
+            },
+            maxLines: 3,
+            minLines: 1,
+            decoration: InputDecoration(
+              hintText: l10n.generateQrInputHint,
+              hintStyle: TextStyle(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+              ),
+              filled: true,
+              fillColor: isDark
+                  ? const Color(0xFF1A1A26)
+                  : const Color(0xFFF5F6FA),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 14.0,
+                vertical: 20.0,
+              ),
+              prefixIcon: Icon(
+                Icons.text_fields_rounded,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          QrStyleOptions(
+            selectedColor: state.selectedColor,
+            onColorChanged: (c) =>
+                context.read<GenerateQrBloc>().add(QrColorChanged(c)),
+            selectedEyeShape: state.eyeShape,
+            onEyeShapeChanged: (s) =>
+                context.read<GenerateQrBloc>().add(QrEyeShapeChanged(s)),
+            selectedDataShape: state.dataShape,
+            onDataShapeChanged: (s) =>
+                context.read<GenerateQrBloc>().add(QrDataShapeChanged(s)),
+            isDarkBackground: state.isDarkBackground,
+            onBackgroundChanged: (b) =>
+                context.read<GenerateQrBloc>().add(QrBackgroundChanged(b)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─── Share button ─────────────────────────────────────────────────────────
+
+  Widget _buildShareButton(
+    BuildContext context,
+    GenerateQrState state,
+    ThemeData theme,
+    AppLocalizations l10n,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: _buildShareButtonChild(context, state, theme, l10n),
+    );
+  }
+
+  Widget _buildShareButtonChild(
+    BuildContext context,
+    GenerateQrState state,
+    ThemeData theme,
+    AppLocalizations l10n,
+  ) {
+    return ElevatedButton(
+      onPressed: state.qrData.trim().isEmpty || state.isSharing
+          ? null
+          : () => _shareQrCode(state),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: theme.colorScheme.primary,
+        foregroundColor: theme.colorScheme.onPrimary,
+        minimumSize: const Size(double.infinity, 50),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        elevation: 0,
+      ),
+      child: state.isSharing
+          ? const SizedBox(
+              height: 24,
+              width: 24,
+              child: CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2.5,
+              ),
+            )
+          : Row(
+              spacing: 8.0,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.share_rounded, size: 20),
+                Text(
+                  l10n.generateQrBtnShare,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
     );
   }
 }

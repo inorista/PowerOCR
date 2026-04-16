@@ -1,8 +1,10 @@
+import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:powerocr/core/utils/responsive.dart';
 import 'package:powerocr/features/home_screen/presentation/bloc/home_bloc.dart';
 import 'package:powerocr/features/home_screen/presentation/bloc/home_event.dart';
 import 'package:powerocr/features/scanning/domain/entities/text_recognition_result.dart';
@@ -94,7 +96,11 @@ class _ScanResultScreenState extends State<ScanResultScreen>
     final isDark = theme.brightness == Brightness.dark;
     final size = MediaQuery.sizeOf(context);
     final bottomPad = MediaQuery.paddingOf(context).bottom;
-    final expandedImageHeight = size.height * 0.46;
+    final isTablet = AppBreakpoints.isTablet(context);
+
+    final scaffoldBg = isDark
+        ? const Color(0xFF1A1A26)
+        : const Color(0xFFF2F3F8);
 
     return PopScope(
       onPopInvokedWithResult: (didPop, result) {
@@ -103,65 +109,300 @@ class _ScanResultScreenState extends State<ScanResultScreen>
         }
       },
       child: Scaffold(
-        backgroundColor: isDark
-            ? const Color(0xFF1A1A26)
-            : const Color(0xFFF2F3F8),
-        body: Stack(
-          children: [
-            FadeTransition(
-              opacity: _imageFade,
-              child: CustomScrollView(
-                physics: const BouncingScrollPhysics(),
-                slivers: [
-                  ResultSliverAppBar(
-                    imagePath: widget.imagePath,
-                    expandedHeight: expandedImageHeight,
-                    isDark: isDark,
-                    boundingBoxes: widget.result.blocks
-                        .map((block) => block.boundingBox)
-                        .toList(),
-                    imageWidth: widget.result.imageWidth,
-                    imageHeight: widget.result.imageHeight,
-                    scanType: widget.result.type,
+        backgroundColor: scaffoldBg,
+        body: isTablet
+            ? _TabletLayout(
+                imageFade: _imageFade,
+                contentFade: _contentFade,
+                isDark: isDark,
+                scaffoldBg: scaffoldBg,
+                isCopied: _isCopied,
+                showAlignedFormat: _showAlignedFormat,
+                wordCount: _wordCount,
+                charCount: _charCount,
+                bottomPad: bottomPad,
+                extractedText: _extractedText,
+                onToggleFormat: (val) =>
+                    setState(() => _showAlignedFormat = val),
+                onCopy: _copyText,
+                result: widget.result,
+                imagePath: widget.imagePath,
+                l10n: AppLocalizations.of(context)!,
+              )
+            : _PhoneLayout(
+                imageFade: _imageFade,
+                contentFade: _contentFade,
+                isDark: isDark,
+                isCopied: _isCopied,
+                showAlignedFormat: _showAlignedFormat,
+                wordCount: _wordCount,
+                charCount: _charCount,
+                bottomPad: bottomPad,
+                expandedImageHeight: size.height * 0.46,
+                extractedText: _extractedText,
+                onToggleFormat: (val) =>
+                    setState(() => _showAlignedFormat = val),
+                onCopy: _copyText,
+                result: widget.result,
+                imagePath: widget.imagePath,
+                l10n: AppLocalizations.of(context)!,
+              ),
+      ),
+    );
+  }
+}
+
+// ─── Phone layout (original) ─────────────────────────────────────────────────
+
+class _PhoneLayout extends StatelessWidget {
+  const _PhoneLayout({
+    required this.imageFade,
+    required this.contentFade,
+    required this.isDark,
+    required this.isCopied,
+    required this.showAlignedFormat,
+    required this.wordCount,
+    required this.charCount,
+    required this.bottomPad,
+    required this.expandedImageHeight,
+    required this.extractedText,
+    required this.onToggleFormat,
+    required this.onCopy,
+    required this.result,
+    required this.imagePath,
+    required this.l10n,
+  });
+
+  final Animation<double> imageFade;
+  final Animation<double> contentFade;
+  final bool isDark;
+  final bool isCopied;
+  final bool showAlignedFormat;
+  final int wordCount;
+  final int charCount;
+  final double bottomPad;
+  final double expandedImageHeight;
+  final String extractedText;
+  final ValueChanged<bool> onToggleFormat;
+  final VoidCallback onCopy;
+  final TextRecognitionResult result;
+  final String imagePath;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Stack(
+      children: [
+        FadeTransition(
+          opacity: imageFade,
+          child: CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              ResultSliverAppBar(
+                imagePath: imagePath,
+                expandedHeight: expandedImageHeight,
+                isDark: isDark,
+                boundingBoxes: result.blocks
+                    .map((block) => block.boundingBox)
+                    .toList(),
+                imageWidth: result.imageWidth,
+                imageHeight: result.imageHeight,
+                scanType: result.type,
+              ),
+              ResultHeaderSection(
+                wordCount: wordCount,
+                charCount: charCount,
+                isDark: isDark,
+                showAlignedFormat: showAlignedFormat,
+                onToggleFormat: onToggleFormat,
+                contentFade: contentFade,
+              ),
+              ResultTextSection(
+                extractedText: extractedText,
+                showAlignedFormat: showAlignedFormat,
+                isDark: isDark,
+                bottomPadding: bottomPad,
+                contentFade: contentFade,
+              ),
+            ],
+          ),
+        ),
+        _BottomBar(
+          contentFade: contentFade,
+          isDark: isDark,
+          bottomPad: bottomPad,
+          isCopied: isCopied,
+          onCopy: onCopy,
+          l10n: l10n,
+        ),
+      ],
+    );
+  }
+}
+
+// ─── Tablet layout (side-by-side) ────────────────────────────────────────────
+
+class _TabletLayout extends StatelessWidget {
+  const _TabletLayout({
+    required this.imageFade,
+    required this.contentFade,
+    required this.isDark,
+    required this.scaffoldBg,
+    required this.isCopied,
+    required this.showAlignedFormat,
+    required this.wordCount,
+    required this.charCount,
+    required this.bottomPad,
+    required this.extractedText,
+    required this.onToggleFormat,
+    required this.onCopy,
+    required this.result,
+    required this.imagePath,
+    required this.l10n,
+  });
+
+  final Animation<double> imageFade;
+  final Animation<double> contentFade;
+  final bool isDark;
+  final Color scaffoldBg;
+  final bool isCopied;
+  final bool showAlignedFormat;
+  final int wordCount;
+  final int charCount;
+  final double bottomPad;
+  final String extractedText;
+  final ValueChanged<bool> onToggleFormat;
+  final VoidCallback onCopy;
+  final TextRecognitionResult result;
+  final String imagePath;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final borderColor = isDark
+        ? Colors.white.withValues(alpha: 0.08)
+        : Colors.black.withValues(alpha: 0.06);
+
+    return SafeArea(
+      child: Column(
+        children: [
+          // ── Top row: image left + text right ──────────────────────────
+          Expanded(
+            child: FadeTransition(
+              opacity: imageFade,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Left pane — image
+                  Expanded(
+                    flex: 4,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? const Color(0xFF1E1E2E)
+                                : Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: borderColor),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(
+                                    alpha: isDark ? 0.25 : 0.08),
+                                blurRadius: 16,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: imagePath.isNotEmpty && File(imagePath).existsSync()
+                              ? Image.file(
+                                  File(imagePath),
+                                  fit: BoxFit.contain,
+                                )
+                              : const Center(
+                                  child: Icon(
+                                    Icons.image_not_supported_outlined,
+                                    size: 48,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ),
                   ),
-                  ResultHeaderSection(
-                    wordCount: _wordCount,
-                    charCount: _charCount,
-                    isDark: isDark,
-                    showAlignedFormat: _showAlignedFormat,
-                    onToggleFormat: (val) =>
-                        setState(() => _showAlignedFormat = val),
-                    contentFade: _contentFade,
-                  ),
-                  ResultTextSection(
-                    extractedText: _extractedText,
-                    showAlignedFormat: _showAlignedFormat,
-                    isDark: isDark,
-                    bottomPadding: bottomPad,
-                    contentFade: _contentFade,
+                  // Right pane — text content
+                  Expanded(
+                    flex: 6,
+                    child: CustomScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      slivers: [
+                        ResultHeaderSection(
+                          wordCount: wordCount,
+                          charCount: charCount,
+                          isDark: isDark,
+                          showAlignedFormat: showAlignedFormat,
+                          onToggleFormat: onToggleFormat,
+                          contentFade: contentFade,
+                        ),
+                        ResultTextSection(
+                          extractedText: extractedText,
+                          showAlignedFormat: showAlignedFormat,
+                          isDark: isDark,
+                          bottomPadding: bottomPad + 80,
+                          contentFade: contentFade,
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
-
-            _buildBottomBar(context, theme, isDark, bottomPad, AppLocalizations.of(context)!),
-          ],
-        ),
+          ),
+          // ── Bottom action bar ──────────────────────────────────────────
+          _BottomBar(
+            contentFade: contentFade,
+            isDark: isDark,
+            bottomPad: 0,
+            isCopied: isCopied,
+            onCopy: onCopy,
+            l10n: l10n,
+          ),
+        ],
       ),
     );
   }
+}
 
-  Widget _buildBottomBar(
-    BuildContext context,
-    ThemeData theme,
-    bool isDark,
-    double bottomPad,
-    AppLocalizations l10n,
-  ) {
+// ─── Shared bottom action bar ─────────────────────────────────────────────────
+
+class _BottomBar extends StatelessWidget {
+  const _BottomBar({
+    required this.contentFade,
+    required this.isDark,
+    required this.bottomPad,
+    required this.isCopied,
+    required this.onCopy,
+    required this.l10n,
+  });
+
+  final Animation<double> contentFade;
+  final bool isDark;
+  final double bottomPad;
+  final bool isCopied;
+  final VoidCallback onCopy;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: _contentFade,
+      animation: contentFade,
       builder: (context, child) => Opacity(
-        opacity: _contentFade.value,
+        opacity: contentFade.value,
         child: Align(
           alignment: Alignment.bottomCenter,
           child: ClipRect(
@@ -180,18 +421,21 @@ class _ScanResultScreenState extends State<ScanResultScreen>
                     ),
                   ),
                 ),
-                padding: EdgeInsets.fromLTRB(20, 12, 20, bottomPad + 12),
+                padding:
+                    EdgeInsets.fromLTRB(20, 12, 20, bottomPad + 12),
                 child: Row(
                   children: [
                     Expanded(
                       flex: 2,
                       child: PrimaryActionButton(
-                        icon: _isCopied
+                        icon: isCopied
                             ? Icons.check_rounded
                             : Icons.copy_rounded,
-                        label: _isCopied ? l10n.scanResultCopied : l10n.scanResultCopyText,
-                        onTap: _copyText,
-                        isCopied: _isCopied,
+                        label: isCopied
+                            ? l10n.scanResultCopied
+                            : l10n.scanResultCopyText,
+                        onTap: onCopy,
+                        isCopied: isCopied,
                       ),
                     ),
                   ],

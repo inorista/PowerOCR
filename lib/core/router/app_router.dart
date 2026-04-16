@@ -10,6 +10,8 @@ import 'package:powerocr/features/scanning/presentation/screens/batch_result_scr
 import 'package:powerocr/features/scanning/presentation/screens/scanning_screen/scanning_screen.dart';
 import 'package:powerocr/features/splash_screen/presentation/screens/splash_screen.dart';
 import 'package:powerocr/features/generate_qr/presentation/screens/generate_qr_screen.dart';
+import 'package:powerocr/features/qr_library/domain/entities/user_qr.dart';
+import 'package:powerocr/features/qr_library/presentation/qr_detail_screen/qr_detail_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -60,6 +62,13 @@ final GoRouter router = GoRouter(
       },
     ),
     GoRoute(
+      path: AppRouter.qrDetail,
+      builder: (context, state) {
+        final userQr = state.extra as UserQr;
+        return QrDetailScreen(userQr: userQr);
+      },
+    ),
+    GoRoute(
       path: AppRouter.main,
       builder: (context, state) {
         return const MainScreen();
@@ -79,4 +88,5 @@ class AppRouter {
   static const String batchResult = '/batch-result';
   static const String generateQr = '/generate-qr';
   static const String main = '/main';
+  static const String qrDetail = '/qr-detail';
 }
