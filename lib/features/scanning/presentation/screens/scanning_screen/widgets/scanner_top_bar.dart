@@ -7,6 +7,7 @@ import 'package:powerocr/core/constants/enum.dart';
 import 'package:powerocr/core/router/app_router.dart';
 import 'package:powerocr/features/scanning/presentation/bloc/scanning_bloc.dart';
 import 'package:powerocr/features/scanning/presentation/bloc/scanning_event.dart';
+import 'package:powerocr/l10n/app_localizations.dart';
 
 class ScannerTopBar extends StatelessWidget {
   final FlashMode flashMode;
@@ -31,7 +32,7 @@ class ScannerTopBar extends StatelessWidget {
             children: [
               _TopBarButton(
                 icon: Icons.close_rounded,
-                onTap: () => context.go(AppRouter.home),
+                onTap: () => context.go(AppRouter.main),
               ),
               const Spacer(),
               _ScannerHint(featureOption: featureOption),
@@ -54,8 +55,10 @@ class _ScannerHint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final (IconData icon, String label, Color accent) = _hintForMode(
       featureOption,
+      l10n,
     );
 
     return ClipRRect(
@@ -82,26 +85,29 @@ class _ScannerHint extends StatelessWidget {
     );
   }
 
-  static (IconData, String, Color) _hintForMode(FeatureOption mode) {
+  static (IconData, String, Color) _hintForMode(
+    FeatureOption mode,
+    AppLocalizations l10n,
+  ) {
     return switch (mode) {
       FeatureOption.scanQR => (
         Icons.qr_code_rounded,
-        'Hướng vào mã QR / barcode',
+        l10n.scannerInstructionQr,
         const Color(0xFF06D6A0),
       ),
       FeatureOption.scanId => (
         Icons.credit_card_rounded,
-        'Căn chỉnh thẻ căn cước / CCCD',
+        l10n.scannerInstructionId,
         const Color(0xFFFFD166),
       ),
       FeatureOption.batchScan => (
         Icons.layers_rounded,
-        'Quét từng trang một',
+        l10n.scannerInstructionBatch,
         const Color(0xFF8B8FE3),
       ),
       FeatureOption.scanDocument => (
         Icons.description_rounded,
-        'Căn tài liệu vào khung',
+        l10n.scannerInstructionDoc,
         const Color(0xFF8B8FE3),
       ),
     };

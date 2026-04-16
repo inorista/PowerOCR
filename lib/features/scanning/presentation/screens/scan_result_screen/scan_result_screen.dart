@@ -11,6 +11,7 @@ import 'package:powerocr/features/scanning/presentation/screens/scan_result_scre
 import 'package:powerocr/features/scanning/presentation/screens/scan_result_screen/widgets/result_header_section.dart';
 import 'package:powerocr/features/scanning/presentation/screens/scan_result_screen/widgets/result_text_section.dart';
 import 'package:powerocr/features/scanning/presentation/screens/scan_result_screen/utils/text_alignment_utils.dart';
+import 'package:powerocr/l10n/app_localizations.dart';
 
 class ScanResultScreen extends StatefulWidget {
   final String imagePath;
@@ -143,7 +144,7 @@ class _ScanResultScreenState extends State<ScanResultScreen>
               ),
             ),
 
-            _buildBottomBar(context, theme, isDark, bottomPad),
+            _buildBottomBar(context, theme, isDark, bottomPad, AppLocalizations.of(context)!),
           ],
         ),
       ),
@@ -155,6 +156,7 @@ class _ScanResultScreenState extends State<ScanResultScreen>
     ThemeData theme,
     bool isDark,
     double bottomPad,
+    AppLocalizations l10n,
   ) {
     return AnimatedBuilder(
       animation: _contentFade,
@@ -187,7 +189,7 @@ class _ScanResultScreenState extends State<ScanResultScreen>
                         icon: _isCopied
                             ? Icons.check_rounded
                             : Icons.copy_rounded,
-                        label: _isCopied ? 'Đã sao chép!' : 'Sao chép văn bản',
+                        label: _isCopied ? l10n.scanResultCopied : l10n.scanResultCopyText,
                         onTap: _copyText,
                         isCopied: _isCopied,
                       ),

@@ -26,6 +26,8 @@ import 'package:powerocr/core/services/implements/scan_history_service.dart'
     as _i911;
 import 'package:powerocr/core/services/implements/theme_setting_service.dart'
     as _i1017;
+import 'package:powerocr/core/services/implements/user_qr_service.dart'
+    as _i964;
 import 'package:powerocr/core/services/interfaces/ilocal_notification_service.dart'
     as _i780;
 import 'package:powerocr/core/services/interfaces/inetwork_service.dart'
@@ -37,10 +39,13 @@ import 'package:powerocr/core/services/interfaces/iscan_history_service.dart'
     as _i254;
 import 'package:powerocr/core/services/interfaces/itheme_setting_service.dart'
     as _i126;
+import 'package:powerocr/core/services/interfaces/iuser_qr_service.dart'
+    as _i973;
 import 'package:powerocr/database/hive_daos/scan_history_dao.dart' as _i812;
 import 'package:powerocr/database/hive_daos/scan_text_block_history_dao.dart'
     as _i1031;
 import 'package:powerocr/database/hive_daos/theme_setting_dao.dart' as _i406;
+import 'package:powerocr/database/hive_daos/user_qr_dao.dart' as _i118;
 import 'package:powerocr/features/home_screen/data/datasources/home_local_data_source.dart'
     as _i577;
 import 'package:powerocr/features/home_screen/data/repositories/home_repository_impl.dart'
@@ -49,6 +54,18 @@ import 'package:powerocr/features/home_screen/domain/repositories/home_repositor
     as _i729;
 import 'package:powerocr/features/home_screen/domain/usecases/get_scan_history.dart'
     as _i445;
+import 'package:powerocr/features/qr_library/data/datasource/qr_library_local_datasource.dart'
+    as _i326;
+import 'package:powerocr/features/qr_library/data/repositories/qr_library_repository_impl.dart'
+    as _i977;
+import 'package:powerocr/features/qr_library/domain/repositories/qr_library_repository.dart'
+    as _i554;
+import 'package:powerocr/features/qr_library/domain/usecases/delete_user_qr.dart'
+    as _i968;
+import 'package:powerocr/features/qr_library/domain/usecases/get_user_qrs.dart'
+    as _i33;
+import 'package:powerocr/features/qr_library/domain/usecases/save_user_qr.dart'
+    as _i461;
 import 'package:powerocr/features/scan_history_screen/data/datasource/scan_history_screen_data_source.dart'
     as _i290;
 import 'package:powerocr/features/scan_history_screen/data/repositories/scan_history_screen_repository_impl.dart'
@@ -85,6 +102,7 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i1031.ScanTextBlockHistoryDao(),
     );
     gh.lazySingleton<_i406.ThemeSettingDao>(() => _i406.ThemeSettingDao());
+    gh.lazySingleton<_i118.UserQrDao>(() => _i118.UserQrDao());
     gh.lazySingleton<_i729.HomeRepository>(() => _i576.HomeRepositoryImpl());
     gh.lazySingleton<_i126.IThemeSettingService>(
       () => _i1017.ThemeSettingService(gh<_i406.ThemeSettingDao>()),
@@ -110,14 +128,34 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i254.IScanHistoryService>(
       () => _i911.ScanHistoryService(),
     );
+    gh.lazySingleton<_i973.IUserQrService>(
+      () => _i964.UserQrService(gh<_i118.UserQrDao>()),
+    );
     gh.lazySingleton<_i577.HomeLocalDataSource>(
       () => _i577.HomeLocalDataSourceImpl(gh<_i812.ScanHistoryDao>()),
     );
     gh.lazySingleton<_i47.INetworkService>(() => _i169.NetworkService());
+    gh.lazySingleton<_i326.QrLibraryLocalDataSource>(
+      () => _i326.QrLibraryLocalDataSourceImpl(),
+    );
     gh.lazySingleton<_i277.IPdfService>(() => _i810.PdfService());
     gh.lazySingleton<_i361.Dio>(
       () => registerModule.provideVisionDio(),
       instanceName: 'VisionDio',
+    );
+    gh.lazySingleton<_i554.QrLibraryRepository>(
+      () => _i977.QrLibraryRepositoryImpl(
+        localDataSource: gh<_i326.QrLibraryLocalDataSource>(),
+      ),
+    );
+    gh.lazySingleton<_i968.DeleteUserQr>(
+      () => _i968.DeleteUserQr(gh<_i554.QrLibraryRepository>()),
+    );
+    gh.lazySingleton<_i33.GetUserQrs>(
+      () => _i33.GetUserQrs(gh<_i554.QrLibraryRepository>()),
+    );
+    gh.lazySingleton<_i461.SaveUserQr>(
+      () => _i461.SaveUserQr(gh<_i554.QrLibraryRepository>()),
     );
     gh.lazySingleton<_i150.RestClient>(
       () => registerModule.provideRestClient(

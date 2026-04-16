@@ -8,6 +8,7 @@ import 'package:powerocr/core/router/app_router.dart';
 import 'package:powerocr/core/domain/entities/scan_history.dart';
 import 'package:powerocr/core/services/interfaces/iscan_history_service.dart';
 import 'package:powerocr/features/home_screen/presentation/bloc/home_bloc.dart';
+import 'package:powerocr/l10n/app_localizations.dart';
 
 import 'package:powerocr/features/home_screen/presentation/bloc/home_state.dart';
 import 'package:powerocr/features/home_screen/presentation/screens/widgets/ambient_orbs.dart';
@@ -226,7 +227,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(24, 28, 24, 12),
                       child: Text(
-                        'Thao tác nhanh',
+                        AppLocalizations.of(context)!.homeQuickActions,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.3,
@@ -253,7 +254,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Quét gần đây',
+                            AppLocalizations.of(context)!.homeRecentHistory,
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w700,
                               letterSpacing: 0.3,
@@ -268,11 +269,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               padding: EdgeInsets.zero,
                               minimumSize: const Size(44, 32),
                             ),
-                            child: const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8.0,
+                              ),
                               child: Text(
-                                'Xem tất cả',
-                                style: TextStyle(fontSize: 13),
+                                AppLocalizations.of(context)!.historySeeAll,
+                                style: const TextStyle(fontSize: 13),
                               ),
                             ),
                           ),

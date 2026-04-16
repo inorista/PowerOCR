@@ -12,6 +12,7 @@ import 'dart:math' as math;
 
 import 'package:powerocr/features/scanning/domain/entities/text_recognition_result.dart'
     show TextRecognitionResult;
+import 'package:powerocr/l10n/app_localizations.dart';
 
 class ScanHistoryScreen extends StatefulWidget {
   const ScanHistoryScreen({super.key});
@@ -86,9 +87,8 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen>
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      body: BlocProvider<ScanHistoryScreenBlocBloc>(
-        create: (context) =>
-            ScanHistoryScreenBlocBloc()..add(LoadScanHistory()),
+      body: BlocProvider<ScanHistoryScreenBloc>(
+        create: (context) => ScanHistoryScreenBloc()..add(LoadScanHistory()),
         child: Stack(
           children: [
             RepaintBoundary(
@@ -105,7 +105,7 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen>
               ),
             ),
 
-            BlocBuilder<ScanHistoryScreenBlocBloc, ScanHistoryScreenBlocState>(
+            BlocBuilder<ScanHistoryScreenBloc, ScanHistoryScreenBlocState>(
               builder: (context, state) {
                 if (state.status == ScanHistoryScreenBlocStatus.initial) {
                   return const SizedBox();
@@ -129,18 +129,25 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen>
                       SliverFillRemaining(
                         hasScrollBody: false,
                         child: _ErrorView(
-                          message: state.errorMessage ?? 'Đã xảy ra lỗi',
+                          message:
+                              state.errorMessage ??
+                              AppLocalizations.of(context)!.scanHistoryErrorMsg,
                           theme: theme,
                           isDark: isDark,
+                          l10n: AppLocalizations.of(context)!,
                           onRetry: () => context
-                              .read<ScanHistoryScreenBlocBloc>()
+                              .read<ScanHistoryScreenBloc>()
                               .add(LoadScanHistory()),
                         ),
                       )
                     else if (state.scanHistory.isEmpty)
                       SliverFillRemaining(
                         hasScrollBody: false,
-                        child: _EmptyView(theme: theme, isDark: isDark),
+                        child: _EmptyView(
+                          theme: theme,
+                          isDark: isDark,
+                          l10n: AppLocalizations.of(context)!,
+                        ),
                       )
                     else ...[
                       SliverFadeTransition(
@@ -203,7 +210,7 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen>
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       child:
                           BlocBuilder<
-                            ScanHistoryScreenBlocBloc,
+                            ScanHistoryScreenBloc,
                             ScanHistoryScreenBlocState
                           >(
                             builder: (context, state) {
@@ -220,7 +227,9 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen>
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
-                                      'Lịch sử quét',
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.scanHistoryTitle,
                                       style: theme.textTheme.titleLarge
                                           ?.copyWith(
                                             fontWeight: FontWeight.w800,
@@ -296,6 +305,7 @@ class _LoadingIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -309,7 +319,7 @@ class _LoadingIndicator extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         Text(
-          'Đang tải lịch sử...',
+          l10n.scanHistoryLoading,
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
           ),
@@ -322,8 +332,13 @@ class _LoadingIndicator extends StatelessWidget {
 class _EmptyView extends StatelessWidget {
   final ThemeData theme;
   final bool isDark;
+  final AppLocalizations l10n;
 
-  const _EmptyView({required this.theme, required this.isDark});
+  const _EmptyView({
+    required this.theme,
+    required this.isDark,
+    required this.l10n,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -348,7 +363,7 @@ class _EmptyView extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Text(
-              'Chưa có lịch sử',
+              l10n.scanHistoryEmptyTitle,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w700,
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
@@ -356,7 +371,7 @@ class _EmptyView extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Tài liệu đã quét sẽ xuất hiện\nở đây khi bạn bắt đầu quét.',
+              l10n.scanHistoryEmptySubtitle,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.42),
@@ -374,12 +389,14 @@ class _ErrorView extends StatelessWidget {
   final String message;
   final ThemeData theme;
   final bool isDark;
+  final AppLocalizations l10n;
   final VoidCallback onRetry;
 
   const _ErrorView({
     required this.message,
     required this.theme,
     required this.isDark,
+    required this.l10n,
     required this.onRetry,
   });
 
@@ -398,7 +415,7 @@ class _ErrorView extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Tải thất bại',
+              l10n.scanHistoryErrorTitle,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
@@ -416,7 +433,7 @@ class _ErrorView extends StatelessWidget {
             FilledButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: const Text('Thử lại'),
+              label: Text(l10n.scanHistoryRetryBtn),
               style: FilledButton.styleFrom(
                 backgroundColor: theme.colorScheme.primary,
                 shape: RoundedRectangleBorder(

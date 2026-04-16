@@ -4,6 +4,7 @@ import 'package:powerocr/core/constants/enum.dart';
 import 'package:powerocr/core/router/app_router.dart';
 import 'package:powerocr/features/home_screen/presentation/screens/widgets/quick_action.dart';
 import 'package:powerocr/features/home_screen/presentation/screens/widgets/quick_action_title.dart';
+import 'package:powerocr/l10n/app_localizations.dart';
 
 class QuickActionsGrid extends StatelessWidget {
   final ThemeData theme;
@@ -17,10 +18,11 @@ class QuickActionsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final actions = [
       QuickAction(
         icon: Icons.camera_alt_rounded,
-        label: 'Quét\nTài liệu',
+        label: l10n.homeQuickScanDoc,
         gradient: [const Color(0xFF8B8FE3), const Color(0xFF6B6FCC)],
         onTap: () {
           context.push(AppRouter.scanning, extra: FeatureOption.scanDocument);
@@ -28,7 +30,7 @@ class QuickActionsGrid extends StatelessWidget {
       ),
       QuickAction(
         icon: Icons.qr_code_scanner_rounded,
-        label: 'Quét\nMã QR',
+        label: l10n.homeQuickScanId,
         gradient: [const Color(0xFFFFB7A3), const Color(0xFFE8896E)],
         onTap: () {
           context.push(AppRouter.scanning, extra: FeatureOption.scanQR);
@@ -36,7 +38,7 @@ class QuickActionsGrid extends StatelessWidget {
       ),
       QuickAction(
         icon: Icons.picture_as_pdf, // Batch Scan Icon
-        label: 'Quét\n& Xuất file',
+        label: l10n.homeQuickScanBatch,
         gradient: [const Color(0xFF95E1D3), const Color(0xFF5ABCAE)],
         onTap: () {
           context.push(AppRouter.scanning, extra: FeatureOption.batchScan);
@@ -44,7 +46,7 @@ class QuickActionsGrid extends StatelessWidget {
       ),
       QuickAction(
         icon: Icons.qr_code_outlined, // Scan ID Icon
-        label: 'Tạo mã\nQR cá nhân',
+        label: l10n.homeQuickGenerateQr,
         gradient: [const Color(0xFFCBAACB), const Color(0xFF9F83A0)],
         onTap: () {
           context.push(AppRouter.generateQr);

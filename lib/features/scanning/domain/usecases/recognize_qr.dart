@@ -5,10 +5,9 @@ import 'package:powerocr/features/scanning/domain/repositories/scanning_reposito
 @lazySingleton
 class RecognizeQR {
   final ScanningRepository repository;
-
   RecognizeQR(this.repository);
 
-  Future<TextRecognitionResult> call(String imagePath) {
-    return repository.recognizeQR(imagePath);
+  Future<TextRecognitionResult> call(String imagePath) async {
+    return await repository.recognizeQR(imagePath);
   }
 }

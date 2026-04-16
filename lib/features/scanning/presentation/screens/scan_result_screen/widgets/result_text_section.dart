@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:powerocr/l10n/app_localizations.dart';
 
 class ResultTextSection extends StatelessWidget {
   final String extractedText;
@@ -19,13 +20,14 @@ class ResultTextSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     
     if (extractedText.trim().isEmpty) {
       return SliverFillRemaining(
         hasScrollBody: false,
         child: FadeTransition(
           opacity: contentFade,
-          child: _buildEmptyText(theme),
+          child: _buildEmptyText(theme, l10n),
         ),
       );
     }
@@ -44,7 +46,7 @@ class ResultTextSection extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyText(ThemeData theme) {
+  Widget _buildEmptyText(ThemeData theme, AppLocalizations l10n) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -56,14 +58,14 @@ class ResultTextSection extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Text(
-          'Không phát hiện văn bản',
+          l10n.scanResultNoTextFound,
           style: theme.textTheme.bodyLarge?.copyWith(
             color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
           ),
         ),
         const SizedBox(height: 6),
         Text(
-          'Thử quét ảnh rõ hơn',
+          l10n.scanResultTryClearerImage,
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
           ),

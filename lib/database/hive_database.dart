@@ -7,6 +7,7 @@ import 'package:powerocr/database/hive_entities/scan_history_entity/scan_history
     show ScanHistoryEntityAdapter, ScanHistoryEntity;
 import 'package:powerocr/database/hive_entities/scan_text_block_history_entity/scan_text_block_history_entity.dart';
 import 'package:powerocr/database/hive_entities/theme_setting_entity/theme_setting_entity.dart';
+import 'package:powerocr/database/hive_entities/user_qr_entity/user_qr_entity.dart';
 
 class HiveDatabase {
   Future<void> setupHiveDatabase() async {
@@ -22,6 +23,7 @@ class HiveDatabase {
     Hive.registerAdapter(ScanHistoryEntityAdapter());
     Hive.registerAdapter(ScanTextBlockHistoryEntityAdapter());
     Hive.registerAdapter(ScanHistoryTypeAdapter());
+    Hive.registerAdapter(UserQrEntityAdapter());
   }
 
   Future<void> _initBoxes() async {
@@ -30,6 +32,7 @@ class HiveDatabase {
     await Hive.openBox<ScanTextBlockHistoryEntity>(
       HiveBoxIds.scanTextBlockHistoryEntity,
     );
+    await Hive.openBox<UserQrEntity>(HiveBoxIds.userQrEntity);
   }
 }
 
@@ -37,6 +40,7 @@ class HiveBoxIds {
   static const themeSettingEntity = 'themeSettingEntity';
   static const scanHistoryEntity = 'scanHistoryEntity';
   static const scanTextBlockHistoryEntity = 'scanTextBlockHistoryEntity';
+  static const userQrEntity = 'userQrEntity';
 }
 
 class HiveBoxNums {
@@ -45,4 +49,5 @@ class HiveBoxNums {
   static const scanHistoryEntity = 2;
   static const scanTextBlockHistoryEntity = 3;
   static const scanHistoryType = 4;
+  static const userQrEntity = 5;
 }

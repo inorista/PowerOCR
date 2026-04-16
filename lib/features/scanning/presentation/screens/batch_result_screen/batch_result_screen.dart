@@ -5,6 +5,7 @@ import 'package:powerocr/core/di/locator.dart';
 import 'package:powerocr/core/services/interfaces/ipdf_service.dart';
 import 'dart:math' as math;
 import 'package:go_router/go_router.dart';
+import 'package:powerocr/l10n/app_localizations.dart';
 
 class BatchResultScreen extends StatefulWidget {
   final List<String> imagePaths;
@@ -69,7 +70,7 @@ class _BatchResultScreenState extends State<BatchResultScreen>
               bottom: MediaQuery.paddingOf(context).bottom + 92,
             ),
             behavior: SnackBarBehavior.floating,
-            content: Text('Xuất PDF thất bại: $e'),
+            content: Text(AppLocalizations.of(context)!.exportPdfFailed(e.toString())),
           ),
         );
       }
@@ -85,6 +86,7 @@ class _BatchResultScreenState extends State<BatchResultScreen>
     final primary = theme.colorScheme.primary;
     final size = MediaQuery.sizeOf(context);
     final topPadding = MediaQuery.paddingOf(context).top;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -205,7 +207,7 @@ class _BatchResultScreenState extends State<BatchResultScreen>
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            '${widget.imagePaths.length} trang đã quét',
+                            l10n.batchResultPageCount(widget.imagePaths.length),
                             style: theme.textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.w800,
                               fontSize: 20,
@@ -233,7 +235,7 @@ class _BatchResultScreenState extends State<BatchResultScreen>
           child: FilledButton.icon(
             onPressed: _isExporting ? null : _exportToPdf,
             icon: const Icon(Icons.share_rounded),
-            label: const Text('Xuất & Chia sẻ PDF'),
+            label: Text(l10n.batchResultExportPdfBtn),
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(

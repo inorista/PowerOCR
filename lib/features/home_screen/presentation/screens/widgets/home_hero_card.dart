@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:powerocr/l10n/app_localizations.dart' show AppLocalizations;
 
 class HomeHeroCard extends StatelessWidget {
   final Animation<double> shimmerPos;
@@ -176,9 +177,9 @@ class _AnimatedHeroCardState extends State<AnimatedHeroCard>
                                   ),
                                 ),
                                 const Spacer(),
-                                const Text(
-                                  'Bắt đầu Quét',
-                                  style: TextStyle(
+                                Text(
+                                  AppLocalizations.of(context)!.homeHeroBtn,
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 22,
                                     fontWeight: FontWeight.w800,
@@ -188,7 +189,7 @@ class _AnimatedHeroCardState extends State<AnimatedHeroCard>
                                 ),
                                 const SizedBox(height: 5),
                                 Text(
-                                  'Số hóa tài liệu ngay lập tức với AI',
+                                  AppLocalizations.of(context)!.homeHeroDesc,
                                   style: TextStyle(
                                     color: Colors.white.withValues(alpha: 0.75),
                                     fontSize: 12.5,

@@ -1,0 +1,144 @@
+{
+  "@@locale": "vi",
+
+  "generateQrTitle": "Tạo mã QR",
+  "generateQrPlaceholder": "Nhập nội dung để\ntạo mã QR",
+  "generateQrInputHint": "Nhập văn bản, link, số điện thoại...",
+  "generateQrColor": "Màu sắc",
+  "generateQrEyeShape": "Kiểu mắt",
+  "generateQrPattern": "Hoạ tiết",
+  "generateQrBackground": "Nền mã QR",
+  "generateQrShapeSquare": "Vuông",
+  "generateQrShapeCircle": "Tròn",
+  "generateQrBgWhite": "Nền trắng",
+  "generateQrBgDark": "Nền tối",
+  "generateQrColorSmoke": "Khói",
+  "generateQrBtnShare": "Lưu & chia sẻ mã QR",
+  "generateQrShareTitle": "Mã QR của tôi",
+  "generateQrShareError": "Lỗi khi chia sẻ QR: {error}",
+  "@generateQrShareError": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "scanHistoryTitle": "Lịch sử quét",
+  "scanHistoryLoading": "Đang tải lịch sử...",
+  "scanHistoryEmptyTitle": "Chưa có lịch sử",
+  "scanHistoryEmptySubtitle": "Tài liệu đã quét sẽ xuất hiện\nở đây khi bạn bắt đầu quét.",
+  "scanHistoryErrorTitle": "Tải thất bại",
+  "scanHistoryErrorMsg": "Đã xảy ra lỗi",
+  "scanHistoryRetryBtn": "Thử lại",
+
+  "timeJustNow": "Vừa xong",
+  "timeMinutesAgo": "{minutes} phút trước",
+  "@timeMinutesAgo": {
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+  "timeHoursAgo": "{hours} giờ trước",
+  "@timeHoursAgo": {
+    "placeholders": {
+      "hours": { "type": "int" }
+    }
+  },
+  "timeYesterday": "Hôm qua",
+  "timeDaysAgo": "{days} ngày trước",
+  "@timeDaysAgo": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+
+  "historyNoTextExtracted": "Không có văn bản được trích xuất",
+  "historyTypeDocument": "Tài liệu",
+  "historyTypeQr": "Mã QR",
+  "historyWordCount": "{words} từ",
+  "@historyWordCount": {
+    "placeholders": {
+      "words": { "type": "int" }
+    }
+  },
+  "historySeeAll": "Xem tất cả",
+
+  "scanFailed": "Quét thất bại",
+  "exportPdfFailed": "Xuất PDF thất bại: {error}",
+  "@exportPdfFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "batchResultPageCount": "{count} trang đã quét",
+  "@batchResultPageCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "batchResultExportPdfBtn": "Xuất & Chia sẻ PDF",
+
+  "scanResultCopied": "Đã sao chép!",
+  "scanResultCopyText": "Sao chép văn bản",
+  "scanResultTapToZoom": "Tap để phóng to",
+  "scanResultExtractedText": "Văn bản trích xuất",
+  "scanResultWordCharCount": "{words} từ · {chars} ký tự",
+  "@scanResultWordCharCount": {
+    "placeholders": {
+      "words": { "type": "int" },
+      "chars": { "type": "int" }
+    }
+  },
+  "scanResultPlainText": "Văn bản thuần",
+  "scanResultVisualLayout": "Bố cục trực quan",
+  "scanResultAiScan": "AI quét",
+  "scanResultHideBoxes": "Ẩn",
+  "scanResultShowBoxes": "Hiện",
+  "scanResultNoTextFound": "Không phát hiện văn bản",
+  "scanResultTryClearerImage": "Thử quét ảnh rõ hơn",
+
+  "scannerGalleryBtn": "Thư viện",
+  "scannerInstructionQr": "Hướng vào mã QR / barcode",
+  "scannerInstructionId": "Căn chỉnh thẻ căn cước / CCCD",
+  "scannerInstructionBatch": "Quét từng trang một",
+  "scannerInstructionDoc": "Căn tài liệu vào khung",
+
+  "homeGreetingMorning": "Chào buổi sáng ☀️",
+  "homeGreetingAfternoon": "Chào buổi chiều 🌤️",
+  "homeGreetingEvening": "Chào buổi tối 🌙",
+  "homeTotalScans": "Tổng số lần quét",
+  "homeThisWeekScans": "Lần quét tuần này",
+  "homeWordsExtracted": "Từ đã trích xuất",
+  "homeQuickActions": "Thao tác nhanh",
+  "homeQuickScanDoc": "Quét\nTài liệu",
+  "homeQuickScanDocDesc": "Trích xuất văn bản từ ảnh",
+  "homeQuickScanId": "Quét\nMã QR",
+  "homeQuickScanIdDesc": "Trích xuất thông tin thẻ",
+  "homeQuickScanBatch": "Quét\n& Xuất file",
+  "homeQuickScanBatchDesc": "Tạo PDF từ nhiều ảnh",
+  "homeQuickGenerateQr": "Tạo mã\nQR cá nhân",
+  "homeQuickGenerateQrDesc": "Tạo và chia sẻ QR",
+  "homeRecentHistory": "Quét gần đây",
+  "homeEmptyStateTitle": "Chưa có lượt quét nào",
+  "homeEmptyStateSubtitle": "Tài liệu đã quét của bạn sẽ hiển thị tại đây.\nNhấn Quét để bắt đầu!",
+  "homeHeroBtn": "Bắt đầu Quét",
+  "homeHeroDesc": "Số hóa tài liệu ngay lập tức với AI",
+  "homeStatsScannedDocs": "Tài liệu đã quét",
+  "homeStatsScannedQr": "Mã QR đã quét",
+  "homeStatsSaved": "Đã lưu",
+  "homeTabHome": "Trang chủ",
+  "homeTabSetting": "Cài đặt",
+  "homeTabQr": "Kho QR",
+  "visibilityMode": "Chế độ hiển thị",
+  "language": "Ngôn ngữ",
+  "vietnamese": "Tiếng Việt",
+  "english": "Tiếng Anh",
+  "generateQrReminderName": "Tên gợi nhớ",
+  "generateQrReminderNameHint": "VD: Facebook cá nhân, Số điện thoại...",
+  "generateQrContent": "Nội dung",
+  "qrLibraryNoQrCodesSavedYet": "Chưa có mã QR nào được lưu.",
+  "untitledQr": "QR chưa đặt tên",
+  "deleteQrCode": "Xóa mã QR",
+  "deleteQrCodeConfirm": "Bạn có chắc chắn muốn xóa mã QR này?",
+  "deleteQrCodeCancel": "Hủy",
+  "deleteQrCodeDelete": "Xóa"
+}

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:powerocr/core/constants/enum.dart';
 import 'package:powerocr/features/home_screen/presentation/screens/home_screen.dart';
+import 'package:powerocr/features/main_screen/presentation/screen/main_screen.dart';
 import 'package:powerocr/features/scan_history_screen/presentation/scan_history_screen/scan_history_screen.dart';
 import 'package:powerocr/features/scanning/domain/entities/text_recognition_result.dart';
 import 'package:powerocr/features/scanning/presentation/screens/scan_result_screen/scan_result_screen.dart';
@@ -55,7 +56,13 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: AppRouter.generateQr,
       builder: (context, state) {
-        return GenerateQrScreen();
+        return const GenerateQrScreen();
+      },
+    ),
+    GoRoute(
+      path: AppRouter.main,
+      builder: (context, state) {
+        return const MainScreen();
       },
     ),
   ],
@@ -71,4 +78,5 @@ class AppRouter {
   static const String scanHistory = '/scan-history';
   static const String batchResult = '/batch-result';
   static const String generateQr = '/generate-qr';
+  static const String main = '/main';
 }

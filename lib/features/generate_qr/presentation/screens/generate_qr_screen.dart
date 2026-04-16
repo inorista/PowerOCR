@@ -5,6 +5,10 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:powerocr/core/di/locator.dart';
+import 'package:powerocr/core/services/interfaces/iuser_qr_service.dart';
+import 'package:powerocr/database/hive_entities/user_qr_entity/user_qr_entity.dart'
+    show UserQrEntity;
 import 'package:share_plus/share_plus.dart';
 
 import 'package:powerocr/features/generate_qr/presentation/bloc/generate_qr_bloc.dart';
@@ -12,6 +16,7 @@ import 'package:powerocr/features/generate_qr/presentation/bloc/generate_qr_even
 import 'package:powerocr/features/generate_qr/presentation/bloc/generate_qr_state.dart';
 import 'package:powerocr/features/generate_qr/presentation/screens/widgets/qr_preview_card.dart';
 import 'package:powerocr/features/generate_qr/presentation/screens/widgets/qr_style_options.dart';
+import 'package:powerocr/l10n/app_localizations.dart';
 
 class GenerateQrScreen extends StatelessWidget {
   const GenerateQrScreen({super.key});
@@ -34,18 +39,22 @@ class _GenerateQrScreenView extends StatefulWidget {
 
 class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
   final TextEditingController _textController = TextEditingController();
+  final TextEditingController _titleController = TextEditingController();
   final GlobalKey _qrKey = GlobalKey();
 
   @override
   void dispose() {
     _textController.dispose();
+    _titleController.dispose();
     super.dispose();
   }
 
   Future<void> _shareQrCode(GenerateQrState state) async {
+    final userQrService = locator<IUserQrService>();
     if (state.qrData.trim().isEmpty) return;
 
     final bloc = context.read<GenerateQrBloc>();
+    final l10n = AppLocalizations.of(context)!;
     bloc.add(const QrShareStatusChanged(true));
 
     try {
@@ -53,23 +62,31 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
           _qrKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
       if (boundary == null) return;
 
-      final image = await boundary.toImage(pixelRatio: 3.0);
+      final image = await boundary.toImage(pixelRatio: 5.0);
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       final pngBytes = byteData?.buffer.asUint8List();
 
       if (pngBytes != null) {
         final tempDir = await getApplicationDocumentsDirectory();
-        final file = await File(
-          '${tempDir.path}/custom_qr/qr_code_${DateTime.now().millisecondsSinceEpoch}.png',
-        ).create(recursive: true);
+        final fileName =
+            '${tempDir.path}/custom_qr/qr_code_${DateTime.now().millisecondsSinceEpoch}.png';
+        final file = await File(fileName).create(recursive: true);
         await file.writeAsBytes(pngBytes);
+
+        userQrService.saveUserQr(
+          UserQrEntity(
+            content: state.qrData,
+            imagePath: fileName,
+            title: _titleController.text.trim(),
+          ),
+        );
 
         if (mounted) {
           final box = context.findRenderObject() as RenderBox?;
           await SharePlus.instance.share(
             ShareParams(
               files: [XFile(file.path)],
-              text: 'Mã QR của tôi',
+              text: l10n.generateQrShareTitle,
               sharePositionOrigin: box!.localToGlobal(Offset.zero) & box.size,
             ),
           );
@@ -77,9 +94,9 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Lỗi khi chia sẻ QR: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.generateQrShareError(e.toString()))),
+        );
       }
     } finally {
       if (mounted) {
@@ -92,12 +109,12 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          'Tạo mã QR',
+          l10n.generateQrTitle,
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w700,
           ),
@@ -113,6 +130,9 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
           ),
           onPressed: () => context.pop(),
         ),
+        actions: const [
+          
+        ]
       ),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
@@ -139,40 +159,99 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
                           ),
                           const SizedBox(height: 32),
 
-                          // Input Field
+                          // Title Input Field
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: TextField(
-                              controller: _textController,
-                              onChanged: (val) {
-                                context.read<GenerateQrBloc>().add(
-                                  QrDataChanged(val),
-                                );
-                              },
-                              maxLines: 1,
-                              minLines: 1,
-                              decoration: InputDecoration(
-                                hintText:
-                                    'Nhập văn bản, link, số điện thoại...',
-                                hintStyle: TextStyle(
-                                  color: theme.colorScheme.onSurface
-                                      .withOpacity(0.3),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.generateQrReminderName,
+                                  style: theme.textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color: theme.colorScheme.onSurface,
+                                  ),
                                 ),
-                                filled: true,
-                                fillColor: isDark
-                                    ? const Color(0xFF1A1A26)
-                                    : const Color(0xFFF5F6FA),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  borderSide: BorderSide.none,
+                                const SizedBox(height: 12),
+                                TextField(
+                                  controller: _titleController,
+                                  maxLines: 1,
+                                  decoration: InputDecoration(
+                                    hintText: l10n.generateQrReminderNameHint,
+                                    hintStyle: TextStyle(
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.3),
+                                    ),
+                                    filled: true,
+                                    fillColor: isDark
+                                        ? const Color(0xFF1A1A26)
+                                        : const Color(0xFFF5F6FA),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                    contentPadding: const EdgeInsets.all(14),
+                                    prefixIcon: Icon(
+                                      Icons.label_important_outline_rounded,
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.4),
+                                    ),
+                                  ),
                                 ),
-                                contentPadding: const EdgeInsets.all(14),
-                                prefixIcon: Icon(
-                                  Icons.text_fields_rounded,
-                                  color: theme.colorScheme.onSurface
-                                      .withOpacity(0.4),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+
+                          // Content Input Field
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.generateQrContent,
+                                  style: theme.textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color: theme.colorScheme.onSurface,
+                                  ),
                                 ),
-                              ),
+                                const SizedBox(height: 12),
+                                TextField(
+                                  controller: _textController,
+                                  onChanged: (val) {
+                                    context.read<GenerateQrBloc>().add(
+                                      QrDataChanged(val),
+                                    );
+                                  },
+                                  maxLines: 3,
+                                  minLines: 1,
+                                  decoration: InputDecoration(
+                                    hintText: l10n.generateQrInputHint,
+                                    hintStyle: TextStyle(
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.3),
+                                    ),
+                                    filled: true,
+                                    fillColor: isDark
+                                        ? const Color(0xFF1A1A26)
+                                        : const Color(0xFFF5F6FA),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 14.0,
+                                      vertical: 20.0,
+                                    ),
+                                    prefixIcon: Icon(
+                                      Icons.text_fields_rounded,
+                                      color: theme.colorScheme.onSurface
+                                          .withOpacity(0.4),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           const SizedBox(height: 32),
@@ -223,14 +302,14 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
                                 strokeWidth: 2.5,
                               ),
                             )
-                          : const Row(
+                          : Row(
                               spacing: 8.0,
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.share_rounded, size: 20),
+                                const Icon(Icons.share_rounded, size: 20),
                                 Text(
-                                  'Chia sẻ mã QR',
-                                  style: TextStyle(
+                                  l10n.generateQrBtnShare,
+                                  style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
                                   ),

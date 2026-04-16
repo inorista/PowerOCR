@@ -11,6 +11,9 @@ import 'package:powerocr/database/hive_database.dart';
 import 'package:powerocr/features/home_screen/domain/usecases/get_scan_history.dart';
 import 'package:powerocr/features/home_screen/presentation/bloc/home_bloc.dart';
 import 'package:powerocr/features/home_screen/presentation/bloc/home_event.dart';
+import 'package:powerocr/core/localization/cubit/locale_cubit.dart';
+import 'package:powerocr/l10n/app_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,26 +34,39 @@ class MainApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider<ThemeCubit>(create: (_) => ThemeCubit()),
+        BlocProvider<LocaleCubit>(create: (_) => LocaleCubit()),
         BlocProvider<HomeBloc>(
           create: (_) =>
               HomeBloc(getScanHistory: locator<GetScanHistory>())
                 ..add(LoadHomeData()),
         ),
       ],
-      child: BlocSelector<ThemeCubit, ThemeState, ThemeMode>(
-        selector: (state) => state.themeMode,
-        builder: (context, themeMode) {
-          return MaterialApp.router(
-            title: 'PowerOCR',
-            debugShowCheckedModeBanner: false,
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
-            themeMode: themeMode,
-            routerConfig: router,
-            themeAnimationStyle: const AnimationStyle(
-              curve: Curves.easeOut,
-              duration: Duration(milliseconds: 400),
-            ),
+      child: BlocBuilder<LocaleCubit, LocaleState>(
+        builder: (context, localeState) {
+          return BlocSelector<ThemeCubit, ThemeState, ThemeMode>(
+            selector: (state) => state.themeMode,
+            builder: (context, themeMode) {
+              return MaterialApp.router(
+                title: 'PowerOCR',
+                debugShowCheckedModeBanner: false,
+                localizationsDelegates: const [
+                  AppLocalizations.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+                supportedLocales: const [Locale('vi'), Locale('en')],
+                locale: localeState.locale,
+                theme: AppTheme.lightTheme,
+                darkTheme: AppTheme.darkTheme,
+                themeMode: themeMode,
+                routerConfig: router,
+                themeAnimationStyle: const AnimationStyle(
+                  curve: Curves.easeOut,
+                  duration: Duration(milliseconds: 400),
+                ),
+              );
+            },
           );
         },
       ),

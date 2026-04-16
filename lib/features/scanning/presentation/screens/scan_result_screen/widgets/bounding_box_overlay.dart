@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:powerocr/features/scanning/presentation/screens/scan_result_screen/widgets/bounding_box_painter.dart';
+import 'package:powerocr/l10n/app_localizations.dart';
 
 /// Widget hiển thị bounding boxes overlay lên ảnh document
 class BoundingBoxOverlay extends StatefulWidget {
@@ -28,6 +29,7 @@ class _BoundingBoxOverlayState extends State<BoundingBoxOverlay> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -91,7 +93,7 @@ class _BoundingBoxOverlayState extends State<BoundingBoxOverlay> {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        _showBoundingBoxes ? 'Ẩn' : 'Hiện',
+                        _showBoundingBoxes ? l10n.scanResultHideBoxes : l10n.scanResultShowBoxes,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
