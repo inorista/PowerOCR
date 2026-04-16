@@ -275,7 +275,7 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
           decoration: InputDecoration(
             hintText: l10n.generateQrReminderNameHint,
             hintStyle: TextStyle(
-              color: theme.colorScheme.onSurface.withOpacity(0.3),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
             ),
             filled: true,
             fillColor: isDark
@@ -288,7 +288,7 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
             contentPadding: const EdgeInsets.all(14),
             prefixIcon: Icon(
               Icons.label_important_outline_rounded,
-              color: theme.colorScheme.onSurface.withOpacity(0.4),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
             ),
           ),
         ),
@@ -313,7 +313,7 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
           decoration: InputDecoration(
             hintText: l10n.generateQrInputHint,
             hintStyle: TextStyle(
-              color: theme.colorScheme.onSurface.withOpacity(0.3),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
             ),
             filled: true,
             fillColor: isDark
@@ -329,7 +329,7 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
             ),
             prefixIcon: Icon(
               Icons.text_fields_rounded,
-              color: theme.colorScheme.onSurface.withOpacity(0.4),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
             ),
           ),
         ),
