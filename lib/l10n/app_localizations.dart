@@ -572,6 +572,12 @@ abstract class AppLocalizations {
   /// **'QR Library'**
   String get homeTabQr;
 
+  /// No description provided for @settingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settingsTitle;
+
   /// No description provided for @visibilityMode.
   ///
   /// In en, this message translates to:
@@ -649,6 +655,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete'**
   String get deleteQrCodeDelete;
+
+  /// No description provided for @qrDetailId.
+  ///
+  /// In en, this message translates to:
+  /// **'ID: {id}'**
+  String qrDetailId(String id);
+
+  /// No description provided for @qrDetailContentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Content'**
+  String get qrDetailContentLabel;
 }
 
 class _AppLocalizationsDelegate

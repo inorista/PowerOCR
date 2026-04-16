@@ -264,6 +264,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get homeTabQr => 'Kho QR';
 
   @override
+  String get settingsTitle => 'Cài đặt';
+
+  @override
   String get visibilityMode => 'Chế độ hiển thị';
 
   @override
@@ -302,4 +305,12 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get deleteQrCodeDelete => 'Xóa';
+
+  @override
+  String qrDetailId(String id) {
+    return 'ID: $id';
+  }
+
+  @override
+  String get qrDetailContentLabel => 'Nội dung';
 }

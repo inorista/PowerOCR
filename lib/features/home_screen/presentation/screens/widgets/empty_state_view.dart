@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:powerocr/core/utils/responsive.dart' show AppBreakpoints;
 import 'package:powerocr/l10n/app_localizations.dart';
 
 class EmptyStateView extends StatelessWidget {
   final ThemeData theme;
   final bool isDark;
 
-  const EmptyStateView({
-    super.key,
-    required this.theme,
-    required this.isDark,
-  });
+  const EmptyStateView({super.key, required this.theme, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
@@ -17,9 +14,9 @@ class EmptyStateView extends StatelessWidget {
     final cardColor = isDark
         ? const Color(0xFF2E2E3E).withValues(alpha: 0.7)
         : Colors.white.withValues(alpha: 0.8);
-
+    final hPad = AppBreakpoints.horizontalPadding(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: EdgeInsets.symmetric(horizontal: hPad),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
         decoration: BoxDecoration(

@@ -162,7 +162,9 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
         children: [
           Expanded(
             child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
+              physics: const BouncingScrollPhysics(
+                parent: AlwaysScrollableScrollPhysics(),
+              ),
               padding: const EdgeInsets.fromLTRB(0, 16, 0, 40),
               child: Column(
                 children: [
@@ -187,8 +189,6 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
       ),
     );
   }
-
-  // ─── Tablet layout (side-by-side) ────────────────────────────────────────
 
   Widget _buildTabletLayout(
     BuildContext context,
@@ -233,7 +233,12 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
                     physics: const BouncingScrollPhysics(),
                     padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),
                     child: _buildFormFields(
-                        context, state, theme, isDark, l10n),
+                      context,
+                      state,
+                      theme,
+                      isDark,
+                      l10n,
+                    ),
                   ),
                 ),
                 Padding(
@@ -248,8 +253,6 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
     );
   }
 
-  // ─── Shared form fields ───────────────────────────────────────────────────
-
   Widget _buildFormFields(
     BuildContext context,
     GenerateQrState state,
@@ -257,98 +260,100 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
     bool isDark,
     AppLocalizations l10n,
   ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Title Input Field
-        Text(
-          l10n.generateQrReminderName,
-          style: theme.textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: theme.colorScheme.onSurface,
-          ),
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: _titleController,
-          maxLines: 1,
-          decoration: InputDecoration(
-            hintText: l10n.generateQrReminderNameHint,
-            hintStyle: TextStyle(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
-            ),
-            filled: true,
-            fillColor: isDark
-                ? const Color(0xFF1A1A26)
-                : const Color(0xFFF5F6FA),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide.none,
-            ),
-            contentPadding: const EdgeInsets.all(14),
-            prefixIcon: Icon(
-              Icons.label_important_outline_rounded,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.generateQrReminderName,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: theme.colorScheme.onSurface,
             ),
           ),
-        ),
-        const SizedBox(height: 24),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _titleController,
+            maxLines: 1,
+            decoration: InputDecoration(
+              hintText: l10n.generateQrReminderNameHint,
+              hintStyle: TextStyle(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+              ),
+              filled: true,
+              fillColor: isDark
+                  ? const Color(0xFF1A1A26)
+                  : const Color(0xFFF5F6FA),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding: const EdgeInsets.all(14),
+              prefixIcon: Icon(
+                Icons.label_important_outline_rounded,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
 
-        // Content Input Field
-        Text(
-          l10n.generateQrContent,
-          style: theme.textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: theme.colorScheme.onSurface,
-          ),
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: _textController,
-          onChanged: (val) {
-            context.read<GenerateQrBloc>().add(QrDataChanged(val));
-          },
-          maxLines: 3,
-          minLines: 1,
-          decoration: InputDecoration(
-            hintText: l10n.generateQrInputHint,
-            hintStyle: TextStyle(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
-            ),
-            filled: true,
-            fillColor: isDark
-                ? const Color(0xFF1A1A26)
-                : const Color(0xFFF5F6FA),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide.none,
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 14.0,
-              vertical: 20.0,
-            ),
-            prefixIcon: Icon(
-              Icons.text_fields_rounded,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+          // Content Input Field
+          Text(
+            l10n.generateQrContent,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: theme.colorScheme.onSurface,
             ),
           ),
-        ),
-        const SizedBox(height: 32),
-        QrStyleOptions(
-          selectedColor: state.selectedColor,
-          onColorChanged: (c) =>
-              context.read<GenerateQrBloc>().add(QrColorChanged(c)),
-          selectedEyeShape: state.eyeShape,
-          onEyeShapeChanged: (s) =>
-              context.read<GenerateQrBloc>().add(QrEyeShapeChanged(s)),
-          selectedDataShape: state.dataShape,
-          onDataShapeChanged: (s) =>
-              context.read<GenerateQrBloc>().add(QrDataShapeChanged(s)),
-          isDarkBackground: state.isDarkBackground,
-          onBackgroundChanged: (b) =>
-              context.read<GenerateQrBloc>().add(QrBackgroundChanged(b)),
-        ),
-      ],
+          const SizedBox(height: 12),
+          TextField(
+            controller: _textController,
+            onChanged: (val) {
+              context.read<GenerateQrBloc>().add(QrDataChanged(val));
+            },
+            maxLines: 3,
+            minLines: 1,
+            decoration: InputDecoration(
+              hintText: l10n.generateQrInputHint,
+              hintStyle: TextStyle(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+              ),
+              filled: true,
+              fillColor: isDark
+                  ? const Color(0xFF1A1A26)
+                  : const Color(0xFFF5F6FA),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 14.0,
+                vertical: 20.0,
+              ),
+              prefixIcon: Icon(
+                Icons.text_fields_rounded,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          QrStyleOptions(
+            selectedColor: state.selectedColor,
+            onColorChanged: (c) =>
+                context.read<GenerateQrBloc>().add(QrColorChanged(c)),
+            selectedEyeShape: state.eyeShape,
+            onEyeShapeChanged: (s) =>
+                context.read<GenerateQrBloc>().add(QrEyeShapeChanged(s)),
+            selectedDataShape: state.dataShape,
+            onDataShapeChanged: (s) =>
+                context.read<GenerateQrBloc>().add(QrDataShapeChanged(s)),
+            isDarkBackground: state.isDarkBackground,
+            onBackgroundChanged: (b) =>
+                context.read<GenerateQrBloc>().add(QrBackgroundChanged(b)),
+          ),
+        ],
+      ),
     );
   }
 
@@ -380,9 +385,7 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: theme.colorScheme.onPrimary,
         minimumSize: const Size(double.infinity, 50),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         elevation: 0,
       ),
       child: state.isSharing

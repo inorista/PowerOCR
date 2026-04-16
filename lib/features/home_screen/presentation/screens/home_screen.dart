@@ -190,134 +190,168 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   maxWidth: AppBreakpoints.maxContentWidth,
                 ),
                 child: CustomScrollView(
-              physics: const BouncingScrollPhysics(
-                parent: AlwaysScrollableScrollPhysics(),
-              ),
-              slivers: [
-                SliverToBoxAdapter(
-                  child: FadeTransition(
-                    opacity: _headerFade,
-                    child: SlideTransition(
-                      position: _headerSlide,
-                      child: HomeHeader(isDark: isDark, theme: theme),
-                    ),
+                  physics: const BouncingScrollPhysics(
+                    parent: AlwaysScrollableScrollPhysics(),
                   ),
-                ),
-                SliverToBoxAdapter(
-                  child: FadeTransition(
-                    opacity: _heroFade,
-                    child: SlideTransition(
-                      position: _heroSlide,
-                      child: HomeHeroCard(
-                        shimmerPos: _shimmerPos,
-                        isDark: isDark,
-                        onTap: () => context.push(
-                          AppRouter.scanning,
-                          extra: FeatureOption.scanDocument,
-                        ),
-                        theme: theme,
-                      ),
-                    ),
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: FadeTransition(
-                    opacity: _statFade,
-                    child: HomeStatsRow(
-                      theme: theme,
-                      isDark: isDark,
-                      statCtrl: _statCtrl,
-                    ),
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: FadeTransition(
-                    opacity: _actionsFade,
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(hPad, 28, hPad, 12),
-                      child: Text(
-                        AppLocalizations.of(context)!.homeQuickActions,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.3,
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: FadeTransition(
+                        opacity: _headerFade,
+                        child: SlideTransition(
+                          position: _headerSlide,
+                          child: HomeHeader(isDark: isDark, theme: theme),
                         ),
                       ),
                     ),
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: FadeTransition(
-                    opacity: _actionsFade,
-                    child: SlideTransition(
-                      position: _actionsSlide,
-                      child: QuickActionsGrid(theme: theme, isDark: isDark),
+                    SliverToBoxAdapter(
+                      child: FadeTransition(
+                        opacity: _heroFade,
+                        child: SlideTransition(
+                          position: _heroSlide,
+                          child: HomeHeroCard(
+                            shimmerPos: _shimmerPos,
+                            isDark: isDark,
+                            onTap: () => context.push(
+                              AppRouter.scanning,
+                              extra: FeatureOption.scanDocument,
+                            ),
+                            theme: theme,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: FadeTransition(
-                    opacity: _actionsFade,
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: hPad),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            AppLocalizations.of(context)!.homeRecentHistory,
+                    SliverToBoxAdapter(
+                      child: FadeTransition(
+                        opacity: _statFade,
+                        child: HomeStatsRow(
+                          theme: theme,
+                          isDark: isDark,
+                          statCtrl: _statCtrl,
+                        ),
+                      ),
+                    ),
+                    SliverToBoxAdapter(
+                      child: FadeTransition(
+                        opacity: _actionsFade,
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(hPad, 28, hPad, 12),
+                          child: Text(
+                            AppLocalizations.of(context)!.homeQuickActions,
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w700,
                               letterSpacing: 0.3,
                             ),
                           ),
-                          TextButton(
-                            onPressed: () {
-                              context.push(AppRouter.scanHistory);
-                            },
-                            style: TextButton.styleFrom(
-                              foregroundColor: theme.colorScheme.primary,
-                              padding: EdgeInsets.zero,
-                              minimumSize: const Size(44, 32),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8.0,
-                              ),
-                              child: Text(
-                                AppLocalizations.of(context)!.historySeeAll,
-                                style: const TextStyle(fontSize: 13),
-                              ),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
-                  ),
-                ),
-                BlocSelector<HomeBloc, HomeState, List<ScanHistory>>(
-                  selector: (state) => state.history,
-                  builder: (context, history) {
-                    if (history.isEmpty) {
-                      return SliverToBoxAdapter(
+                    SliverToBoxAdapter(
+                      child: FadeTransition(
+                        opacity: _actionsFade,
+                        child: SlideTransition(
+                          position: _actionsSlide,
+                          child: QuickActionsGrid(theme: theme, isDark: isDark),
+                        ),
+                      ),
+                    ),
+                    SliverPadding(
+                      padding: const EdgeInsets.only(top: 14.0),
+                      sliver: SliverToBoxAdapter(
                         child: FadeTransition(
                           opacity: _actionsFade,
-                          child: EmptyStateView(theme: theme, isDark: isDark),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: hPad),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  AppLocalizations.of(
+                                    context,
+                                  )!.homeRecentHistory,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 0.3,
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    context.push(AppRouter.scanHistory);
+                                  },
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: theme.colorScheme.primary,
+                                    padding: EdgeInsets.zero,
+                                    minimumSize: const Size(44, 32),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8.0,
+                                    ),
+                                    child: Text(
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.historySeeAll,
+                                      style: const TextStyle(fontSize: 13),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                      );
-                    }
-                    final displayCount =
-                        history.length > 5 ? 5 : history.length;
-                    // Tablet: 2-column grid; phone: single-column list
-                    if (isTablet) {
-                      return SliverPadding(
-                        padding: EdgeInsets.symmetric(horizontal: hPad),
-                        sliver: SliverGrid.builder(
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                crossAxisSpacing: 12,
-                                mainAxisSpacing: 12,
-                                mainAxisExtent: 90,
+                      ),
+                    ),
+                    BlocSelector<HomeBloc, HomeState, List<ScanHistory>>(
+                      selector: (state) => state.history,
+                      builder: (context, history) {
+                        if (history.isEmpty) {
+                          return SliverToBoxAdapter(
+                            child: FadeTransition(
+                              opacity: _actionsFade,
+                              child: EmptyStateView(
+                                theme: theme,
+                                isDark: isDark,
                               ),
+                            ),
+                          );
+                        }
+                        final displayCount = history.length > 5
+                            ? 5
+                            : history.length;
+                        // Tablet: 2-column grid; phone: single-column list
+                        if (isTablet) {
+                          return SliverPadding(
+                            padding: EdgeInsets.symmetric(horizontal: hPad),
+                            sliver: SliverGrid.builder(
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2,
+                                    crossAxisSpacing: 12,
+                                    mainAxisSpacing: 12,
+                                    mainAxisExtent: 90,
+                                  ),
+                              itemCount: displayCount,
+                              itemBuilder: (context, index) {
+                                final item = history[index];
+                                return FadeTransition(
+                                  opacity: _actionsFade,
+                                  child: SlideTransition(
+                                    position: _actionsSlide,
+                                    child: HistoryItem(
+                                      theme: theme,
+                                      isDark: isDark,
+                                      item: item,
+                                      isCompact: true,
+                                      onTap: () async {
+                                        await onTapHistoryItem(item);
+                                      },
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        }
+                        return SliverList.builder(
                           itemCount: displayCount,
                           itemBuilder: (context, index) {
                             final item = history[index];
@@ -329,7 +363,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   theme: theme,
                                   isDark: isDark,
                                   item: item,
-                                  isCompact: true,
                                   onTap: () async {
                                     await onTapHistoryItem(item);
                                   },
@@ -337,36 +370,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               ),
                             );
                           },
-                        ),
-                      );
-                    }
-                    return SliverList.builder(
-                      itemCount: displayCount,
-                      itemBuilder: (context, index) {
-                        final item = history[index];
-                        return FadeTransition(
-                          opacity: _actionsFade,
-                          child: SlideTransition(
-                            position: _actionsSlide,
-                            child: HistoryItem(
-                              theme: theme,
-                              isDark: isDark,
-                              item: item,
-                              onTap: () async {
-                                await onTapHistoryItem(item);
-                              },
-                            ),
-                          ),
                         );
                       },
-                    );
-                  },
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
               ),
             ),
+          ),
         ],
       ),
     );

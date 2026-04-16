@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:powerocr/core/utils/responsive.dart';
 import 'package:powerocr/l10n/app_localizations.dart';
 
 class HomeHeader extends StatelessWidget {
@@ -9,8 +10,9 @@ class HomeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hPad = AppBreakpoints.horizontalPadding(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 20, 20, 0),
+      padding: EdgeInsets.fromLTRB(hPad, 20, hPad, 0),
       child: Row(
         children: [
           Expanded(

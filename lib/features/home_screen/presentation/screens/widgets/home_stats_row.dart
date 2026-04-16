@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:powerocr/core/constants/enum.dart';
+import 'package:powerocr/core/utils/responsive.dart';
 import 'package:powerocr/features/home_screen/presentation/bloc/home_bloc.dart';
 import 'package:powerocr/features/home_screen/presentation/bloc/home_state.dart';
 import 'package:powerocr/features/home_screen/presentation/screens/widgets/stat_card.dart';
@@ -21,14 +22,18 @@ class HomeStatsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final hPad = AppBreakpoints.horizontalPadding(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+      padding: EdgeInsets.fromLTRB(hPad, 20, hPad, 0),
       child: Row(
         spacing: 12.0,
         children: [
           Expanded(
             child: BlocSelector<HomeBloc, HomeState, int>(
-              selector: (state) => state.history.length,
+              selector: (state) => state.history
+                  .where((a) => a.type == ScanHistoryType.document)
+                  .toList()
+                  .length,
               builder: (context, historyCount) {
                 return StatCard(
                   label: l10n.homeStatsScannedDocs,

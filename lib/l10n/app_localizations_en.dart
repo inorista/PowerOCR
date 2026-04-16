@@ -264,6 +264,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeTabQr => 'QR Library';
 
   @override
+  String get settingsTitle => 'Settings';
+
+  @override
   String get visibilityMode => 'Appearance';
 
   @override
@@ -302,4 +305,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteQrCodeDelete => 'Delete';
+
+  @override
+  String qrDetailId(String id) {
+    return 'ID: $id';
+  }
+
+  @override
+  String get qrDetailContentLabel => 'Content';
 }
