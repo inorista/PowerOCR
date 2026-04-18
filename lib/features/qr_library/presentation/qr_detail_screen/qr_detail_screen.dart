@@ -8,14 +8,19 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:path_provider/path_provider.dart'
     show getApplicationDocumentsDirectory;
+import 'package:powerocr/core/di/locator.dart';
+import 'package:powerocr/core/services/interfaces/iuser_qr_service.dart';
 import 'package:powerocr/features/qr_library/domain/entities/user_qr.dart';
+import 'package:powerocr/features/qr_library/presentation/bloc/qr_library_bloc.dart';
+import 'package:powerocr/features/qr_library/presentation/bloc/qr_library_event.dart';
 import 'package:powerocr/l10n/app_localizations.dart';
 import 'package:share_plus/share_plus.dart' show SharePlus, ShareParams, XFile;
 
 class QrDetailScreen extends StatefulWidget {
-  const QrDetailScreen({super.key, required this.userQr});
+  const QrDetailScreen({super.key, required this.userQr, this.qrLibraryBloc});
 
   final UserQr userQr;
+  final QrLibraryBloc? qrLibraryBloc;
 
   @override
   State<QrDetailScreen> createState() => _QrDetailScreenState();
@@ -89,93 +94,93 @@ class _QrDetailScreenState extends State<QrDetailScreen>
     final qr = widget.userQr;
     final title = qr.title?.isNotEmpty == true ? qr.title! : l10n.untitledQr;
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(
-          parent: AlwaysScrollableScrollPhysics(),
-        ),
-        slivers: [
-          // ── Hero SliverAppBar ────────────────────────────────────────
-          SliverAppBar(
-            expandedHeight: 340,
-            pinned: true,
-            stretch: true,
-            backgroundColor: theme.scaffoldBackgroundColor,
-            surfaceTintColor: Colors.transparent,
-            leading: _BackButton(isDark: isDark),
-            actions: [
-              _CopyButton(content: qr.content, isDark: isDark),
-              const SizedBox(width: 8),
-            ],
-            flexibleSpace: FlexibleSpaceBar(
-              stretchModes: const [
-                StretchMode.zoomBackground,
-                StretchMode.blurBackground,
+    return PopScope(
+      child: Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        body: CustomScrollView(
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
+          slivers: [
+            SliverAppBar(
+              expandedHeight: 340,
+              pinned: true,
+              stretch: true,
+              backgroundColor: theme.scaffoldBackgroundColor,
+              surfaceTintColor: Colors.transparent,
+              leading: _BackButton(isDark: isDark),
+              actions: [
+                _CopyButton(content: qr.content, isDark: isDark),
+                const SizedBox(width: 8),
               ],
-              background: _QrHeroImage(
-                imagePath: qr.imagePath,
-                isDark: isDark,
-                boundaryKey: _qrKey,
+              flexibleSpace: FlexibleSpaceBar(
+                stretchModes: const [
+                  StretchMode.zoomBackground,
+                  StretchMode.blurBackground,
+                ],
+                background: _QrHeroImage(
+                  imagePath: qr.imagePath,
+                  isDark: isDark,
+                  boundaryKey: _qrKey,
+                ),
               ),
             ),
-          ),
 
-          // ── Content ──────────────────────────────────────────────────
-          SliverToBoxAdapter(
-            child: FadeTransition(
-              opacity: _fadeAnim,
-              child: SlideTransition(
-                position: _slideAnim,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            title,
-                            style: theme.textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -0.5,
+            SliverToBoxAdapter(
+              child: FadeTransition(
+                opacity: _fadeAnim,
+                child: SlideTransition(
+                  position: _slideAnim,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              title,
+                              style: theme.textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.5,
+                              ),
                             ),
-                          ),
-                          IconButton(
-                            onPressed: () async {
-                              await _shareQrCode();
-                            },
-                            icon: const Icon(CupertinoIcons.share),
-                          ),
-                        ],
-                      ),
+                            IconButton(
+                              onPressed: () async {
+                                await _shareQrCode();
+                              },
+                              icon: const Icon(CupertinoIcons.share),
+                            ),
+                          ],
+                        ),
 
-                      const SizedBox(height: 28),
-                      _SectionLabel(
-                        label: l10n.qrDetailContentLabel,
-                        theme: theme,
-                      ),
-                      const SizedBox(height: 10),
-                      _ContentCard(
-                        content: qr.content,
-                        theme: theme,
-                        isDark: isDark,
-                      ),
+                        const SizedBox(height: 28),
+                        _SectionLabel(
+                          label: l10n.qrDetailContentLabel,
+                          theme: theme,
+                        ),
+                        const SizedBox(height: 10),
+                        _ContentCard(
+                          content: qr.content,
+                          theme: theme,
+                          isDark: isDark,
+                        ),
 
-                      const SizedBox(height: 32),
-                      _DeleteButton(
-                        onDelete: () => _confirmDelete(context, l10n),
-                        theme: theme,
-                      ),
-                    ],
+                        const SizedBox(height: 32),
+                        _DeleteButton(
+                          onDelete: () => _confirmDelete(context, l10n),
+                          theme: theme,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -186,17 +191,18 @@ class _QrDetailScreenState extends State<QrDetailScreen>
       backgroundColor: Colors.transparent,
       builder: (sheetCtx) => _DeleteSheet(
         l10n: l10n,
-        onConfirm: () {
-          Navigator.pop(sheetCtx);
-          context.pop(true); // pop back với signal xóa
+        onConfirm: () async {
+          widget.qrLibraryBloc?.add(DeleteUserQrEvent(widget.userQr.id));
+          if (context.mounted) {
+            context.pop();
+            context.pop();
+          }
         },
-        onCancel: () => Navigator.pop(sheetCtx),
+        onCancel: () => context.pop(sheetCtx),
       ),
     );
   }
 }
-
-// ── Sub-widgets ───────────────────────────────────────────────────────────────
 
 class _BackButton extends StatelessWidget {
   const _BackButton({required this.isDark});

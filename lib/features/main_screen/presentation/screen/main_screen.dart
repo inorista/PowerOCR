@@ -2,10 +2,12 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:powerocr/core/utils/responsive.dart';
 import 'package:powerocr/features/home_screen/presentation/screens/home_screen.dart';
 import 'package:powerocr/features/main_screen/presentation/cubit/main_screen_cubit.dart';
-import 'package:powerocr/features/main_screen/presentation/screen/widgets/bottom_navigation_item.dart';
+import 'package:powerocr/features/main_screen/presentation/screen/widgets/custom_bottom_navigation_bar.dart'
+    show CustomBottomNavigationBar;
 import 'package:powerocr/features/qr_library/presentation/qr_library_screen/qr_library_screen.dart';
 import 'package:powerocr/features/settings/presentation/screen/settings_screen.dart';
 import 'package:powerocr/l10n/app_localizations.dart';
@@ -20,104 +22,35 @@ class MainScreen extends StatelessWidget {
 
     return BlocProvider<MainScreenCubit>(
       create: (context) => MainScreenCubit(),
-      child: isTablet
-          ? _TabletShell(l10n: l10n)
-          : _PhoneShell(l10n: l10n),
+      child: isTablet ? _TabletShell(l10n: l10n) : _PhoneShell(l10n: l10n),
     );
   }
 }
-
-// ─── Phone layout ────────────────────────────────────────────────────────────
 
 class _PhoneShell extends StatelessWidget {
   const _PhoneShell({required this.l10n});
   final AppLocalizations l10n;
 
-  static const _screens = [
-    HomeScreen(),
-    QrLibraryScreen(),
-    SettingsScreen(),
-  ];
+  static const _screens = [HomeScreen(), QrLibraryScreen(), SettingsScreen()];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
       body: BlocBuilder<MainScreenCubit, MainScreenState>(
-        builder: (context, state) => IndexedStack(
-          index: state.screenIndex,
-          children: _screens,
-        ),
+        builder: (context, state) =>
+            IndexedStack(index: state.screenIndex, children: _screens),
       ),
-      bottomNavigationBar: SizedBox(
-        height: 92,
-        child: Stack(
-          alignment: Alignment.center,
-          clipBehavior: Clip.none,
-          children: [
-            Positioned.fill(
-              child: ClipRRect(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
-                  child: Container(
-                    width: double.infinity,
-                    height: 92,
-                    color: Theme.of(context).colorScheme.surface.withAlpha(20),
-                  ),
-                ),
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.only(top: 10),
-              width: double.infinity,
-              height: 92,
-              child: SafeArea(
-                child: Row(
-                  children: [
-                    _buildNavItem(context, 0, l10n.homeTabHome, 'assets/images/home_icon.svg'),
-                    _buildNavItem(context, 1, l10n.homeTabQr, 'assets/images/qr_icon.svg'),
-                    _buildNavItem(context, 2, l10n.homeTabSetting, 'assets/images/setting_icon.svg'),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavItem(
-    BuildContext context,
-    int index,
-    String label,
-    String iconPath,
-  ) {
-    return Expanded(
-      child: BlocSelector<MainScreenCubit, MainScreenState, int>(
-        selector: (state) => state.screenIndex,
-        builder: (context, screenIndex) => BottomNavigationItem(
-          onTap: () => context.read<MainScreenCubit>().changeScreen(index),
-          isSelected: screenIndex == index,
-          label: label,
-          iconPath: iconPath,
-        ),
-      ),
+      bottomNavigationBar: const CustomBottomNavigationBar(),
     );
   }
 }
-
-// ─── Tablet layout ────────────────────────────────────────────────────────────
 
 class _TabletShell extends StatelessWidget {
   const _TabletShell({required this.l10n});
   final AppLocalizations l10n;
 
-  static const _screens = [
-    HomeScreen(),
-    QrLibraryScreen(),
-    SettingsScreen(),
-  ];
+  static const _screens = [HomeScreen(), QrLibraryScreen(), SettingsScreen()];
 
   @override
   Widget build(BuildContext context) {
@@ -160,17 +93,25 @@ class _TabletShell extends StatelessWidget {
                           size: 24,
                         ),
                         unselectedIconTheme: IconThemeData(
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.45,
+                          ),
                           size: 22,
                         ),
-                        selectedLabelTextStyle: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.primary,
-                          fontWeight: FontWeight.w700,
+                        selectedLabelTextStyle: theme.textTheme.labelSmall
+                            ?.copyWith(
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.w700,
+                            ),
+                        unselectedLabelTextStyle: theme.textTheme.labelSmall
+                            ?.copyWith(
+                              color: theme.colorScheme.onSurface.withValues(
+                                alpha: 0.45,
+                              ),
+                            ),
+                        indicatorColor: theme.colorScheme.primary.withValues(
+                          alpha: 0.12,
                         ),
-                        unselectedLabelTextStyle: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
-                        ),
-                        indicatorColor: theme.colorScheme.primary.withValues(alpha: 0.12),
                         destinations: [
                           NavigationRailDestination(
                             icon: const Icon(Icons.home_outlined),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:powerocr/core/localization/cubit/locale_cubit.dart';
+import 'package:powerocr/features/localization/cubit/locale_cubit.dart';
 import 'package:powerocr/core/theme/cubit/theme_cubit.dart';
 import 'package:powerocr/core/utils/responsive.dart';
 import 'package:powerocr/features/home_screen/presentation/screens/widgets/home_header.dart';
@@ -86,8 +86,7 @@ class SettingsScreen extends StatelessWidget {
                           trailing: BlocBuilder<LocaleCubit, LocaleState>(
                             builder: (context, state) {
                               return CustomLanguageDropdown(
-                                currentLanguageCode:
-                                    state.locale.languageCode,
+                                currentLanguageCode: state.locale.languageCode,
                                 englishText: l10n.english,
                                 vietnameseText: l10n.vietnamese,
                               );

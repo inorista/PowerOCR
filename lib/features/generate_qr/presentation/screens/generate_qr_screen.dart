@@ -4,8 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:powerocr/core/commons/banner_ad_widget.dart';
 import 'package:powerocr/core/di/locator.dart';
+import 'package:powerocr/core/helpers/admob_helper.dart' show AdMobHelper;
 import 'package:powerocr/core/services/interfaces/iuser_qr_service.dart';
 import 'package:powerocr/core/utils/responsive.dart';
 import 'package:powerocr/database/hive_entities/user_qr_entity/user_qr_entity.dart'
@@ -24,7 +27,7 @@ class GenerateQrScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
+    return BlocProvider<GenerateQrBloc>(
       create: (context) => GenerateQrBloc(),
       child: const _GenerateQrScreenView(),
     );
@@ -43,10 +46,50 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
   final TextEditingController _titleController = TextEditingController();
   final GlobalKey _qrKey = GlobalKey();
 
+  // ADMOB
+  InterstitialAd? _interstitialAd;
+
+  void _loadInterstitialAd() {
+    InterstitialAd.load(
+      adUnitId: AdMobHelper.interstitialAdUnitId,
+      request: const AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) {
+          setState(() {
+            _interstitialAd = ad;
+            ad.fullScreenContentCallback = FullScreenContentCallback(
+              onAdDismissedFullScreenContent: (ad) {
+                ad.dispose();
+                _shareQrCode(context.read<GenerateQrBloc>().state);
+                _loadInterstitialAd();
+              },
+              onAdFailedToShowFullScreenContent: (ad, error) {
+                ad.dispose();
+                _loadInterstitialAd();
+              },
+            );
+            print('Interstitial ad loaded');
+          });
+        },
+
+        onAdFailedToLoad: (error) {
+          print('Interstitial ad failed to load: $error');
+        },
+      ),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadInterstitialAd();
+  }
+
   @override
   void dispose() {
     _textController.dispose();
     _titleController.dispose();
+    _interstitialAd?.dispose();
     super.dispose();
   }
 
@@ -81,7 +124,6 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
             title: _titleController.text.trim(),
           ),
         );
-
         if (mounted) {
           final box = context.findRenderObject() as RenderBox?;
           await SharePlus.instance.share(
@@ -148,8 +190,6 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
     );
   }
 
-  // ─── Phone layout (original) ──────────────────────────────────────────────
-
   Widget _buildPhoneLayout(
     BuildContext context,
     GenerateQrState state,
@@ -168,6 +208,8 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
               padding: const EdgeInsets.fromLTRB(0, 16, 0, 40),
               child: Column(
                 children: [
+                  const BannerAdWidget(),
+                  const SizedBox(height: 24),
                   Center(
                     child: QrPreviewCard(
                       boundaryKey: _qrKey,
@@ -273,9 +315,10 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
             ),
           ),
           const SizedBox(height: 12),
-          TextField(
+          TextFormField(
             controller: _titleController,
             maxLines: 1,
+            textInputAction: TextInputAction.next,
             decoration: InputDecoration(
               hintText: l10n.generateQrReminderNameHint,
               hintStyle: TextStyle(
@@ -307,11 +350,12 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
             ),
           ),
           const SizedBox(height: 12),
-          TextField(
+          TextFormField(
             controller: _textController,
             onChanged: (val) {
               context.read<GenerateQrBloc>().add(QrDataChanged(val));
             },
+            textInputAction: TextInputAction.done,
             maxLines: 3,
             minLines: 1,
             decoration: InputDecoration(
@@ -357,8 +401,6 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
     );
   }
 
-  // ─── Share button ─────────────────────────────────────────────────────────
-
   Widget _buildShareButton(
     BuildContext context,
     GenerateQrState state,
@@ -380,7 +422,13 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
     return ElevatedButton(
       onPressed: state.qrData.trim().isEmpty || state.isSharing
           ? null
-          : () => _shareQrCode(state),
+          : () {
+              if (_interstitialAd != null) {
+                _interstitialAd!.show();
+              } else {
+                _shareQrCode(state);
+              }
+            },
       style: ElevatedButton.styleFrom(
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: theme.colorScheme.onPrimary,

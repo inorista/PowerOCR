@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:powerocr/core/di/locator.dart';
 import 'package:powerocr/core/router/app_router.dart';
 import 'package:powerocr/core/services/interfaces/ilocal_notification_service.dart';
@@ -11,19 +12,26 @@ import 'package:powerocr/database/hive_database.dart';
 import 'package:powerocr/features/home_screen/domain/usecases/get_scan_history.dart';
 import 'package:powerocr/features/home_screen/presentation/bloc/home_bloc.dart';
 import 'package:powerocr/features/home_screen/presentation/bloc/home_event.dart';
-import 'package:powerocr/core/localization/cubit/locale_cubit.dart';
+import 'package:powerocr/features/localization/cubit/locale_cubit.dart';
 import 'package:powerocr/l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  await MobileAds.instance.initialize();
+  await _initPlugin();
   await HiveDatabase().setupHiveDatabase();
   await configureDependencies();
   await locator<ILocalNotificationService>().initialize();
   await locator<ILocalNotificationService>().requestPermissions();
   await locator<IPushNotificationService>().initialize();
   runApp(const MainApp());
+}
+
+Future<void> _initPlugin() async {
+  await AppTrackingTransparency.requestTrackingAuthorization();
 }
 
 class MainApp extends StatelessWidget {

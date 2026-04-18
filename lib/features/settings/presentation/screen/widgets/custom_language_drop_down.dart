@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart' show ReadContext;
-import 'package:powerocr/core/localization/cubit/locale_cubit.dart';
+import 'package:powerocr/features/localization/cubit/locale_cubit.dart';
 
 class CustomLanguageDropdown extends StatelessWidget {
   final String currentLanguageCode;
