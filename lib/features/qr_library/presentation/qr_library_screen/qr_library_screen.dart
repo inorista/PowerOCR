@@ -63,26 +63,35 @@ class _QrLibraryScreenState extends State<QrLibraryScreen> {
                   );
                 } else if (state is QrLibraryLoaded) {
                   if (state.userQrs.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.qr_code_2,
-                            size: 80,
-                            color: Colors.grey.shade400,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            l10n.qrLibraryNoQrCodesSavedYet,
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey.shade600,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
+                    return CustomScrollView(
+                      controller: _scrollController,
+                      physics: const BouncingScrollPhysics(
+                        parent: AlwaysScrollableScrollPhysics(),
                       ),
+                      slivers: [
+                        SliverFillRemaining(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.qr_code_2,
+                                size: 80,
+                                color: Colors.grey.shade400,
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                l10n.qrLibraryNoQrCodesSavedYet,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey.shade600,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     );
                   }
 
@@ -231,7 +240,6 @@ class _QrLibraryScreenState extends State<QrLibraryScreen> {
               },
             ),
 
-            // ── Custom Opacity AppBar ─────────────────────────────────
             QrLibraryAppBar(
               bloc: _bloc,
               scrollController: _scrollController,
@@ -245,8 +253,10 @@ class _QrLibraryScreenState extends State<QrLibraryScreen> {
   }
 
   void _onTapQrItem(BuildContext context, UserQr qr) async {
-    final result = await context.push<bool>(AppRouter.qrDetail, extra: qr);
-    // result == true means user deleted the QR from detail screen
+    final result = await context.push<bool>(
+      AppRouter.qrDetail,
+      extra: {'userQr': qr, 'qrLibraryBloc': _bloc},
+    );
     if (result == true) {
       _bloc.add(LoadUserQrsEvent());
     }
@@ -265,13 +275,13 @@ class _QrLibraryScreenState extends State<QrLibraryScreen> {
           content: Text(l10n.deleteQrCodeConfirm),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
+              onPressed: () => context.pop(dialogContext),
               child: Text(l10n.deleteQrCodeCancel),
             ),
             TextButton(
               onPressed: () {
                 bloc.add(DeleteUserQrEvent(qrId));
-                Navigator.pop(dialogContext);
+                context.pop(dialogContext);
               },
               child: Text(
                 l10n.deleteQrCodeDelete,

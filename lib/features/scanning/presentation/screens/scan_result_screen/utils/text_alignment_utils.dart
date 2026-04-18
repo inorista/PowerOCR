@@ -7,7 +7,15 @@ class TextAlignmentUtils {
       return result.text;
     }
 
-    var sortedBlocks = List<TextBlock>.from(result.blocks);
+    final validBlocks = result.blocks
+        .where((b) => b.boundingBox.length >= 4)
+        .toList();
+
+    if (validBlocks.isEmpty) {
+      return result.text;
+    }
+
+    var sortedBlocks = List<TextBlock>.from(validBlocks);
     sortedBlocks.sort((a, b) {
       double aCenterY = (a.boundingBox[1] + a.boundingBox[3]) / 2;
       double bCenterY = (b.boundingBox[1] + b.boundingBox[3]) / 2;

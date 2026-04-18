@@ -4,9 +4,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_mlkit_barcode_scanning/google_mlkit_barcode_scanning.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:powerocr/core/constants/enum.dart';
 import 'package:powerocr/core/di/locator.dart';
+import 'package:powerocr/core/helpers/admob_helper.dart' show AdMobHelper;
 import 'package:powerocr/core/router/app_router.dart';
 
 import 'package:powerocr/features/scanning/presentation/bloc/scanning_bloc.dart';
@@ -26,6 +28,10 @@ class ScanningScreen extends StatefulWidget {
 
 class _ScanningScreenState extends State<ScanningScreen>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
+  // ADMOB
+  InterstitialAd? _interstitialAd;
+  bool _isAdLoaded = false;
+
   CameraController? _controller;
 
   late AnimationController _scanLineCtrl;
@@ -75,6 +81,36 @@ class _ScanningScreenState extends State<ScanningScreen>
     ).animate(CurvedAnimation(parent: _scanLineCtrl, curve: Curves.easeInOut));
 
     _initCamera();
+    _loadInterstitialAd();
+  }
+
+  void _loadInterstitialAd() {
+    InterstitialAd.load(
+      adUnitId: AdMobHelper.interstitialAdUnitId,
+      request: const AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) {
+          setState(() {
+            _interstitialAd = ad;
+            ad.fullScreenContentCallback = FullScreenContentCallback(
+              onAdDismissedFullScreenContent: (ad) {
+                ad.dispose();
+                _loadInterstitialAd();
+              },
+              onAdFailedToShowFullScreenContent: (ad, error) {
+                ad.dispose();
+                _loadInterstitialAd();
+              },
+            );
+            _isAdLoaded = true;
+          });
+        },
+
+        onAdFailedToLoad: (error) {
+          print('Interstitial ad failed to load: $error');
+        },
+      ),
+    );
   }
 
   Future<void> _initCamera() async {
@@ -197,6 +233,7 @@ class _ScanningScreenState extends State<ScanningScreen>
       _controller?.dispose();
     }
     _scanLineCtrl.dispose();
+    _interstitialAd?.dispose();
     super.dispose();
   }
 
@@ -239,11 +276,13 @@ class _ScanningScreenState extends State<ScanningScreen>
           if (state.status == ScanningStatus.success &&
               state.result != null &&
               state.imagePath != null) {
+            _interstitialAd?.show();
             context.replace(
               AppRouter.scanResult,
               extra: {'imagePath': state.imagePath!, 'result': state.result!},
             );
           } else if (state.status == ScanningStatus.batchFinished) {
+            _interstitialAd?.show();
             context.replace(
               AppRouter.batchResult,
               extra: List<String>.from(state.batchImagePaths),

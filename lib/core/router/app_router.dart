@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:powerocr/core/constants/enum.dart';
 import 'package:powerocr/features/home_screen/presentation/screens/home_screen.dart';
 import 'package:powerocr/features/main_screen/presentation/screen/main_screen.dart';
+import 'package:powerocr/features/qr_library/presentation/bloc/qr_library_bloc.dart';
 import 'package:powerocr/features/scan_history_screen/presentation/scan_history_screen/scan_history_screen.dart';
 import 'package:powerocr/features/scanning/domain/entities/text_recognition_result.dart';
 import 'package:powerocr/features/scanning/presentation/screens/scan_result_screen/scan_result_screen.dart';
@@ -64,8 +65,11 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: AppRouter.qrDetail,
       builder: (context, state) {
-        final userQr = state.extra as UserQr;
-        return QrDetailScreen(userQr: userQr);
+        final extra = state.extra as Map<String, dynamic>;
+        return QrDetailScreen(
+          userQr: extra['userQr'] as UserQr,
+          qrLibraryBloc: extra['qrLibraryBloc'] as QrLibraryBloc,
+        );
       },
     ),
     GoRoute(

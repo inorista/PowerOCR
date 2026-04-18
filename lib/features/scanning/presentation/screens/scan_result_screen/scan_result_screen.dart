@@ -206,6 +206,7 @@ class _PhoneLayout extends StatelessWidget {
                 expandedHeight: expandedImageHeight,
                 isDark: isDark,
                 boundingBoxes: result.blocks
+                    .where((block) => block.boundingBox.length >= 4)
                     .map((block) => block.boundingBox)
                     .toList(),
                 imageWidth: result.imageWidth,
