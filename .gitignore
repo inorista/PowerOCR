@@ -126,3 +126,5 @@ app.*.symbols
 .fvm/
 .fvmrc
 .github/skills
+.agents/
+.agent/
