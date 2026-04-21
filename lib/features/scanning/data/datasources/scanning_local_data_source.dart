@@ -1,3 +1,4 @@
+import 'dart:developer' as dev;
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -48,100 +49,96 @@ class ScanningLocalDataSourceImpl implements ScanningLocalDataSource {
 
   @override
   Future<TextRecognitionResult> recognizeText(String imagePath) async {
+    int displayWidth = 0;
+    int displayHeight = 0;
+    try {
+      final bytes = await File(imagePath).readAsBytes();
+      final codec = await ui.instantiateImageCodec(bytes);
+      final frame = await codec.getNextFrame();
+      displayWidth = frame.image.width;
+      displayHeight = frame.image.height;
+      frame.image.dispose();
+    } catch (_) {}
+
     final inputImage = ml.InputImage.fromFilePath(imagePath);
     final textRecognizer = ml.TextRecognizer(
       script: ml.TextRecognitionScript.latin,
     );
 
-    int imageWidth = 0;
-    int imageHeight = 0;
-    try {
-      final bytes = await File(imagePath).readAsBytes();
-      final codec = await ui.instantiateImageCodec(bytes);
-      final frameInfo = await codec.getNextFrame();
-      imageWidth = frameInfo.image.width;
-      imageHeight = frameInfo.image.height;
-    } catch (_) {}
-
     try {
       final recognizedText = await textRecognizer.processImage(inputImage);
 
-      double totalW = 0;
-      double totalH = 0;
+      double totalWordW = 0;
+      double totalWordH = 0;
       double firstWordX = -1;
       double firstWordY = -1;
 
-      List<List<double>> rawBlocks = [];
-      List<String> blockTexts = [];
-
       for (final block in recognizedText.blocks) {
-        final double minX = block.boundingBox.left;
-        final double minY = block.boundingBox.top;
-        final double maxX = block.boundingBox.right;
-        final double maxY = block.boundingBox.bottom;
-
-        if (firstWordX == -1) {
-          firstWordX = minX;
-          firstWordY = minY;
+        for (final line in block.lines) {
+          for (final element in line.elements) {
+            final bb = element.boundingBox;
+            totalWordW += bb.width;
+            totalWordH += bb.height;
+            if (firstWordX == -1) {
+              firstWordX = bb.left;
+              firstWordY = bb.top;
+            }
+          }
         }
-        totalW += (maxX - minX);
-        totalH += (maxY - minY);
-
-        rawBlocks.add([minX, minY, maxX, maxY]);
-        blockTexts.add(block.text);
       }
 
-      int rotation = 0;
-      double rawW = imageWidth.toDouble();
-      double rawH = imageHeight.toDouble();
+      int rotationToApply = 0;
+      final double displayW = displayWidth.toDouble();
+      final double displayH = displayHeight.toDouble();
 
-      if (totalW > 0 && totalH > totalW * 1.2) {
-        rawW = imageHeight.toDouble();
-        rawH = imageWidth.toDouble();
-        if (firstWordY > rawH / 2) {
-          rotation = -90;
+      if (totalWordW > 0 && totalWordH > totalWordW * 1.2) {
+        if (firstWordX > displayH / 2) {
+          rotationToApply = -90;
         } else {
-          rotation = 90;
+          rotationToApply = 90;
         }
-      } else if (totalW > 0) {
-        if (firstWordX > rawW / 2 && firstWordY > rawH / 2) {
-          rotation = 180;
+      } else if (totalWordW > 0) {
+        if (firstWordY > displayH / 2 && firstWordX > displayW / 2) {
+          rotationToApply = 180;
         }
       }
 
-      List<TextBlock> finalBlocks = [];
-      for (int i = 0; i < rawBlocks.length; i++) {
-        double minX = rawBlocks[i][0];
-        double minY = rawBlocks[i][1];
-        double maxX = rawBlocks[i][2];
-        double maxY = rawBlocks[i][3];
+      final List<TextBlock> finalBlocks = [];
+      for (final block in recognizedText.blocks) {
+        final bb = block.boundingBox;
+        final minX = bb.left;
+        final minY = bb.top;
+        final maxX = bb.right;
+        final maxY = bb.bottom;
 
-        double finalMinX = minX,
-            finalMinY = minY,
-            finalMaxX = maxX,
-            finalMaxY = maxY;
+        double fMinX = minX;
+        double fMinY = minY;
+        double fMaxX = maxX;
+        double fMaxY = maxY;
 
-        if (rotation == -90) {
-          finalMinX = rawH - maxY;
-          finalMinY = minX;
-          finalMaxX = rawH - minY;
-          finalMaxY = maxX;
-        } else if (rotation == 90) {
-          finalMinX = minY;
-          finalMinY = rawW - maxX;
-          finalMaxX = maxY;
-          finalMaxY = rawW - minX;
-        } else if (rotation == 180) {
-          finalMinX = rawW - maxX;
-          finalMinY = rawH - maxY;
-          finalMaxX = rawW - minX;
-          finalMaxY = rawH - minY;
+        if (rotationToApply == 90) {
+          // ML Kit was (displayH x displayW). CW mapped to (displayW x displayH)
+          fMinX = displayW - maxY;
+          fMinY = minX;
+          fMaxX = displayW - minY;
+          fMaxY = maxX;
+        } else if (rotationToApply == -90) {
+          // CCW mapped to (displayW x displayH)
+          fMinX = minY;
+          fMinY = displayH - maxX;
+          fMaxX = maxY;
+          fMaxY = displayH - minX;
+        } else if (rotationToApply == 180) {
+          fMinX = displayW - maxX;
+          fMinY = displayH - maxY;
+          fMaxX = displayW - minX;
+          fMaxY = displayH - minY;
         }
 
         finalBlocks.add(
           TextBlock(
-            text: blockTexts[i],
-            boundingBox: [finalMinX, finalMinY, finalMaxX, finalMaxY],
+            text: block.text,
+            boundingBox: [fMinX, fMinY, fMaxX, fMaxY],
           ),
         );
       }
@@ -149,8 +146,8 @@ class ScanningLocalDataSourceImpl implements ScanningLocalDataSource {
       return TextRecognitionResult(
         text: recognizedText.text,
         blocks: finalBlocks,
-        imageWidth: imageWidth,
-        imageHeight: imageHeight,
+        imageWidth: displayWidth,
+        imageHeight: displayHeight,
         createdAt: DateTime.now(),
         imagePath: imagePath,
         type: ScanHistoryType.document,
