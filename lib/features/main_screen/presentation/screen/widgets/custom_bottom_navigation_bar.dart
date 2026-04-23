@@ -58,7 +58,7 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return SizedBox(
-      height: 80 + (_isLoaded ? _bannerAd!.size.height.toDouble() + 35 : 0),
+      height: 85 + (_isLoaded ? _bannerAd!.size.height.toDouble() + 35 : 0),
       child: Stack(
         alignment: Alignment.center,
         clipBehavior: Clip.none,
@@ -70,7 +70,7 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
                 child: Container(
                   width: double.infinity,
                   height:
-                      80 +
+                      85 +
                       (_isLoaded ? _bannerAd!.size.height.toDouble() + 35 : 0),
                   color: Theme.of(context).colorScheme.surface.withAlpha(20),
                 ),
@@ -106,6 +106,7 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
                   ],
                 ),
               ),
+              const SizedBox(height: 5),
               if (_isLoaded && _bannerAd != null)
                 SafeArea(
                   child: SizedBox(

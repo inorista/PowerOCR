@@ -14,6 +14,7 @@ import 'package:dio/dio.dart' as _i361;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 import 'package:powerocr/core/di/locator.dart' as _i537;
+import 'package:powerocr/core/network/powerocr_rest_client.dart' as _i273;
 import 'package:powerocr/core/network/rest_client.dart' as _i150;
 import 'package:powerocr/core/services/implements/local_notification_service.dart'
     as _i803;
@@ -102,9 +103,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i118.UserQrDao>(() => _i118.UserQrDao());
     gh.lazySingleton<_i729.HomeRepository>(() => _i576.HomeRepositoryImpl());
-    gh.lazySingleton<_i126.IThemeSettingService>(
-      () => _i1017.ThemeSettingService(),
-    );
     gh.lazySingleton<_i455.IPushNotificationService>(
       () => _i88.PushNotificationService(),
     );
@@ -132,9 +130,16 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i577.HomeLocalDataSource>(
       () => _i577.HomeLocalDataSourceImpl(gh<_i812.ScanHistoryDao>()),
     );
+    gh.lazySingleton<_i126.IThemeSettingService>(
+      () => _i1017.ThemeSettingService(),
+    );
     gh.lazySingleton<_i47.INetworkService>(() => _i169.NetworkService());
     gh.lazySingleton<_i326.QrLibraryLocalDataSource>(
       () => _i326.QrLibraryLocalDataSourceImpl(),
+    );
+    gh.lazySingleton<_i361.Dio>(
+      () => registerModule.providePowerOCRDio(),
+      instanceName: 'PowerOCRDio',
     );
     gh.lazySingleton<_i277.IPdfService>(() => _i810.PdfService());
     gh.lazySingleton<_i361.Dio>(
@@ -144,6 +149,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i554.QrLibraryRepository>(
       () => _i977.QrLibraryRepositoryImpl(
         localDataSource: gh<_i326.QrLibraryLocalDataSource>(),
+      ),
+    );
+    gh.lazySingleton<_i273.PowerOCRRestClient>(
+      () => registerModule.providePowerOCRRestClient(
+        gh<_i361.Dio>(instanceName: 'PowerOCRDio'),
       ),
     );
     gh.lazySingleton<_i968.DeleteUserQr>(
