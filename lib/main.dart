@@ -13,6 +13,7 @@ import 'package:powerocr/features/home_screen/domain/usecases/get_scan_history.d
 import 'package:powerocr/features/home_screen/presentation/bloc/home_bloc.dart';
 import 'package:powerocr/features/home_screen/presentation/bloc/home_event.dart';
 import 'package:powerocr/features/localization/cubit/locale_cubit.dart';
+import 'package:powerocr/features/ocr_models/presentation/bloc/ocr_model_cubit.dart';
 import 'package:powerocr/l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
@@ -43,6 +44,7 @@ class MainApp extends StatelessWidget {
       providers: [
         BlocProvider<ThemeCubit>(create: (_) => ThemeCubit()),
         BlocProvider<LocaleCubit>(create: (_) => LocaleCubit()),
+        BlocProvider<OcrModelCubit>.value(value: locator<OcrModelCubit>()),
         BlocProvider<HomeBloc>(
           create: (_) =>
               HomeBloc(getScanHistory: locator<GetScanHistory>())

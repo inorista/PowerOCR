@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:ui' as ui;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -208,7 +209,7 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
               padding: const EdgeInsets.fromLTRB(0, 16, 0, 40),
               child: Column(
                 children: [
-                  const BannerAdWidget(),
+                  if (kReleaseMode) const BannerAdWidget(),
                   const SizedBox(height: 24),
                   Center(
                     child: QrPreviewCard(

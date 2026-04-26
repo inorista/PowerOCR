@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart' show BlocSelector, ReadContext;
 import 'package:google_mobile_ads/google_mobile_ads.dart'
@@ -29,23 +30,25 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
   }
 
   void _loadAd() {
-    _bannerAd = BannerAd(
-      adUnitId: AdMobHelper.bannerAdUnitId,
-      request: const AdRequest(),
-      size: AdSize.banner,
-      listener: BannerAdListener(
-        onAdLoaded: (ad) {
-          debugPrint('$ad loaded.');
-          setState(() {
-            _isLoaded = true;
-          });
-        },
-        onAdFailedToLoad: (ad, err) {
-          debugPrint('BannerAd failed to load: $err');
-          ad.dispose();
-        },
-      ),
-    )..load();
+    if (kReleaseMode) {
+      _bannerAd = BannerAd(
+        adUnitId: AdMobHelper.bannerAdUnitId,
+        request: const AdRequest(),
+        size: AdSize.banner,
+        listener: BannerAdListener(
+          onAdLoaded: (ad) {
+            debugPrint('$ad loaded.');
+            setState(() {
+              _isLoaded = true;
+            });
+          },
+          onAdFailedToLoad: (ad, err) {
+            debugPrint('BannerAd failed to load: $err');
+            ad.dispose();
+          },
+        ),
+      )..load();
+    }
   }
 
   @override
@@ -107,7 +110,7 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
                 ),
               ),
               const SizedBox(height: 5),
-              if (_isLoaded && _bannerAd != null)
+              if (kReleaseMode && _isLoaded && _bannerAd != null)
                 SafeArea(
                   child: SizedBox(
                     width: _bannerAd!.size.width.toDouble(),

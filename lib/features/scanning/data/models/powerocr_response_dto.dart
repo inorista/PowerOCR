@@ -6,7 +6,6 @@ part 'powerocr_response_dto.g.dart';
 class PowerOCRResponseDto {
   final String status;
   final String engine;
-  @JsonKey(name: 'total_text')
   final String totalText;
   final List<DatumResponseDto> data;
 

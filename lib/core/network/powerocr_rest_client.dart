@@ -1,4 +1,6 @@
 import 'package:dio/dio.dart';
+import 'package:powerocr/features/ocr_models/data/models/ocr_model_dto.dart'
+    show OcrModelDto;
 import 'package:powerocr/features/scanning/data/models/health_check_dto.dart';
 import 'package:powerocr/features/scanning/data/models/powerocr_request_dto.dart';
 import 'package:powerocr/features/scanning/data/models/powerocr_response_dto.dart';
@@ -14,4 +16,7 @@ abstract class PowerOCRRestClient {
 
   @POST('/api/v1/scan-base64')
   Future<PowerOCRResponseDto> scanBase64(@Body() PowerOCRRequestDto request);
+
+  @GET('/api/v1/models')
+  Future<List<OcrModelDto>> getModels();
 }

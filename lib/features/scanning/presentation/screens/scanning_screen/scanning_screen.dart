@@ -1,4 +1,5 @@
 import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -85,32 +86,34 @@ class _ScanningScreenState extends State<ScanningScreen>
   }
 
   void _loadInterstitialAd() {
-    InterstitialAd.load(
-      adUnitId: AdMobHelper.interstitialAdUnitId,
-      request: const AdRequest(),
-      adLoadCallback: InterstitialAdLoadCallback(
-        onAdLoaded: (ad) {
-          setState(() {
-            _interstitialAd = ad;
-            ad.fullScreenContentCallback = FullScreenContentCallback(
-              onAdDismissedFullScreenContent: (ad) {
-                ad.dispose();
-                _loadInterstitialAd();
-              },
-              onAdFailedToShowFullScreenContent: (ad, error) {
-                ad.dispose();
-                _loadInterstitialAd();
-              },
-            );
-            _isAdLoaded = true;
-          });
-        },
+    if (kReleaseMode) {
+      InterstitialAd.load(
+        adUnitId: AdMobHelper.interstitialAdUnitId,
+        request: const AdRequest(),
+        adLoadCallback: InterstitialAdLoadCallback(
+          onAdLoaded: (ad) {
+            setState(() {
+              _interstitialAd = ad;
+              ad.fullScreenContentCallback = FullScreenContentCallback(
+                onAdDismissedFullScreenContent: (ad) {
+                  ad.dispose();
+                  _loadInterstitialAd();
+                },
+                onAdFailedToShowFullScreenContent: (ad, error) {
+                  ad.dispose();
+                  _loadInterstitialAd();
+                },
+              );
+              _isAdLoaded = true;
+            });
+          },
 
-        onAdFailedToLoad: (error) {
-          print('Interstitial ad failed to load: $error');
-        },
-      ),
-    );
+          onAdFailedToLoad: (error) {
+            print('Interstitial ad failed to load: $error');
+          },
+        ),
+      );
+    }
   }
 
   Future<void> _initCamera() async {
@@ -276,13 +279,13 @@ class _ScanningScreenState extends State<ScanningScreen>
           if (state.status == ScanningStatus.success &&
               state.result != null &&
               state.imagePath != null) {
-            _interstitialAd?.show();
+            if (kReleaseMode) _interstitialAd?.show();
             context.replace(
               AppRouter.scanResult,
               extra: {'imagePath': state.imagePath!, 'result': state.result!},
             );
           } else if (state.status == ScanningStatus.batchFinished) {
-            _interstitialAd?.show();
+            if (kReleaseMode) _interstitialAd?.show();
             context.replace(
               AppRouter.batchResult,
               extra: List<String>.from(state.batchImagePaths),
@@ -390,6 +393,8 @@ class _ScanningScreenState extends State<ScanningScreen>
                     onCaptureTap: () => _takePicture(context),
                     featureOption: widget.featureOption,
                     isAutoScan: widget.featureOption == FeatureOption.scanQR,
+                    isRequireModel:
+                        widget.featureOption == FeatureOption.scanDocument,
                   ),
 
                   if (widget.featureOption == FeatureOption.batchScan &&

@@ -10,6 +10,8 @@ import 'package:powerocr/core/constants/enum.dart';
 import 'package:powerocr/core/di/locator.dart';
 import 'package:powerocr/core/environment/env.dart';
 import 'package:powerocr/core/network/rest_client.dart';
+import 'package:powerocr/features/ocr_models/presentation/bloc/ocr_model_cubit.dart'
+    show OcrModelCubit;
 import 'package:powerocr/features/scanning/data/models/annotate_image_request_dto.dart';
 import 'package:powerocr/features/scanning/data/models/vision_feature_dto.dart';
 import 'package:powerocr/features/scanning/data/models/vision_image_dto.dart';
@@ -277,8 +279,6 @@ class ScanningRemoteDataSourceImpl implements ScanningRemoteDataSource {
 
   Future<TextRecognitionResult> _processPowerOCR(String imagePath) async {
     try {
-      final detectedLang = await _detectLanguageFromImage(imagePath);
-
       final bytes = await File(imagePath).readAsBytes();
       final base64Image = base64Encode(bytes);
 
@@ -289,7 +289,7 @@ class ScanningRemoteDataSourceImpl implements ScanningRemoteDataSource {
 
       final request = PowerOCRRequestDto(
         base64String: base64Image,
-        lang: detectedLang,
+        lang: locator<OcrModelCubit>().state.selectedModel?.language ?? 'en',
       );
 
       final response = await locator<PowerOCRRestClient>().scanBase64(request);
