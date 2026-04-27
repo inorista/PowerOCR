@@ -306,14 +306,6 @@ class ScanningRemoteDataSourceImpl implements ScanningRemoteDataSource {
       String detectedText = response.totalText;
       List<TextBlock> detectedBlocks = [];
 
-      double totalW = 0;
-      double totalH = 0;
-      double firstWordX = -1;
-      double firstWordY = -1;
-
-      List<List<double>> rawBlocks = [];
-      List<String> blockTexts = [];
-
       if (response.data.isNotEmpty) {
         for (final item in response.data) {
           final box = item.box;
@@ -339,74 +331,10 @@ class ScanningRemoteDataSourceImpl implements ScanningRemoteDataSource {
             if (maxX == double.negativeInfinity) maxX = 0;
             if (maxY == double.negativeInfinity) maxY = 0;
 
-            if (firstWordX == -1) {
-              firstWordX = minX;
-              firstWordY = minY;
-            }
-
-            totalW += (maxX - minX);
-            totalH += (maxY - minY);
-
-            rawBlocks.add([minX, minY, maxX, maxY]);
-            blockTexts.add(text);
+            detectedBlocks.add(
+              TextBlock(text: text, boundingBox: [minX, minY, maxX, maxY]),
+            );
           }
-        }
-
-        int rotation = 0; // 0: upright, 90: CW, -90: CCW, 180: upside down
-        double rawW = imageWidth.toDouble();
-        double rawH = imageHeight.toDouble();
-
-        // If bounding boxes are predominantly tall and narrow, it means text was read sideways
-        if (totalW > 0 && totalH > totalW * 1.2) {
-          rawW = imageHeight.toDouble();
-          rawH = imageWidth.toDouble();
-          if (firstWordY > rawH / 2) {
-            rotation = -90; // Top-left word is at bottom edge -> CCW
-          } else {
-            rotation = 90; // CW
-          }
-        } else if (totalW > 0) {
-          if (firstWordX > rawW / 2 && firstWordY > rawH / 2) {
-            rotation = 180;
-          }
-        }
-
-        for (int i = 0; i < rawBlocks.length; i++) {
-          double minX = rawBlocks[i][0];
-          double minY = rawBlocks[i][1];
-          double maxX = rawBlocks[i][2];
-          double maxY = rawBlocks[i][3];
-
-          double finalMinX = minX,
-              finalMinY = minY,
-              finalMaxX = maxX,
-              finalMaxY = maxY;
-
-          if (rotation == -90) {
-            // CCW -> unrotate by CW
-            finalMinX = rawH - maxY;
-            finalMinY = minX;
-            finalMaxX = rawH - minY;
-            finalMaxY = maxX;
-          } else if (rotation == 90) {
-            // CW -> unrotate by CCW
-            finalMinX = minY;
-            finalMinY = rawW - maxX;
-            finalMaxX = maxY;
-            finalMaxY = rawW - minX;
-          } else if (rotation == 180) {
-            finalMinX = rawW - maxX;
-            finalMinY = rawH - maxY;
-            finalMaxX = rawW - minX;
-            finalMaxY = rawH - minY;
-          }
-
-          detectedBlocks.add(
-            TextBlock(
-              text: blockTexts[i],
-              boundingBox: [finalMinX, finalMinY, finalMaxX, finalMaxY],
-            ),
-          );
         }
       }
 
