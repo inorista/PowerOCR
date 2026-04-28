@@ -34,6 +34,8 @@ class _CustomModelDropdownState extends State<CustomModelDropdown>
     super.dispose();
   }
 
+  bool _closing = false; // guard against re-entrant close
+
   void _toggleOverlay() {
     if (_isOpen) {
       _removeOverlay();
@@ -43,6 +45,8 @@ class _CustomModelDropdownState extends State<CustomModelDropdown>
   }
 
   void _showOverlay() {
+    if (_isOpen || !mounted) return;
+    _closing = false;
     _overlayEntry = _buildOverlayEntry();
     Overlay.of(context).insert(_overlayEntry!);
     _animController?.forward(from: 0);
@@ -50,15 +54,19 @@ class _CustomModelDropdownState extends State<CustomModelDropdown>
   }
 
   void _removeOverlay() {
-    _animController?.reverse().then((_) {
+    if (!_isOpen || _closing) return;
+    _closing = true;
+
+    _animController?.reverse().whenCompleteOrCancel(() {
       _overlayEntry?.remove();
+      _overlayEntry?.dispose();
       _overlayEntry = null;
+      _closing = false;
+      if (mounted) setState(() => _isOpen = false);
     });
-    if (_overlayEntry != null && !(_animController?.isAnimating ?? false)) {
-      _overlayEntry?.remove();
-      _overlayEntry = null;
-    }
-    setState(() => _isOpen = false);
+
+    // Update button state immediately so the arrow rotates back
+    if (mounted) setState(() => _isOpen = false);
   }
 
   OverlayEntry _buildOverlayEntry() {
