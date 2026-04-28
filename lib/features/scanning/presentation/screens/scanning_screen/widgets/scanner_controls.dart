@@ -1,14 +1,18 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:powerocr/core/constants/enum.dart';
+import 'package:powerocr/features/ocr_models/presentation/widgets/custom_model_dropdown.dart'
+    show CustomModelDropdown;
 import 'package:powerocr/l10n/app_localizations.dart';
 
 class ScannerControls extends StatelessWidget {
   final VoidCallback onGalleryTap;
   final VoidCallback onCaptureTap;
   final FeatureOption featureOption;
+
   /// When [true] the capture button is hidden — scanning happens automatically.
   final bool isAutoScan;
+  final bool isRequireModel;
 
   const ScannerControls({
     super.key,
@@ -16,6 +20,7 @@ class ScannerControls extends StatelessWidget {
     required this.onCaptureTap,
     required this.featureOption,
     this.isAutoScan = false,
+    this.isRequireModel = false,
   });
 
   @override
@@ -39,23 +44,28 @@ class ScannerControls extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                _ControlButton(
-                  icon: Icons.photo_library_rounded,
-                  label: AppLocalizations.of(context)!.scannerGalleryBtn,
-                  onTap: onGalleryTap,
+                Expanded(
+                  child: _ControlButton(
+                    icon: Icons.photo_library_rounded,
+                    label: AppLocalizations.of(context)!.scannerGalleryBtn,
+                    onTap: onGalleryTap,
+                  ),
                 ),
-                const SizedBox(width: 8),
+
                 if (!isAutoScan)
-                  _CaptureButton(
-                    onTap: onCaptureTap,
-                    featureOption: featureOption,
+                  Expanded(
+                    child: _CaptureButton(
+                      onTap: onCaptureTap,
+                      featureOption: featureOption,
+                    ),
                   )
                 else
-                  // Keep layout balanced when capture button is hidden.
-                  const SizedBox(width: 84),
-                const SizedBox(width: 8),
-                // Balance the gallery button
-                const SizedBox(width: 52),
+                  const Expanded(child: SizedBox()),
+
+                if (isRequireModel)
+                  const Expanded(child: CustomModelDropdown())
+                else
+                  const Expanded(child: SizedBox()),
               ],
             ),
           ),

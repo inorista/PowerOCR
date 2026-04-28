@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 import 'package:powerocr/core/constants/api_constants.dart';
+import 'package:powerocr/core/network/powerocr_rest_client.dart';
 import 'package:powerocr/core/network/rest_client.dart';
 
 import 'locator.config.dart';
@@ -25,7 +26,22 @@ abstract class RegisterModule {
   }
 
   @lazySingleton
+  @Named('PowerOCRDio')
+  Dio providePowerOCRDio() {
+    final dio = Dio();
+    dio.options = BaseOptions(
+      baseUrl: ApiConstants.powerOcrBaseUrl,
+      contentType: 'application/json',
+    );
+    return dio;
+  }
+
+  @lazySingleton
   RestClient provideRestClient(@Named('VisionDio') Dio dio) => RestClient(dio);
+
+  @lazySingleton
+  PowerOCRRestClient providePowerOCRRestClient(@Named('PowerOCRDio') Dio dio) =>
+      PowerOCRRestClient(dio);
 
   @lazySingleton
   Connectivity get connectivity => Connectivity();

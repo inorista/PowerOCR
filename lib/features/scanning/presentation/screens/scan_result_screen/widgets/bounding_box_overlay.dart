@@ -161,34 +161,55 @@ class _NormalizedBoxPainter extends CustomPainter {
     required this.imageHeight,
   });
 
+  // Curated palette — 12 visually distinct, high-contrast colors
+  // evenly spaced across the hue wheel (HSL saturation 85%, lightness 58%)
+  static const List<Color> _palette = [
+    Color(0xFFFF6B6B), // Red
+    Color(0xFFFF9F43), // Orange
+    Color(0xFFFECA57), // Yellow
+    Color(0xFF48DBFB), // Cyan
+    Color(0xFF0ABDE3), // Sky
+    Color(0xFF54A0FF), // Blue
+    Color(0xFF5F27CD), // Violet
+    Color(0xFFC44AFF), // Purple
+    Color(0xFFFF6FB5), // Pink
+    Color(0xFF1DD1A1), // Emerald
+    Color(0xFF10AC84), // Green
+    Color(0xFF00D2D3), // Teal
+  ];
+
   @override
   void paint(Canvas canvas, Size size) {
-    // size == renderedW × renderedH (the exact rendered image area)
-    // So scale = size.width / imageWidth  (same in both axes for contain)
     if (imageWidth <= 0 || imageHeight <= 0) return;
 
     final double scaleX = size.width / imageWidth;
     final double scaleY = size.height / imageHeight;
 
-    final Paint stroke = Paint()
-      ..color = Colors.cyan
-      ..strokeWidth = 2.0
-      ..style = PaintingStyle.stroke;
-
-    final Paint fill = Paint()
-      ..color = const Color.fromARGB(20, 0, 255, 255)
-      ..style = PaintingStyle.fill;
-
-    for (final box in boundingBoxes) {
+    for (int i = 0; i < boundingBoxes.length; i++) {
+      final box = boundingBoxes[i];
       if (box.length < 4) continue;
+
+      final color = _palette[i % _palette.length];
+
+      final Paint stroke = Paint()
+        ..color = color
+        ..strokeWidth = 2.0
+        ..style = PaintingStyle.stroke;
+
+      final Paint fill = Paint()
+        ..color = color.withValues(alpha: 0.08)
+        ..style = PaintingStyle.fill;
+
       final rect = Rect.fromLTRB(
         box[0] * scaleX,
         box[1] * scaleY,
         box[2] * scaleX,
         box[3] * scaleY,
       );
-      canvas.drawRect(rect, fill);
-      canvas.drawRect(rect, stroke);
+
+      final rRect = RRect.fromRectAndRadius(rect, const Radius.circular(4));
+      canvas.drawRRect(rRect, fill);
+      canvas.drawRRect(rRect, stroke);
     }
   }
 

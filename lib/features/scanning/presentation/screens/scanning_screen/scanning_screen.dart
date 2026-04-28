@@ -1,4 +1,5 @@
 import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -85,53 +86,62 @@ class _ScanningScreenState extends State<ScanningScreen>
   }
 
   void _loadInterstitialAd() {
-    InterstitialAd.load(
-      adUnitId: AdMobHelper.interstitialAdUnitId,
-      request: const AdRequest(),
-      adLoadCallback: InterstitialAdLoadCallback(
-        onAdLoaded: (ad) {
-          setState(() {
-            _interstitialAd = ad;
-            ad.fullScreenContentCallback = FullScreenContentCallback(
-              onAdDismissedFullScreenContent: (ad) {
-                ad.dispose();
-                _loadInterstitialAd();
-              },
-              onAdFailedToShowFullScreenContent: (ad, error) {
-                ad.dispose();
-                _loadInterstitialAd();
-              },
-            );
-            _isAdLoaded = true;
-          });
-        },
+    if (kReleaseMode) {
+      InterstitialAd.load(
+        adUnitId: AdMobHelper.interstitialAdUnitId,
+        request: const AdRequest(),
+        adLoadCallback: InterstitialAdLoadCallback(
+          onAdLoaded: (ad) {
+            setState(() {
+              _interstitialAd = ad;
+              ad.fullScreenContentCallback = FullScreenContentCallback(
+                onAdDismissedFullScreenContent: (ad) {
+                  ad.dispose();
+                  _loadInterstitialAd();
+                },
+                onAdFailedToShowFullScreenContent: (ad, error) {
+                  ad.dispose();
+                  _loadInterstitialAd();
+                },
+              );
+              _isAdLoaded = true;
+            });
+          },
 
-        onAdFailedToLoad: (error) {
-          print('Interstitial ad failed to load: $error');
-        },
-      ),
-    );
+          onAdFailedToLoad: (error) {
+            print('Interstitial ad failed to load: $error');
+          },
+        ),
+      );
+    }
   }
 
   Future<void> _initCamera() async {
-    final cameras = await availableCameras();
-    if (cameras.isEmpty) return;
+    // Tear down any existing controller before creating a new one
+    _disposeCamera();
 
-    _controller = CameraController(
+    final cameras = await availableCameras();
+    if (cameras.isEmpty || !mounted) return;
+
+    final cc = CameraController(
       cameras.first,
       ResolutionPreset.high,
       enableAudio: false,
       imageFormatGroup: ImageFormatGroup.yuv420,
     );
+    _controller = cc;
 
     try {
-      await _controller!.initialize();
-      if (mounted) {
-        setState(() => _isInit = true);
-        _bloc.add(CameraReady());
-        if (widget.featureOption == FeatureOption.scanQR) {
-          _startQrImageStream();
-        }
+      await cc.initialize();
+      if (!mounted || _controller != cc) {
+        // Widget was disposed or a newer init replaced us — clean up silently
+        try { cc.dispose(); } catch (_) {}
+        return;
+      }
+      setState(() => _isInit = true);
+      _bloc.add(CameraReady());
+      if (widget.featureOption == FeatureOption.scanQR) {
+        _startQrImageStream();
       }
     } catch (e) {
       debugPrint('Camera init error: $e');
@@ -222,36 +232,37 @@ class _ScanningScreenState extends State<ScanningScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    if (_isQrScanning) {
-      _isQrScanning = false;
-      try {
-        _controller?.stopImageStream();
-      } catch (_) {}
-    }
-    _barcodeScanner.close();
-    if (_controller != null && _controller!.value.isInitialized) {
-      _controller?.dispose();
-    }
     _scanLineCtrl.dispose();
     _interstitialAd?.dispose();
+    _barcodeScanner.close();
+    _disposeCamera();
     super.dispose();
+  }
+
+  /// Safely stops image stream (if active) then disposes the controller.
+  /// Always nulls out [_controller] so double-dispose is impossible.
+  void _disposeCamera() {
+    final cc = _controller;
+    _controller = null; // null first — prevents any race from using it again
+    _isQrScanning = false;
+    if (cc == null) return;
+    try {
+      if (cc.value.isStreamingImages) cc.stopImageStream();
+    } catch (_) {}
+    try {
+      if (cc.value.isInitialized) cc.dispose();
+    } catch (_) {}
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final cc = _controller;
-    if (cc == null || !cc.value.isInitialized) return;
     if (state == AppLifecycleState.inactive) {
-      if (_isQrScanning) {
-        _isQrScanning = false;
-        try {
-          cc.stopImageStream();
-        } catch (_) {}
-      }
-      cc.dispose();
+      // Fully tear down the camera; _controller is nulled inside _disposeCamera
+      _disposeCamera();
+      if (mounted) setState(() => _isInit = false);
     } else if (state == AppLifecycleState.resumed) {
       _qrDetected = false;
-      _initCamera();
+      _initCamera(); // _initCamera disposes any stale controller before re-init
     }
   }
 
@@ -276,13 +287,13 @@ class _ScanningScreenState extends State<ScanningScreen>
           if (state.status == ScanningStatus.success &&
               state.result != null &&
               state.imagePath != null) {
-            _interstitialAd?.show();
+            if (kReleaseMode) _interstitialAd?.show();
             context.replace(
               AppRouter.scanResult,
               extra: {'imagePath': state.imagePath!, 'result': state.result!},
             );
           } else if (state.status == ScanningStatus.batchFinished) {
-            _interstitialAd?.show();
+            if (kReleaseMode) _interstitialAd?.show();
             context.replace(
               AppRouter.batchResult,
               extra: List<String>.from(state.batchImagePaths),
@@ -390,6 +401,8 @@ class _ScanningScreenState extends State<ScanningScreen>
                     onCaptureTap: () => _takePicture(context),
                     featureOption: widget.featureOption,
                     isAutoScan: widget.featureOption == FeatureOption.scanQR,
+                    isRequireModel:
+                        widget.featureOption == FeatureOption.scanDocument,
                   ),
 
                   if (widget.featureOption == FeatureOption.batchScan &&

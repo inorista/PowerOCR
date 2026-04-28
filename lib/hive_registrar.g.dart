@@ -4,6 +4,7 @@
 
 import 'package:hive_ce/hive_ce.dart';
 import 'package:powerocr/core/constants/enum.dart';
+import 'package:powerocr/database/hive_entities/ocr_model_entity/ocr_model_entity.dart';
 import 'package:powerocr/database/hive_entities/scan_history_entity/scan_history_entity.dart';
 import 'package:powerocr/database/hive_entities/scan_text_block_history_entity/scan_text_block_history_entity.dart';
 import 'package:powerocr/database/hive_entities/theme_setting_entity/theme_setting_entity.dart';
@@ -11,6 +12,7 @@ import 'package:powerocr/database/hive_entities/user_qr_entity/user_qr_entity.da
 
 extension HiveRegistrar on HiveInterface {
   void registerAdapters() {
+    registerAdapter(OcrModelEntityAdapter());
     registerAdapter(ScanHistoryEntityAdapter());
     registerAdapter(ScanHistoryTypeAdapter());
     registerAdapter(ScanTextBlockHistoryEntityAdapter());
@@ -22,6 +24,7 @@ extension HiveRegistrar on HiveInterface {
 
 extension IsolatedHiveRegistrar on IsolatedHiveInterface {
   void registerAdapters() {
+    registerAdapter(OcrModelEntityAdapter());
     registerAdapter(ScanHistoryEntityAdapter());
     registerAdapter(ScanHistoryTypeAdapter());
     registerAdapter(ScanTextBlockHistoryEntityAdapter());

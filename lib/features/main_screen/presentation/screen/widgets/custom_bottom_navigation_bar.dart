@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart' show BlocSelector, ReadContext;
 import 'package:google_mobile_ads/google_mobile_ads.dart'
@@ -29,23 +30,25 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
   }
 
   void _loadAd() {
-    _bannerAd = BannerAd(
-      adUnitId: AdMobHelper.bannerAdUnitId,
-      request: const AdRequest(),
-      size: AdSize.banner,
-      listener: BannerAdListener(
-        onAdLoaded: (ad) {
-          debugPrint('$ad loaded.');
-          setState(() {
-            _isLoaded = true;
-          });
-        },
-        onAdFailedToLoad: (ad, err) {
-          debugPrint('BannerAd failed to load: $err');
-          ad.dispose();
-        },
-      ),
-    )..load();
+    if (kReleaseMode) {
+      _bannerAd = BannerAd(
+        adUnitId: AdMobHelper.bannerAdUnitId,
+        request: const AdRequest(),
+        size: AdSize.banner,
+        listener: BannerAdListener(
+          onAdLoaded: (ad) {
+            debugPrint('$ad loaded.');
+            setState(() {
+              _isLoaded = true;
+            });
+          },
+          onAdFailedToLoad: (ad, err) {
+            debugPrint('BannerAd failed to load: $err');
+            ad.dispose();
+          },
+        ),
+      )..load();
+    }
   }
 
   @override
@@ -58,7 +61,7 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return SizedBox(
-      height: 80 + (_isLoaded ? _bannerAd!.size.height.toDouble() + 35 : 0),
+      height: 85 + (_isLoaded ? _bannerAd!.size.height.toDouble() + 35 : 0),
       child: Stack(
         alignment: Alignment.center,
         clipBehavior: Clip.none,
@@ -70,7 +73,7 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
                 child: Container(
                   width: double.infinity,
                   height:
-                      80 +
+                      85 +
                       (_isLoaded ? _bannerAd!.size.height.toDouble() + 35 : 0),
                   color: Theme.of(context).colorScheme.surface.withAlpha(20),
                 ),
@@ -106,7 +109,8 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
                   ],
                 ),
               ),
-              if (_isLoaded && _bannerAd != null)
+              const SizedBox(height: 5),
+              if (kReleaseMode && _isLoaded && _bannerAd != null)
                 SafeArea(
                   child: SizedBox(
                     width: _bannerAd!.size.width.toDouble(),

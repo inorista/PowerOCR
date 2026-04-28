@@ -14,6 +14,7 @@ import 'package:dio/dio.dart' as _i361;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 import 'package:powerocr/core/di/locator.dart' as _i537;
+import 'package:powerocr/core/network/powerocr_rest_client.dart' as _i273;
 import 'package:powerocr/core/network/rest_client.dart' as _i150;
 import 'package:powerocr/core/services/implements/local_notification_service.dart'
     as _i803;
@@ -41,6 +42,7 @@ import 'package:powerocr/core/services/interfaces/itheme_setting_service.dart'
     as _i126;
 import 'package:powerocr/core/services/interfaces/iuser_qr_service.dart'
     as _i973;
+import 'package:powerocr/database/hive_daos/ocr_model_dao.dart' as _i65;
 import 'package:powerocr/database/hive_daos/scan_history_dao.dart' as _i812;
 import 'package:powerocr/database/hive_daos/scan_text_block_history_dao.dart'
     as _i1031;
@@ -53,6 +55,20 @@ import 'package:powerocr/features/home_screen/domain/repositories/home_repositor
     as _i729;
 import 'package:powerocr/features/home_screen/domain/usecases/get_scan_history.dart'
     as _i445;
+import 'package:powerocr/features/ocr_models/data/datasource/ocr_model_local_datasource.dart'
+    as _i896;
+import 'package:powerocr/features/ocr_models/data/repositories/ocr_model_repository_impl.dart'
+    as _i582;
+import 'package:powerocr/features/ocr_models/domain/repositories/ocr_model_repository.dart'
+    as _i940;
+import 'package:powerocr/features/ocr_models/domain/usecases/clear_model.dart'
+    as _i965;
+import 'package:powerocr/features/ocr_models/domain/usecases/get_model_language.dart'
+    as _i241;
+import 'package:powerocr/features/ocr_models/domain/usecases/sync_model_language.dart'
+    as _i708;
+import 'package:powerocr/features/ocr_models/presentation/bloc/ocr_model_cubit.dart'
+    as _i751;
 import 'package:powerocr/features/qr_library/data/datasource/qr_library_local_datasource.dart'
     as _i326;
 import 'package:powerocr/features/qr_library/data/repositories/qr_library_repository_impl.dart'
@@ -96,15 +112,14 @@ extension GetItInjectableX on _i174.GetIt {
     final registerModule = _$RegisterModule();
     gh.factory<_i320.ScanningBloc>(() => _i320.ScanningBloc());
     gh.lazySingleton<_i895.Connectivity>(() => registerModule.connectivity);
+    gh.lazySingleton<_i65.OcrModelDao>(() => _i65.OcrModelDao());
     gh.lazySingleton<_i812.ScanHistoryDao>(() => _i812.ScanHistoryDao());
     gh.lazySingleton<_i1031.ScanTextBlockHistoryDao>(
       () => _i1031.ScanTextBlockHistoryDao(),
     );
     gh.lazySingleton<_i118.UserQrDao>(() => _i118.UserQrDao());
+    gh.lazySingleton<_i751.OcrModelCubit>(() => _i751.OcrModelCubit());
     gh.lazySingleton<_i729.HomeRepository>(() => _i576.HomeRepositoryImpl());
-    gh.lazySingleton<_i126.IThemeSettingService>(
-      () => _i1017.ThemeSettingService(),
-    );
     gh.lazySingleton<_i455.IPushNotificationService>(
       () => _i88.PushNotificationService(),
     );
@@ -126,15 +141,25 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i254.IScanHistoryService>(
       () => _i911.ScanHistoryService(),
     );
+    gh.lazySingleton<_i896.OcrModelLocalDataSource>(
+      () => _i896.OcrModelLocalDataSourceImpl(),
+    );
     gh.lazySingleton<_i973.IUserQrService>(
       () => _i964.UserQrService(gh<_i118.UserQrDao>()),
     );
     gh.lazySingleton<_i577.HomeLocalDataSource>(
       () => _i577.HomeLocalDataSourceImpl(gh<_i812.ScanHistoryDao>()),
     );
+    gh.lazySingleton<_i126.IThemeSettingService>(
+      () => _i1017.ThemeSettingService(),
+    );
     gh.lazySingleton<_i47.INetworkService>(() => _i169.NetworkService());
     gh.lazySingleton<_i326.QrLibraryLocalDataSource>(
       () => _i326.QrLibraryLocalDataSourceImpl(),
+    );
+    gh.lazySingleton<_i361.Dio>(
+      () => registerModule.providePowerOCRDio(),
+      instanceName: 'PowerOCRDio',
     );
     gh.lazySingleton<_i277.IPdfService>(() => _i810.PdfService());
     gh.lazySingleton<_i361.Dio>(
@@ -144,6 +169,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i554.QrLibraryRepository>(
       () => _i977.QrLibraryRepositoryImpl(
         localDataSource: gh<_i326.QrLibraryLocalDataSource>(),
+      ),
+    );
+    gh.lazySingleton<_i273.PowerOCRRestClient>(
+      () => registerModule.providePowerOCRRestClient(
+        gh<_i361.Dio>(instanceName: 'PowerOCRDio'),
       ),
     );
     gh.lazySingleton<_i968.DeleteUserQr>(
@@ -159,6 +189,20 @@ extension GetItInjectableX on _i174.GetIt {
       () => registerModule.provideRestClient(
         gh<_i361.Dio>(instanceName: 'VisionDio'),
       ),
+    );
+    gh.lazySingleton<_i940.OcrModelRepository>(
+      () => _i582.OcrModelRepositoryImpl(
+        localDataSource: gh<_i896.OcrModelLocalDataSource>(),
+      ),
+    );
+    gh.lazySingleton<_i965.ClearOcrModel>(
+      () => _i965.ClearOcrModel(gh<_i940.OcrModelRepository>()),
+    );
+    gh.lazySingleton<_i241.GetModelLanguage>(
+      () => _i241.GetModelLanguage(gh<_i940.OcrModelRepository>()),
+    );
+    gh.lazySingleton<_i708.SyncModelLanguage>(
+      () => _i708.SyncModelLanguage(gh<_i940.OcrModelRepository>()),
     );
     gh.lazySingleton<_i543.ScanningRemoteDataSource>(
       () => _i543.ScanningRemoteDataSourceImpl(gh<_i150.RestClient>()),

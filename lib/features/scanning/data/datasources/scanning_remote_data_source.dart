@@ -5,16 +5,21 @@ import 'dart:ui' as ui;
 import 'package:injectable/injectable.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart'
     as ml;
+import 'package:google_mlkit_language_id/google_mlkit_language_id.dart';
 import 'package:powerocr/core/constants/enum.dart';
 import 'package:powerocr/core/di/locator.dart';
 import 'package:powerocr/core/environment/env.dart';
 import 'package:powerocr/core/network/rest_client.dart';
+import 'package:powerocr/features/ocr_models/presentation/bloc/ocr_model_cubit.dart'
+    show OcrModelCubit;
 import 'package:powerocr/features/scanning/data/models/annotate_image_request_dto.dart';
 import 'package:powerocr/features/scanning/data/models/vision_feature_dto.dart';
 import 'package:powerocr/features/scanning/data/models/vision_image_dto.dart';
 import 'package:powerocr/features/scanning/data/models/vision_request_dto.dart';
 import 'package:powerocr/features/scanning/domain/entities/text_block.dart';
 import 'package:powerocr/features/scanning/domain/entities/text_recognition_result.dart';
+import 'package:powerocr/core/network/powerocr_rest_client.dart';
+import 'package:powerocr/features/scanning/data/models/powerocr_request_dto.dart';
 
 abstract class ScanningRemoteDataSource {
   Future<TextRecognitionResult> recognizeText(String imagePath);
@@ -26,8 +31,7 @@ class ScanningRemoteDataSourceImpl implements ScanningRemoteDataSource {
 
   ScanningRemoteDataSourceImpl(this.restClient);
 
-  @override
-  Future<TextRecognitionResult> recognizeText(String imagePath) async {
+  Future<TextRecognitionResult> _processVisionAI(String imagePath) async {
     try {
       final inputImage = ml.InputImage.fromFilePath(imagePath);
       final textRecognizer = ml.TextRecognizer(
@@ -217,6 +221,149 @@ class ScanningRemoteDataSourceImpl implements ScanningRemoteDataSource {
         createdAt: DateTime.now(),
         type: ScanHistoryType.document,
       );
+    }
+  }
+
+  Future<String> _detectLanguageFromImage(String imagePath) async {
+    final inputImage = ml.InputImage.fromFilePath(imagePath);
+    final textRecognizer = ml.TextRecognizer(
+      script: ml.TextRecognitionScript.latin,
+    );
+
+    try {
+      final localResult = await textRecognizer.processImage(inputImage);
+      final text = localResult.text.trim();
+
+      if (text.isEmpty) {
+        return 'en';
+      }
+
+      final languageIdentifier = LanguageIdentifier(confidenceThreshold: 0.5);
+      final String mlkitCode = await languageIdentifier.identifyLanguage(text);
+      await languageIdentifier.close();
+
+      // Normalize ML Kit's BCP-47 code (e.g., 'zh-Hans', 'en-US' -> 'zh', 'en')
+      final String baseCode = mlkitCode
+          .split('-')
+          .first
+          .split('_')
+          .first
+          .toLowerCase();
+
+      // Map to BE custom language codes
+      switch (baseCode) {
+        case 'vi':
+          return 'vi';
+        case 'zh':
+        case 'cmn':
+        case 'yue':
+          return 'zh';
+        case 'ko':
+          return 'ko';
+        case 'la':
+          return 'la';
+        case 'ar':
+          return 'ar';
+        case 'ja':
+          return 'ja';
+        case 'en':
+        default:
+          return 'en';
+      }
+    } catch (e) {
+      return 'en';
+    } finally {
+      await textRecognizer.close();
+    }
+  }
+
+  Future<TextRecognitionResult> _processPowerOCR(String imagePath) async {
+    try {
+      final bytes = await File(imagePath).readAsBytes();
+      final base64Image = base64Encode(bytes);
+
+      final codec = await ui.instantiateImageCodec(bytes);
+      final frameInfo = await codec.getNextFrame();
+      final int imageWidth = frameInfo.image.width;
+      final int imageHeight = frameInfo.image.height;
+
+      final request = PowerOCRRequestDto(
+        base64String: base64Image,
+        lang: locator<OcrModelCubit>().state.selectedModel?.language ?? 'en',
+      );
+
+      final response = await locator<PowerOCRRestClient>().scanBase64(request);
+
+      if (response.status != 'success') {
+        return TextRecognitionResult(
+          text: '',
+          imagePath: imagePath,
+          createdAt: DateTime.now(),
+          type: ScanHistoryType.document,
+        );
+      }
+
+      String detectedText = response.totalText;
+      List<TextBlock> detectedBlocks = [];
+
+      if (response.data.isNotEmpty) {
+        for (final item in response.data) {
+          final box = item.box;
+          final text = item.text;
+
+          if (box.isNotEmpty) {
+            double minX = double.infinity;
+            double minY = double.infinity;
+            double maxX = double.negativeInfinity;
+            double maxY = double.negativeInfinity;
+
+            for (final pt in box) {
+              final vx = pt[0].toDouble();
+              final vy = pt[1].toDouble();
+              if (vx < minX) minX = vx;
+              if (vy < minY) minY = vy;
+              if (vx > maxX) maxX = vx;
+              if (vy > maxY) maxY = vy;
+            }
+
+            if (minX == double.infinity) minX = 0;
+            if (minY == double.infinity) minY = 0;
+            if (maxX == double.negativeInfinity) maxX = 0;
+            if (maxY == double.negativeInfinity) maxY = 0;
+
+            detectedBlocks.add(
+              TextBlock(text: text, boundingBox: [minX, minY, maxX, maxY]),
+            );
+          }
+        }
+      }
+
+      return TextRecognitionResult(
+        text: detectedText,
+        blocks: detectedBlocks,
+        imageWidth: imageWidth,
+        imageHeight: imageHeight,
+        createdAt: DateTime.now(),
+        imagePath: imagePath,
+        type: ScanHistoryType.document,
+      );
+    } catch (e) {
+      print('PowerOCR API Error: $e');
+      return TextRecognitionResult(
+        text: '',
+        imagePath: imagePath,
+        createdAt: DateTime.now(),
+        type: ScanHistoryType.document,
+      );
+    }
+  }
+
+  @override
+  Future<TextRecognitionResult> recognizeText(String imagePath) async {
+    try {
+      return await _processPowerOCR(imagePath);
+    } catch (e) {
+      return await _processVisionAI(imagePath);
     }
   }
 }
