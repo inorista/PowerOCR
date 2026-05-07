@@ -29,7 +29,7 @@ class BoundingBoxOverlay extends StatefulWidget {
 }
 
 class _BoundingBoxOverlayState extends State<BoundingBoxOverlay> {
-  bool _showBoundingBoxes = true;
+  final bool _showBoundingBoxes = true;
 
   @override
   Widget build(BuildContext context) {
@@ -89,56 +89,56 @@ class _BoundingBoxOverlayState extends State<BoundingBoxOverlay> {
                 ),
               ),
 
-            // ── Toggle button ────────────────────────────────────────────────
-            if (widget.boundingBoxes.isNotEmpty)
-              Positioned(
-                bottom: 16,
-                left: 16,
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () => setState(
-                      () => _showBoundingBoxes = !_showBoundingBoxes,
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _showBoundingBoxes
-                            ? Colors.cyan.withValues(alpha: 0.8)
-                            : Colors.grey.withValues(alpha: 0.6),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            _showBoundingBoxes
-                                ? Icons.visibility
-                                : Icons.visibility_off,
-                            color: Colors.white,
-                            size: 16,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            _showBoundingBoxes
-                                ? l10n.scanResultHideBoxes
-                                : l10n.scanResultShowBoxes,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+            // // ── Toggle button ────────────────────────────────────────────────
+            // if (widget.boundingBoxes.isNotEmpty)
+            //   Positioned(
+            //     bottom: 56,
+            //     left: 16,
+            //     child: Material(
+            //       color: Colors.transparent,
+            //       child: InkWell(
+            //         onTap: () => setState(
+            //           () => _showBoundingBoxes = !_showBoundingBoxes,
+            //         ),
+            //         borderRadius: BorderRadius.circular(20),
+            //         child: Container(
+            //           padding: const EdgeInsets.symmetric(
+            //             horizontal: 12,
+            //             vertical: 8,
+            //           ),
+            //           decoration: BoxDecoration(
+            //             color: _showBoundingBoxes
+            //                 ? Colors.cyan.withValues(alpha: 0.8)
+            //                 : Colors.grey.withValues(alpha: 0.6),
+            //             borderRadius: BorderRadius.circular(20),
+            //           ),
+            //           child: Row(
+            //             mainAxisSize: MainAxisSize.min,
+            //             children: [
+            //               Icon(
+            //                 _showBoundingBoxes
+            //                     ? Icons.visibility
+            //                     : Icons.visibility_off,
+            //                 color: Colors.white,
+            //                 size: 16,
+            //               ),
+            //               const SizedBox(width: 6),
+            //               Text(
+            //                 _showBoundingBoxes
+            //                     ? l10n.scanResultHideBoxes
+            //                     : l10n.scanResultShowBoxes,
+            //                 style: const TextStyle(
+            //                   color: Colors.white,
+            //                   fontSize: 12,
+            //                   fontWeight: FontWeight.w600,
+            //                 ),
+            //               ),
+            //             ],
+            //           ),
+            //         ),
+            //       ),
+            //     ),
+            //   ),
           ],
         );
       },

@@ -10,6 +10,7 @@
   "generateQrBackground": "Background",
   "generateQrShapeSquare": "Square",
   "generateQrShapeCircle": "Circle",
+  "generateQrShapeSmooth": "Smooth",
   "generateQrBgWhite": "Light",
   "generateQrBgDark": "Dark",
   "generateQrColorSmoke": "Smoke",
@@ -149,5 +150,6 @@
       "id": { "type": "String" }
     }
   },
-  "qrDetailContentLabel": "Content"
+  "qrDetailContentLabel": "Content",
+  "shareImage": "Share Image"
 }

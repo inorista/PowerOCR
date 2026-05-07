@@ -256,15 +256,15 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen>
                                             color: theme.colorScheme.primary,
                                           ),
                                     ),
-                                    IconButton(
-                                      icon: Icon(
-                                        Icons.tune_rounded,
-                                        color: theme.colorScheme.onSurface
-                                            .withValues(alpha: 0.6),
-                                        size: 22,
-                                      ),
-                                      onPressed: () {},
-                                    ),
+                                    // IconButton(
+                                    //   icon: Icon(
+                                    //     Icons.tune_rounded,
+                                    //     color: theme.colorScheme.onSurface
+                                    //         .withValues(alpha: 0.6),
+                                    //     size: 22,
+                                    //   ),
+                                    //   onPressed: () {},
+                                    // ),
                                   ],
                                   const SizedBox(width: 4),
                                 ],

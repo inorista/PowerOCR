@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:qr_flutter/qr_flutter.dart';
+
+import 'generate_qr_state.dart';
 
 abstract class GenerateQrEvent extends Equatable {
   const GenerateQrEvent();
@@ -25,20 +26,20 @@ class QrColorChanged extends GenerateQrEvent {
   List<Object?> get props => [color];
 }
 
-class QrEyeShapeChanged extends GenerateQrEvent {
-  final QrEyeShape shape;
-  const QrEyeShapeChanged(this.shape);
+class QrEyeStyleChanged extends GenerateQrEvent {
+  final QrEyeStyle style;
+  const QrEyeStyleChanged(this.style);
 
   @override
-  List<Object?> get props => [shape];
+  List<Object?> get props => [style];
 }
 
-class QrDataShapeChanged extends GenerateQrEvent {
-  final QrDataModuleShape shape;
-  const QrDataShapeChanged(this.shape);
+class QrModuleStyleChanged extends GenerateQrEvent {
+  final QrModuleStyle style;
+  const QrModuleStyleChanged(this.style);
 
   @override
-  List<Object?> get props => [shape];
+  List<Object?> get props => [style];
 }
 
 class QrBackgroundChanged extends GenerateQrEvent {

@@ -150,8 +150,6 @@ class ScanHistoryGridCard extends StatelessWidget {
       return Image.file(
         File(item.imagePath),
         fit: BoxFit.cover,
-        cacheHeight: 600,
-        cacheWidth: 350,
         errorBuilder: (context, err, stack) =>
             _PlaceholderThumbnail(isDark: isDark, theme: theme),
       );

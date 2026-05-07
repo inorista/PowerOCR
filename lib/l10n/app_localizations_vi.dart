@@ -36,6 +36,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get generateQrShapeCircle => 'Tròn';
 
   @override
+  String get generateQrShapeSmooth => 'Mượt';
+
+  @override
   String get generateQrBgWhite => 'Nền trắng';
 
   @override
@@ -313,4 +316,7 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get qrDetailContentLabel => 'Nội dung';
+
+  @override
+  String get shareImage => 'Chia sẻ ảnh';
 }

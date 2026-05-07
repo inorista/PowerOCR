@@ -217,8 +217,8 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
                       data: state.qrData,
                       foregroundColor: state.selectedColor,
                       isDarkBackground: state.isDarkBackground,
-                      eyeShape: state.eyeShape,
-                      dataModuleShape: state.dataShape,
+                      eyeStyle: state.eyeStyle,
+                      moduleStyle: state.moduleStyle,
                     ),
                   ),
                   const SizedBox(height: 32),
@@ -255,8 +255,8 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
                   data: state.qrData,
                   foregroundColor: state.selectedColor,
                   isDarkBackground: state.isDarkBackground,
-                  eyeShape: state.eyeShape,
-                  dataModuleShape: state.dataShape,
+                  eyeStyle: state.eyeStyle,
+                  moduleStyle: state.moduleStyle,
                 ),
               ),
             ),
@@ -382,17 +382,17 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
               ),
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 28),
           QrStyleOptions(
             selectedColor: state.selectedColor,
             onColorChanged: (c) =>
                 context.read<GenerateQrBloc>().add(QrColorChanged(c)),
-            selectedEyeShape: state.eyeShape,
-            onEyeShapeChanged: (s) =>
-                context.read<GenerateQrBloc>().add(QrEyeShapeChanged(s)),
-            selectedDataShape: state.dataShape,
-            onDataShapeChanged: (s) =>
-                context.read<GenerateQrBloc>().add(QrDataShapeChanged(s)),
+            selectedEyeStyle: state.eyeStyle,
+            onEyeStyleChanged: (s) =>
+                context.read<GenerateQrBloc>().add(QrEyeStyleChanged(s)),
+            selectedModuleStyle: state.moduleStyle,
+            onModuleStyleChanged: (s) =>
+                context.read<GenerateQrBloc>().add(QrModuleStyleChanged(s)),
             isDarkBackground: state.isDarkBackground,
             onBackgroundChanged: (b) =>
                 context.read<GenerateQrBloc>().add(QrBackgroundChanged(b)),
@@ -420,46 +420,68 @@ class _GenerateQrScreenViewState extends State<_GenerateQrScreenView> {
     ThemeData theme,
     AppLocalizations l10n,
   ) {
-    return ElevatedButton(
-      onPressed: state.qrData.trim().isEmpty || state.isSharing
-          ? null
-          : () {
-              if (_interstitialAd != null) {
-                _interstitialAd!.show();
-              } else {
-                _shareQrCode(state);
-              }
-            },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: theme.colorScheme.primary,
-        foregroundColor: theme.colorScheme.onPrimary,
-        minimumSize: const Size(double.infinity, 50),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        elevation: 0,
+    final primary = theme.colorScheme.primary;
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          colors: [
+            primary,
+            primary.withValues(alpha: 0.85),
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: primary.withValues(alpha: 0.3),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
-      child: state.isSharing
-          ? const SizedBox(
-              height: 24,
-              width: 24,
-              child: CircularProgressIndicator(
-                color: Colors.white,
-                strokeWidth: 2.5,
-              ),
-            )
-          : Row(
-              spacing: 8.0,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.share_rounded, size: 20),
-                Text(
-                  l10n.generateQrBtnShare,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
+      child: ElevatedButton(
+        onPressed: state.qrData.trim().isEmpty || state.isSharing
+            ? null
+            : () {
+                if (_interstitialAd != null) {
+                  _interstitialAd!.show();
+                } else {
+                  _shareQrCode(state);
+                }
+              },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          foregroundColor: Colors.white,
+          minimumSize: const Size(double.infinity, 54),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          elevation: 0,
+        ),
+        child: state.isSharing
+            ? const SizedBox(
+                height: 24,
+                width: 24,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2.5,
                 ),
-              ],
-            ),
+              )
+            : Row(
+                spacing: 8.0,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.share_rounded, size: 20),
+                  Text(
+                    l10n.generateQrBtnShare,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+      ),
     );
   }
 }

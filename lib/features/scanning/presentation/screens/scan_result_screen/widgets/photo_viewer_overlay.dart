@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:powerocr/features/scanning/presentation/screens/scan_result_screen/widgets/bounding_box_painter.dart';
+import 'package:powerocr/l10n/app_localizations.dart';
 
 class PhotoViewerOverlay extends StatefulWidget {
   final String imagePath;
@@ -331,8 +332,12 @@ class _PhotoViewerOverlayState extends State<PhotoViewerOverlay>
                                   const SizedBox(width: 8),
                                   Text(
                                     _showBoundingBoxes
-                                        ? 'Hide boxes'
-                                        : 'Show boxes',
+                                        ? AppLocalizations.of(
+                                            context,
+                                          )!.scanResultShowBoxes
+                                        : AppLocalizations.of(
+                                            context,
+                                          )!.scanResultHideBoxes,
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 13,
