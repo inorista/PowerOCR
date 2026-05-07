@@ -135,7 +135,9 @@ class _ScanningScreenState extends State<ScanningScreen>
       await cc.initialize();
       if (!mounted || _controller != cc) {
         // Widget was disposed or a newer init replaced us — clean up silently
-        try { cc.dispose(); } catch (_) {}
+        try {
+          cc.dispose();
+        } catch (_) {}
         return;
       }
       setState(() => _isInit = true);
@@ -211,7 +213,12 @@ class _ScanningScreenState extends State<ScanningScreen>
 
         if (!mounted) return;
         _bloc.add(
-          QrStreamDetected(detectedText: detectedText, imagePath: imagePath),
+          QrStreamDetected(
+            detectedText: detectedText,
+            imagePath: imagePath,
+            width: imageSize.width.toInt(),
+            height: imageSize.height.toInt(),
+          ),
         );
       }
     } catch (e) {
@@ -339,7 +346,12 @@ class _ScanningScreenState extends State<ScanningScreen>
                 ),
               );
           }
-          _controller?.setFlashMode(state.flashMode);
+          // Only update flash if the camera is still alive and initialized
+          if (mounted &&
+              _controller != null &&
+              _controller!.value.isInitialized) {
+            _onFlashModeChanged(state.flashMode);
+          }
         },
         child: Scaffold(
           backgroundColor: Colors.black,

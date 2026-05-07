@@ -152,6 +152,12 @@ abstract class AppLocalizations {
   /// **'Circle'**
   String get generateQrShapeCircle;
 
+  /// No description provided for @generateQrShapeSmooth.
+  ///
+  /// In en, this message translates to:
+  /// **'Smooth'**
+  String get generateQrShapeSmooth;
+
   /// No description provided for @generateQrBgWhite.
   ///
   /// In en, this message translates to:
@@ -667,6 +673,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Content'**
   String get qrDetailContentLabel;
+
+  /// No description provided for @shareImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Image'**
+  String get shareImage;
 }
 
 class _AppLocalizationsDelegate

@@ -12,12 +12,12 @@ class GenerateQrBloc extends Bloc<GenerateQrEvent, GenerateQrState> {
       emit(state.copyWith(selectedColor: event.color));
     });
 
-    on<QrEyeShapeChanged>((event, emit) {
-      emit(state.copyWith(eyeShape: event.shape));
+    on<QrEyeStyleChanged>((event, emit) {
+      emit(state.copyWith(eyeStyle: event.style));
     });
 
-    on<QrDataShapeChanged>((event, emit) {
-      emit(state.copyWith(dataShape: event.shape));
+    on<QrModuleStyleChanged>((event, emit) {
+      emit(state.copyWith(moduleStyle: event.style));
     });
 
     on<QrBackgroundChanged>((event, emit) {

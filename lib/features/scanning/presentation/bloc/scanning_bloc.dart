@@ -37,8 +37,8 @@ class ScanningBloc extends Bloc<ScanningEvent, ScanningState> {
       final result = TextRecognitionResult(
         text: event.detectedText,
         blocks: const [],
-        imageWidth: 0,
-        imageHeight: 0,
+        imageWidth: event.width,
+        imageHeight: event.height,
         imagePath: event.imagePath,
         createdAt: DateTime.now(),
         type: ScanHistoryType.qr,

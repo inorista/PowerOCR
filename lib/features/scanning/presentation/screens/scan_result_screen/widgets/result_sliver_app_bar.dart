@@ -8,6 +8,7 @@ import 'package:powerocr/features/scanning/presentation/screens/scan_result_scre
 import 'package:powerocr/features/scanning/presentation/screens/scan_result_screen/widgets/glass_button.dart';
 import 'package:powerocr/features/scanning/presentation/screens/scan_result_screen/widgets/photo_viewer_overlay.dart';
 import 'package:powerocr/l10n/app_localizations.dart';
+import 'package:share_plus/share_plus.dart' show SharePlus, ShareParams, XFile;
 
 class ResultSliverAppBar extends StatelessWidget {
   final String imagePath;
@@ -35,6 +36,17 @@ class ResultSliverAppBar extends StatelessWidget {
       scanType == ScanHistoryType.document &&
       boundingBoxes != null &&
       boundingBoxes!.isNotEmpty;
+
+  Future<void> onShare(BuildContext context) async {
+    try {
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(imagePath)],
+          text: AppLocalizations.of(context)!.shareImage,
+        ),
+      );
+    } catch (e) {}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -167,7 +179,10 @@ class ResultSliverAppBar extends StatelessWidget {
                             icon: Icons.arrow_back_ios_new_rounded,
                             onTap: () => context.go(AppRouter.main),
                           ),
-                          GlassButton(icon: Icons.share_rounded, onTap: () {}),
+                          GlassButton(
+                            icon: Icons.share_rounded,
+                            onTap: () => onShare(context),
+                          ),
                         ],
                       ),
                     ),

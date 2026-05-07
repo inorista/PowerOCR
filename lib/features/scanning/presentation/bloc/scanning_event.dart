@@ -23,14 +23,18 @@ class ScanImage extends ScanningEvent {
 class QrStreamDetected extends ScanningEvent {
   final String detectedText;
   final String imagePath;
+  final int width;
+  final int height;
 
   const QrStreamDetected({
     required this.detectedText,
     required this.imagePath,
+    this.width = 0,
+    this.height = 0,
   });
 
   @override
-  List<Object> get props => [detectedText, imagePath];
+  List<Object> get props => [detectedText, imagePath, width, height];
 }
 
 class ResetScan extends ScanningEvent {}

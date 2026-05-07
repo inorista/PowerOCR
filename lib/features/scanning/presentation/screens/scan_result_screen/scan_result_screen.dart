@@ -14,6 +14,7 @@ import 'package:powerocr/features/scanning/presentation/screens/scan_result_scre
 import 'package:powerocr/features/scanning/presentation/screens/scan_result_screen/widgets/result_text_section.dart';
 import 'package:powerocr/features/scanning/presentation/screens/scan_result_screen/utils/text_alignment_utils.dart';
 import 'package:powerocr/l10n/app_localizations.dart';
+import 'package:share_plus/share_plus.dart' show SharePlus, ShareParams, XFile;
 
 class ScanResultScreen extends StatefulWidget {
   final String imagePath;
@@ -314,17 +315,17 @@ class _TabletLayout extends StatelessWidget {
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withValues(
-                                    alpha: isDark ? 0.25 : 0.08),
+                                  alpha: isDark ? 0.25 : 0.08,
+                                ),
                                 blurRadius: 16,
                                 offset: const Offset(0, 4),
                               ),
                             ],
                           ),
-                          child: imagePath.isNotEmpty && File(imagePath).existsSync()
-                              ? Image.file(
-                                  File(imagePath),
-                                  fit: BoxFit.contain,
-                                )
+                          child:
+                              imagePath.isNotEmpty &&
+                                  File(imagePath).existsSync()
+                              ? Image.file(File(imagePath), fit: BoxFit.contain)
                               : const Center(
                                   child: Icon(
                                     Icons.image_not_supported_outlined,
@@ -422,8 +423,7 @@ class _BottomBar extends StatelessWidget {
                     ),
                   ),
                 ),
-                padding:
-                    EdgeInsets.fromLTRB(20, 12, 20, bottomPad + 12),
+                padding: EdgeInsets.fromLTRB(20, 12, 20, bottomPad + 12),
                 child: Row(
                   children: [
                     Expanded(

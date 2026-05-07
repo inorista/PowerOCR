@@ -36,6 +36,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generateQrShapeCircle => 'Circle';
 
   @override
+  String get generateQrShapeSmooth => 'Smooth';
+
+  @override
   String get generateQrBgWhite => 'Light';
 
   @override
@@ -313,4 +316,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get qrDetailContentLabel => 'Content';
+
+  @override
+  String get shareImage => 'Share Image';
 }

@@ -10,6 +10,7 @@
   "generateQrBackground": "Nền mã QR",
   "generateQrShapeSquare": "Vuông",
   "generateQrShapeCircle": "Tròn",
+  "generateQrShapeSmooth": "Mượt",
   "generateQrBgWhite": "Nền trắng",
   "generateQrBgDark": "Nền tối",
   "generateQrColorSmoke": "Khói",
@@ -149,5 +150,6 @@
       "id": { "type": "String" }
     }
   },
-  "qrDetailContentLabel": "Nội dung"
+  "qrDetailContentLabel": "Nội dung",
+  "shareImage": "Chia sẻ ảnh"
 }
